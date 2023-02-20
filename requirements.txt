@@ -1,0 +1,4 @@
+nextcord
+prisma
+aiosqlite
+aioscheduler

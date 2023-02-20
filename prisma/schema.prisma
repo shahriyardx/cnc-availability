@@ -1,0 +1,30 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider             = "prisma-client-py"
+  recursive_type_depth = 5
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Lineup {
+  id            String @id @default(cuid())
+  team          String
+  left_wing     BigInt
+  right_wing    BigInt
+  left_defense  BigInt
+  right_defense BigInt
+  center        BigInt
+  goalie        BigInt
+}
+
+model lineups {
+  id        String @id @default(cuid())
+  member_id BigInt
+  week      Int
+  year      Int
+}
