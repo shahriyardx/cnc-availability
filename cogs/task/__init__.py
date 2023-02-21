@@ -22,7 +22,7 @@ class Tasker(commands.Cog):
             "Sunday": self.sunday_task,
             "Monday": self.monday_task,
         }
-        self.once = True
+        self.once = False
 
     def get_friday_message(self, role: Role):
         return f"{role.mention} please click {self.bot.get_command_mention(role.guild.id, 'submitavailability')} to submit your availability. Remember you must provide your owner a minimum of four days each week to be considered active."
@@ -207,7 +207,7 @@ class Tasker(commands.Cog):
         self._day_task("Sunday")
         self._day_task("Monday")
 
-        # self.scheduler.start()
+        self.scheduler.start()
 
 
 def setup(bot: IBot):
