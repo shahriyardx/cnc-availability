@@ -66,3 +66,91 @@ class TimeView(ui.View):
         self.slots = []
         self.cancelled = True
         self.stop()
+
+
+class Positions(ui.View):
+    def __init__(self):
+        super().__init__()
+        self._selects: list = []
+
+    @ui.button(label="LW", custom_id="LW", style=ButtonStyle.blurple)
+    async def LW(self, button: ui.Button, ita: Interaction):
+        if button.custom_id in self._selects:
+            self._selects.remove(button.custom_id)
+            button.label = button.custom_id
+            button.style = ButtonStyle.blurple
+        else:
+            self._selects.append(button.custom_id)
+            button.label = f"{button.custom_id} (Selected)"
+            button.style = ButtonStyle.red
+
+        await ita.response.edit_message(view=self)
+
+    @ui.button(label="RW", custom_id="RW", style=ButtonStyle.blurple)
+    async def RW(self, button: ui.Button, ita: Interaction):
+        if button.custom_id in self._selects:
+            self._selects.remove(button.custom_id)
+            button.label = button.custom_id
+            button.style = ButtonStyle.blurple
+        else:
+            self._selects.append(button.custom_id)
+            button.label = f"{button.custom_id} (Selected)"
+            button.style = ButtonStyle.red
+
+        await ita.response.edit_message(view=self)
+
+    @ui.button(label="LD", custom_id="LD", style=ButtonStyle.blurple)
+    async def LD(self, button: ui.Button, ita: Interaction):
+        if button.custom_id in self._selects:
+            self._selects.remove(button.custom_id)
+            button.label = button.custom_id
+            button.style = ButtonStyle.blurple
+        else:
+            self._selects.append(button.custom_id)
+            button.label = f"{button.custom_id} (Selected)"
+            button.style = ButtonStyle.red
+
+        await ita.response.edit_message(view=self)
+
+    @ui.button(label="RD", custom_id="RD", style=ButtonStyle.blurple)
+    async def RD(self, button: ui.Button, ita: Interaction):
+        if button.custom_id in self._selects:
+            self._selects.remove(button.custom_id)
+            button.label = button.custom_id
+            button.style = ButtonStyle.blurple
+        else:
+            self._selects.append(button.custom_id)
+            button.label = f"{button.custom_id} (Selected)"
+            button.style = ButtonStyle.red
+
+        await ita.response.edit_message(view=self)
+
+    @ui.button(label="C", custom_id="C", style=ButtonStyle.blurple)
+    async def C(self, button: ui.Button, ita: Interaction):
+        if button.custom_id in self._selects:
+            self._selects.remove(button.custom_id)
+            button.label = button.custom_id
+            button.style = ButtonStyle.blurple
+        else:
+            self._selects.append(button.custom_id)
+            button.label = f"{button.custom_id} (Selected)"
+            button.style = ButtonStyle.red
+
+        await ita.response.edit_message(view=self)
+
+    @ui.button(label="G", custom_id="G", style=ButtonStyle.blurple)
+    async def G(self, button: ui.Button, ita: Interaction):
+        if button.custom_id in self._selects:
+            self._selects.remove(button.custom_id)
+            button.label = button.custom_id
+            button.style = ButtonStyle.blurple
+        else:
+            self._selects.append(button.custom_id)
+            button.label = f"{button.custom_id} (Selected)"
+            button.style = ButtonStyle.red
+
+        await ita.response.edit_message(view=self)
+
+    @ui.button(label="Done", style=ButtonStyle.green)
+    async def done(self, button: ui.Button, ita: Interaction):
+        self.stop()

@@ -14,6 +14,8 @@ datasource db {
 model Lineup {
   id            String @id @default(cuid())
   team          String
+  day           String
+  time          String
   left_wing     BigInt
   right_wing    BigInt
   left_defense  BigInt

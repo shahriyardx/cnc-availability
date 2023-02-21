@@ -54,26 +54,25 @@ class Tasker(commands.Cog):
 
     async def friday_task(self):
         print("[=] Doing Friday task")
-        try:
-            for guild in self.bot.guilds:
-                if guild.id in Data.IGNORED_GUILDS:
-                    continue
+        await self.bot.prisma.lineup.delete_many()
 
-                PLAYERS_ROLE = get(guild.roles, name=Data.PLAYERS_ROLE)
-                SUBMITTED_ROLE = get(guild.roles, name=Data.SUBMITTED_ROLE)
-                CHANNEL = get(guild.text_channels, name=Data.AVIAL_SUBMIT_CHANNEL)
+        for guild in self.bot.guilds:
+            if guild.id in Data.IGNORED_GUILDS:
+                continue
 
-                if PLAYERS_ROLE and CHANNEL:
-                    await self.unlockdown(channel=CHANNEL, roles=PLAYERS_ROLE)
-                    await CHANNEL.send(content=self.get_friday_message(PLAYERS_ROLE))
+            PLAYERS_ROLE = get(guild.roles, name=Data.PLAYERS_ROLE)
+            SUBMITTED_ROLE = get(guild.roles, name=Data.SUBMITTED_ROLE)
+            CHANNEL = get(guild.text_channels, name=Data.AVIAL_SUBMIT_CHANNEL)
 
-                    for member in SUBMITTED_ROLE.members:
-                        await member.remove_roles(SUBMITTED_ROLE)
+            if PLAYERS_ROLE and CHANNEL and SUBMITTED_ROLE:
+                await self.unlockdown(channel=CHANNEL, roles=PLAYERS_ROLE)
+                await CHANNEL.send(content=self.get_friday_message(PLAYERS_ROLE))
 
-            if not self.once:
-                self._day_task("Friday")
-        except Exception as e:
-            print(e)
+                for member in SUBMITTED_ROLE.members:
+                    await member.remove_roles(SUBMITTED_ROLE)
+
+        if not self.once:
+            self._day_task("Friday")
 
     async def sunday_task(self):
         print("[=] Doing sunday task")
@@ -84,13 +83,11 @@ class Tasker(commands.Cog):
             TEAM_ROLE = get(guild.roles, name=Data.PLAYERS_ROLE)  # `@Team`
             SUBMITTED_ROLE = get(
                 guild.roles, name=Data.SUBMITTED_ROLE
-            ) # `@Availability Submitted` 
+            )  # `@Availability Submitted`
             SUBMIT_CHANNEL = get(
                 guild.text_channels, name=Data.AVIAL_SUBMIT_CHANNEL
             )  # `#submmit-availability`
-            SUPPORT_GUILD = self.bot.get_guild(
-                Data.SUPPORT_GUILD
-            )  # The support server
+            SUPPORT_GUILD = self.bot.get_guild(Data.SUPPORT_GUILD)  # The support server
 
             if TEAM_ROLE and SUBMIT_CHANNEL:
                 await self.lockdown(SUBMIT_CHANNEL, roles=TEAM_ROLE)
@@ -130,10 +127,10 @@ class Tasker(commands.Cog):
                         f"{OWNER_ROLE.mention} or {GM_ROLE.mention} please click on "
                         f"{self.bot.get_command_mention(guild.id, 'setlineups')} to enter your preliminary lineups"
                     )
-                    
+
                     if not_submitted_players:
                         await TEAM_LOG_CHANNEL.send(content=submit_message)
-                    
+
                     await LINEUPS_CHANNEL.send(content=lineups_message)
 
         if not self.once:
@@ -146,7 +143,6 @@ class Tasker(commands.Cog):
             week = datetime.datetime.now().isocalendar().week
         except:
             week = datetime.datetime.now().isocalendar()[1]
-        
 
         SUPPORT_GUILD = self.bot.get_guild(Data.SUPPORT_GUILD)  # The support server
 
@@ -156,35 +152,34 @@ class Tasker(commands.Cog):
         for guild in self.bot.guilds:
             if guild.id in Data.IGNORED_GUILDS:
                 continue
-            
+
             LINEUPS_CHANNEL = get(guild.text_channels, name=Data.LINEUP_SUBMIT_CHANNEL)
 
             if not LINEUPS_CHANNEL:
                 continue
-            
+
             TEAM_ROLE = get(guild.roles, name=Data.PLAYERS_ROLE)
             OWNER_ROLE = get(guild.roles, name="Owner")
             GM_ROLE = get(guild.roles, name="General Manager")
-            
-            TEAM_CHANNEL = get(SUPPORT_GUILD.text_channels, name=f"╟・{guild.name[4:].replace(' ', '-').lower()}",)
+
+            TEAM_CHANNEL = get(
+                SUPPORT_GUILD.text_channels,
+                name=f"╟・{guild.name[4:].replace(' ', '-').lower()}",
+            )
 
             await self.lockdown(LINEUPS_CHANNEL, roles=[OWNER_ROLE, GM_ROLE])
-            
+
             not_played_all = []
             for player in TEAM_ROLE.members:
                 lined_up = await prisma.lineups.find_many(
-                    where={
-                        "memberId": str(player.id),
-                        "week": week
-                    }
+                    where={"memberId": str(player.id), "week": week}
                 )
 
                 if len(lined_up) < 3:
                     not_played_all.append(player.mention)
 
-            
             if not_played_all:
-                players =", ".join(not_played_all)
+                players = ", ".join(not_played_all)
 
                 await TEAM_CHANNEL.send(
                     f"Players {players} have not been scheduled at-least 3 matches this week."
@@ -208,11 +203,11 @@ class Tasker(commands.Cog):
         print("Waiting for the bot to ready")
         await self.bot.wait_until_ready()
 
-        # self._day_task("Friday")
-        # self._day_task("Sunday")
+        self._day_task("Friday")
+        self._day_task("Sunday")
         self._day_task("Monday")
 
-        self.scheduler.start()
+        # self.scheduler.start()
 
 
 def setup(bot: IBot):

@@ -16,12 +16,12 @@ class Availability(commands.AutoShardedBot):
     def __init__(self, command_prefix: str, **kwargs):
         super().__init__(command_prefix, **kwargs)
         self.prisma = Prisma()
-    
+
     async def on_ready(self):
-        await self.prisma.connect()
+        # await self.prisma.connect()
 
         print(f"{self.user} is ready..")
-    
+
     async def on_message(self, message: Message):
         if message.author.bot:
             return
@@ -43,6 +43,7 @@ bot = Availability(command_prefix="a.", intents=intents)
 
 bot.load_extension("cogs.commands")
 bot.load_extension("cogs.task")
+bot.load_extension("cogs.utility")
 
 TOKEN = os.environ["TOKEN"]
 bot.run(TOKEN)

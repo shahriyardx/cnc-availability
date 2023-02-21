@@ -2,6 +2,8 @@
 CREATE TABLE "Lineup" (
     "id" TEXT NOT NULL,
     "team" TEXT NOT NULL,
+    "day" TEXT NOT NULL,
+    "time" TEXT NOT NULL,
     "left_wing" BIGINT NOT NULL,
     "right_wing" BIGINT NOT NULL,
     "left_defense" BIGINT NOT NULL,
