@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 from nextcord import Intents, Message
 from nextcord.ext import commands
+
 from prisma import Prisma
 
 load_dotenv(".env")

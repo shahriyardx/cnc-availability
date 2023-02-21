@@ -1,11 +1,12 @@
-from nextcord import Embed, SlashOption, Member, Role
-from nextcord.ext import commands
+from nextcord import Embed, Member, Role, SlashOption
 from nextcord.application_command import slash_command
+from nextcord.ext import commands
 from nextcord.interactions import Interaction
 from nextcord.utils import get
 
 from essentials.models import IBot
 from essentials.views import Positions
+
 
 class UilityCommands(commands.Cog):
     def __init__(self, bot: IBot) -> None:
@@ -21,20 +22,20 @@ class UilityCommands(commands.Cog):
 
         await interaction.edit_original_message(view=position_view)
         await position_view.wait()
-        
+
         position_roles = {
-            "LW":  get(interaction.guild.roles, name="Left Wing"),
-            "RW":  get(interaction.guild.roles, name="Right Wing"),
-            "LD": get( interaction.guild.roles, name="Left Defense"),
-            "RD":  get(interaction.guild.roles, name="Right Defense"),
-            "C": get( interaction.guild.roles, name="Center"),
-            "G": get( interaction.guild.roles, name="Goalie"),
+            "LW": get(interaction.guild.roles, name="Left Wing"),
+            "RW": get(interaction.guild.roles, name="Right Wing"),
+            "LD": get(interaction.guild.roles, name="Left Defense"),
+            "RD": get(interaction.guild.roles, name="Right Defense"),
+            "C": get(interaction.guild.roles, name="Center"),
+            "G": get(interaction.guild.roles, name="Goalie"),
         }
 
         selected_positions = []
         for position in position_view._selects:
             selected_positions.append(position_roles[position])
-        
+
         await interaction.user.add_roles(*selected_positions)
         await interaction.edit_original_message(content="Roles updated", view=None)
 
@@ -59,7 +60,6 @@ class UilityCommands(commands.Cog):
 
         await player.add_roles(role)
         await interaction.followup.send(content=f"{role} has been added to {player}")
-        
 
     @slash_command(description="Change psn")
     async def psn(

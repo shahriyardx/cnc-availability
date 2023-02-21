@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
-from typing import Union, Tuple
+from typing import Tuple, Union
+
 from typing_extensions import Literal
 
 TIME = Union[datetime, Tuple[datetime, str, Tuple[int, int, int]]]

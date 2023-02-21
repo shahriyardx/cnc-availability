@@ -1,7 +1,8 @@
-from typing import List, Callable
 from dataclasses import dataclass
+from typing import Callable, List
 
 from nextcord.ext.commands import AutoShardedBot
+
 from prisma import Prisma
 
 
