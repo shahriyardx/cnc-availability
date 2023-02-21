@@ -18,7 +18,7 @@ class Availability(commands.AutoShardedBot):
         self.prisma = Prisma()
 
     async def on_ready(self):
-        # await self.prisma.connect()
+        await self.prisma.connect()
 
         print(f"{self.user} is ready..")
 
