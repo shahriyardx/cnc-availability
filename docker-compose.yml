@@ -11,7 +11,6 @@ services:
     build: ./
     depends_on:
       - database
-
     environment:
       DATABASE_URL: postgresql://postgres:password@database/postgres
     env_file:
