@@ -40,7 +40,6 @@ class UilityCommands(commands.Cog):
         await interaction.edit_original_message(content="Roles updated", view=None)
 
     @slash_command(description="Assign new role to players")
-    @commands.has_role("Owner")
     async def assignrole(
         self,
         interaction: Interaction,
@@ -54,9 +53,13 @@ class UilityCommands(commands.Cog):
         ),
     ):
         await interaction.response.defer()
-        highest_role = get(interaction.guild.roles, name="AGM")
-        if role >= highest_role:
-            return await interaction.followup.send("Can't assign this role")
+        if interaction.user.id != interaction.guild.owner_id:
+            if not get(interaction.user.roles, name="Owner"):
+                return await interaction.edit_original_message(content="You can't assign roles")
+            
+            highest_role = get(interaction.guild.roles, name="AGM")
+            if role >= highest_role:
+                return await interaction.followup.send("Can't assign this role")
 
         await player.add_roles(role)
         await interaction.followup.send(content=f"{role} has been added to {player}")
@@ -68,12 +71,9 @@ class UilityCommands(commands.Cog):
         new_psn: str = SlashOption(name="new_psn", description="Your new psn"),
     ):
         await interaction.response.defer()
-        try:
-            await interaction.user.edit(nick=new_psn)
-            await interaction.followup.send(content="PSN has been updated.")
-        except:
-            await interaction.followup.send(content="Unable to update psn")
-
+        
+        await interaction.user.edit(nick=new_psn)
+        await interaction.edit_original_message(content="PSN has been updated.")
 
 def setup(bot: IBot):
     bot.add_cog(UilityCommands(bot))

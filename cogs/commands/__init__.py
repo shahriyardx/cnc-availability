@@ -16,10 +16,7 @@ class TaskerCommands(commands.Cog):
         self.bot = bot
         self.prisma = bot.prisma
 
-    @slash_command(
-        description="Press enter and submit your availability",
-        guild_ids=ALL_GUILD,
-    )
+    @slash_command(description="Press enter and submit your availability")
     async def submitavailability(self, interaction: Interaction):
         await interaction.response.defer(ephemeral=True)
 
