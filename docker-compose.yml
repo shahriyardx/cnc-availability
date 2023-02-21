@@ -3,10 +3,17 @@ version: '3.9'
 services:
   database:
     image: postgres:14-alpine
-    ports:
-      - 5555:5432
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+    env_file:
+      - ./.env
     volumes:
       - ./database:/var/lib/postgresql/data
+  bot:
+    build: ./
+    depends_on:
+      - database
+
+    environment:
+      DATABASE_URL: postgresql://postgres:password@database/postgres
+    env_file:
+      - ./.env
+    
