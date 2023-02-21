@@ -12,4 +12,4 @@ COPY main.py requirements.txt .env ./
 RUN pip install -r requirements.txt
 RUN python -m prisma generate
 
-CMD [ "prisma", "db", "push", "&&", "python", "-u", "main.py" ]
+CMD [ "prisma", "db", "push", "&&", "python", "main.py" ]

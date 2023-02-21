@@ -15,4 +15,5 @@ services:
       DATABASE_URL: postgresql://postgres:password@database/postgres
     env_file:
       - ./.env
+    command: /bin/sh -c "prisma db push && python3 -u main.py"
     
