@@ -125,6 +125,20 @@ class TaskerCommands(commands.Cog):
     ):
         await interaction.response.defer()
 
+        l_data = await self.prisma.lineup.create(
+            data={
+                "team": interaction.guild.name[4:].replace(" ", "-").lower(),
+                "day": day,
+                "time": time,
+                "left_wing": left_wing.id,
+                "right_wing": right_wing.id,
+                "left_defense": left_defense.id,
+                "right_defense": right_defense.id,
+                "center": center.id,
+                "goalie": goalie.id,
+            }
+        )
+
         embed = Embed(title=f"Lineups for `{day}` at `{time}` \n")
         embed.description = (
             f"Left Wing: {left_wing.mention} \n"
@@ -142,7 +156,10 @@ class TaskerCommands(commands.Cog):
         )
 
         if LINEUP_LOG_CHANNEL:
-            await LINEUP_LOG_CHANNEL.send(embed=embed)
+            log_message = await LINEUP_LOG_CHANNEL.send(embed=embed)
+            await self.prisma.lineup.update(
+                where={"id": l_data.id}, data={"message_id_team": log_message.id}
+            )
 
         if SUPPORT_GUILD:
             TEAM_LOG_CHANNEL = get(
@@ -151,7 +168,11 @@ class TaskerCommands(commands.Cog):
             )
 
             if TEAM_LOG_CHANNEL:
-                await TEAM_LOG_CHANNEL.send(embed=embed)
+                cmc_log_message = await TEAM_LOG_CHANNEL.send(embed=embed)
+                await self.prisma.lineup.update(
+                    where={"id": l_data.id},
+                    data={"message_id_team": cmc_log_message.id},
+                )
 
         members = [
             left_wing,
@@ -167,19 +188,6 @@ class TaskerCommands(commands.Cog):
         except:
             week = datetime.now().isocalendar()[1]
 
-        l_data = await self.prisma.lineup.create(
-            data={
-                "team": interaction.guild.name[4:].replace(" ", "-").lower(),
-                "day": day,
-                "time": time,
-                "left_wing": left_wing.id,
-                "right_wing": right_wing.id,
-                "left_defense": left_defense.id,
-                "right_defense": right_defense.id,
-                "center": center.id,
-                "goalie": goalie.id,
-            }
-        )
         for member in members:
             await self.prisma.lineups.create(
                 {"member_id": member.id, "week": week, "year": datetime.now().year}
@@ -188,7 +196,6 @@ class TaskerCommands(commands.Cog):
         await interaction.edit_original_message(
             content=f"Lineups for `{day}` at `{time}` have been submitted. ID: {l_data.id}"
         )
-        await interaction.channel.send(embed=embed)
 
     @slash_command(description="Press enter and edit lineups")
     async def editlineup(
@@ -317,7 +324,16 @@ class TaskerCommands(commands.Cog):
         )
 
         if LINEUP_LOG_CHANNEL:
-            await LINEUP_LOG_CHANNEL.send(embed=embed)
+            old_message = await LINEUP_LOG_CHANNEL.fetch_message(
+                old_lineup.message_id_team
+            )
+            if old_message:
+                await old_message.delete()
+
+            message = await LINEUP_LOG_CHANNEL.send(embed=embed)
+            await self.prisma.lineup.update(
+                where={"id": lineup_id}, data={"message_id_team": message.id}
+            )
 
         if SUPPORT_GUILD:
             TEAM_LOG_CHANNEL = get(
@@ -326,10 +342,18 @@ class TaskerCommands(commands.Cog):
             )
 
             if TEAM_LOG_CHANNEL:
-                await TEAM_LOG_CHANNEL.send(embed=embed)
+                old_message = await TEAM_LOG_CHANNEL.fetch_message(
+                    old_lineup.message_id_cnc
+                )
+                if old_message:
+                    await old_message.delete()
 
-        await interaction.followup.send(content="Lineup has been updated.")
-        await interaction.channel.send(embed=embed)
+                message = await TEAM_LOG_CHANNEL.send(embed=embed)
+                await self.prisma.lineup.update(
+                    where={"id": lineup_id}, data={"message_id_cnc": message.id}
+                )
+
+        await interaction.followup.send(content=f"Lineup ID: `{lineup_id}` has been updated.")
 
 
 def setup(bot: IBot):

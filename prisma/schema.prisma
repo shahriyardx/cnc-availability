@@ -12,16 +12,18 @@ datasource db {
 }
 
 model Lineup {
-  id            String @id @default(cuid())
-  team          String
-  day           String
-  time          String
-  left_wing     BigInt
-  right_wing    BigInt
-  left_defense  BigInt
-  right_defense BigInt
-  center        BigInt
-  goalie        BigInt
+  id              String  @id @default(cuid())
+  team            String
+  day             String
+  time            String
+  left_wing       BigInt
+  right_wing      BigInt
+  left_defense    BigInt
+  right_defense   BigInt
+  center          BigInt
+  goalie          BigInt
+  message_id_cnc  BigInt?
+  message_id_team BigInt?
 }
 
 model lineups {

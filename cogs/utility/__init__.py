@@ -55,8 +55,10 @@ class UilityCommands(commands.Cog):
         await interaction.response.defer()
         if interaction.user.id != interaction.guild.owner_id:
             if not get(interaction.user.roles, name="Owner"):
-                return await interaction.edit_original_message(content="You can't assign roles")
-            
+                return await interaction.edit_original_message(
+                    content="You can't assign roles"
+                )
+
             highest_role = get(interaction.guild.roles, name="AGM")
             if role >= highest_role:
                 return await interaction.followup.send("Can't assign this role")
@@ -71,9 +73,10 @@ class UilityCommands(commands.Cog):
         new_psn: str = SlashOption(name="new_psn", description="Your new psn"),
     ):
         await interaction.response.defer()
-        
+
         await interaction.user.edit(nick=new_psn)
         await interaction.edit_original_message(content="PSN has been updated.")
+
 
 def setup(bot: IBot):
     bot.add_cog(UilityCommands(bot))
