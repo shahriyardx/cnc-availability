@@ -6,10 +6,9 @@ from nextcord.ext import commands
 from nextcord.interactions import Interaction
 from nextcord.utils import get
 
-from essentials.models import ALL_GUILD, Data, IBot
+from essentials.models import Data, IBot
 from essentials.views import TimeView
-from prisma import Prisma
-
+from essentials.utils import get_team_channel
 
 class TaskerCommands(commands.Cog):
     def __init__(self, bot: IBot) -> None:
@@ -19,6 +18,9 @@ class TaskerCommands(commands.Cog):
     @slash_command(description="Press enter and submit your availability")
     async def submitavailability(self, interaction: Interaction):
         await interaction.response.defer(ephemeral=True)
+
+        if interaction.channel.name != Data.AVIAL_SUBMIT_CHANNEL:
+            return await interaction.edit_original_message(content="You can't submit availability in this channel")
 
         tu_times = TimeView()
         wd_times = TimeView()
@@ -124,6 +126,9 @@ class TaskerCommands(commands.Cog):
         goalie: Member = SlashOption(description="Select goalie player"),
     ):
         await interaction.response.defer()
+
+        if interaction.channel.name != Data.LINEUP_SUBMIT_CHANNEL:
+            return await interaction.edit_original_message(content="You can't submit lineups in this channel")
 
         l_data = await self.prisma.lineup.create(
             data={
@@ -249,7 +254,10 @@ class TaskerCommands(commands.Cog):
                 "id": lineup_id,
             }
         )
-        team_name = interaction.guild.name[4:].replace(" ", "-").lower()
+        team_name = get_team_channel(interaction.guild.name)
+
+        if interaction.channel.name != Data.LINEUP_SUBMIT_CHANNEL:
+            return await interaction.edit_original_message(content="You can't edit lineups in this channel")
 
         if not old_lineup or old_lineup.team != team_name:
             return await interaction.followup.send(content="Lineup was not found")
