@@ -10,6 +10,7 @@ from essentials.models import Data, IBot
 from essentials.views import TimeView
 from essentials.utils import get_team_channel
 
+
 class TaskerCommands(commands.Cog):
     def __init__(self, bot: IBot) -> None:
         self.bot = bot
@@ -20,7 +21,9 @@ class TaskerCommands(commands.Cog):
         await interaction.response.defer(ephemeral=True)
 
         if interaction.channel.name != Data.AVIAL_SUBMIT_CHANNEL:
-            return await interaction.edit_original_message(content="You can't submit availability in this channel")
+            return await interaction.edit_original_message(
+                content="You can't submit availability in this channel"
+            )
 
         tu_times = TimeView()
         wd_times = TimeView()
@@ -128,7 +131,9 @@ class TaskerCommands(commands.Cog):
         await interaction.response.defer()
 
         if interaction.channel.name != Data.LINEUP_SUBMIT_CHANNEL:
-            return await interaction.edit_original_message(content="You can't submit lineups in this channel")
+            return await interaction.edit_original_message(
+                content="You can't submit lineups in this channel"
+            )
 
         l_data = await self.prisma.lineup.create(
             data={
@@ -257,7 +262,9 @@ class TaskerCommands(commands.Cog):
         team_name = get_team_channel(interaction.guild.name)
 
         if interaction.channel.name != Data.LINEUP_SUBMIT_CHANNEL:
-            return await interaction.edit_original_message(content="You can't edit lineups in this channel")
+            return await interaction.edit_original_message(
+                content="You can't edit lineups in this channel"
+            )
 
         if not old_lineup or old_lineup.team != team_name:
             return await interaction.followup.send(content="Lineup was not found")
@@ -361,7 +368,9 @@ class TaskerCommands(commands.Cog):
                     where={"id": lineup_id}, data={"message_id_cnc": message.id}
                 )
 
-        await interaction.followup.send(content=f"Lineup ID: `{lineup_id}` has been updated.")
+        await interaction.followup.send(
+            content=f"Lineup ID: `{lineup_id}` has been updated."
+        )
 
 
 def setup(bot: IBot):

@@ -59,8 +59,8 @@ class UilityCommands(commands.Cog):
                     content="You can't assign roles"
                 )
 
-            highest_role = get(interaction.guild.roles, name="AGM")
-            if role >= highest_role:
+            highest_role = get(interaction.guild.roles, name="Owner")
+            if role > highest_role:
                 return await interaction.followup.send("Can't assign this role")
 
         await player.add_roles(role)
@@ -76,6 +76,37 @@ class UilityCommands(commands.Cog):
 
         await interaction.user.edit(nick=new_psn)
         await interaction.edit_original_message(content="PSN has been updated.")
+
+    @slash_command(description="Change color of a role")
+    @commands.has_any_role("Owner", "General Manager")
+    async def changecolor(
+        self,
+        interaction: Interaction,
+        role: Role = SlashOption(
+            name="role", description="The role to change color", required=True
+        ),
+        color: str = SlashOption(
+            name="color", description="The new color code. e.g. #ffffff"
+        ),
+    ):
+        await interaction.response.defer()
+
+        try:
+            code = color.replace("#", "")
+            code = int(code, 16)
+        except ValueError:
+            return await interaction.edit_original_message(
+                content=f"Invalid color code {color}"
+            )
+
+        try:
+            await role.edit(color=code)
+        except:
+            return await interaction.edit_original_message(
+                content="Unable to change color."
+            )
+
+        await interaction.edit_original_message(content="Role color changed")
 
 
 def setup(bot: IBot):
