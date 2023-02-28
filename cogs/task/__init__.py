@@ -2,7 +2,7 @@ import datetime
 from typing import List, Union
 
 from aioscheduler import TimedScheduler
-from nextcord import Interaction, Member, PermissionOverwrite, Role, TextChannel
+from nextcord import Member, PermissionOverwrite, Role, TextChannel
 from nextcord.ext import commands, tasks
 from nextcord.utils import get
 
@@ -206,7 +206,7 @@ class Tasker(commands.Cog):
         self._day_task("Sunday")
         self._day_task("Monday")
 
-        # self.scheduler.start()
+        self.scheduler.start()
 
 
 def setup(bot: IBot):
