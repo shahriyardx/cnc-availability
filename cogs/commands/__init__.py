@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from nextcord import Embed, Member, SlashOption
+from nextcord import Embed, Member, SlashOption, PermissionOverwrite, CategoryChannel
 from nextcord.application_command import slash_command
 from nextcord.ext import commands
 from nextcord.interactions import Interaction
@@ -9,6 +9,26 @@ from nextcord.utils import get
 from essentials.models import Data, IBot
 from essentials.views import TimeView
 from essentials.utils import get_team_channel
+
+
+def get_over(state):
+    overwrites = PermissionOverwrite()
+    overwrites.manage_channels = state
+    overwrites.manage_permissions = state
+    overwrites.send_messages = state
+    overwrites.view_channel = state
+    overwrites.create_public_threads = state
+    overwrites.create_private_threads = state
+    overwrites.send_messages_in_threads = state
+    overwrites.embed_links = state
+    overwrites.attach_files = state
+    overwrites.add_reactions = state
+    overwrites.use_external_emojis = state
+    overwrites.mention_everyone = state
+    overwrites.manage_messages = state
+    overwrites.read_message_history = state
+
+    return overwrites
 
 
 class TaskerCommands(commands.Cog):
@@ -371,6 +391,69 @@ class TaskerCommands(commands.Cog):
         await interaction.followup.send(
             content=f"Lineup ID: `{lineup_id}` has been updated."
         )
+
+    @slash_command(name="create-category", description="Create category")
+    @commands.has_any_role("Owner", "General Manager")
+    async def create_category(
+        self,
+        interaction: Interaction,
+        category_name: str = SlashOption(
+            name="category_name", description="The category name"
+        ),
+    ):
+        await interaction.response.defer(ephemeral=True)
+
+        everyone = get(interaction.guild.roles, name="@everyone")
+        owner = get(interaction.guild.roles, name="Owner")
+        gm = get(interaction.guild.roles, name="General Manager")
+
+        await interaction.guild.create_category(
+            name=category_name,
+            overwrites={
+                everyone: get_over(False),
+                owner: get_over(True),
+                gm: get_over(True),
+            },
+        )
+
+        await interaction.edit_original_message(content="Category created")
+
+    @slash_command(name="create-channel", description="Create Channel")
+    @commands.has_any_role("Owner", "General Manager")
+    async def create_channel(
+        self,
+        interaction: Interaction,
+        channel_name: str = SlashOption(
+            name="channel_name", description="The channel name"
+        ),
+        category: CategoryChannel = SlashOption(
+            name="category", description="Mention the category"
+        ),
+    ):
+        await interaction.response.defer(ephemeral=True)
+
+        everyone = get(interaction.guild.roles, name="@everyone")
+        owner = get(interaction.guild.roles, name="Owner")
+        gm = get(interaction.guild.roles, name="General Manager")
+
+        await interaction.guild.create_text_channel(
+            name=channel_name,
+            category=category,
+            overwrites={
+                everyone: get_over(False),
+                owner: get_over(True),
+                gm: get_over(True),
+            },
+        )
+
+        await interaction.edit_original_message(content="Channel created")
+
+    @slash_command(name="create-role", description="Create a role")
+    @commands.has_any_role("Owner", "General Manager")
+    async def create_role(self, interaction: Interaction, name: str = SlashOption(name="name", description="The role name")):
+        await interaction.response.defer(ephemeral=True)
+        await interaction.guild.create_role(name=name)
+        await interaction.edit_original_message(content="Role created")
 
 
 def setup(bot: IBot):
