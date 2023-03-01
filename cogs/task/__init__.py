@@ -6,7 +6,7 @@ from nextcord import Member, PermissionOverwrite, Role, TextChannel
 from nextcord.ext import commands, tasks
 from nextcord.utils import get
 
-from essentials.mock_time import Days, get_next_date
+from essentials.time import Days, get_next_date
 from essentials.models import Data, IBot
 from prisma import Prisma
 
@@ -206,7 +206,7 @@ class Tasker(commands.Cog):
         self._day_task("Sunday")
         self._day_task("Monday")
 
-        # self.scheduler.start()
+        self.scheduler.start()
 
 
 def setup(bot: IBot):
