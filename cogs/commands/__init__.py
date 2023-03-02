@@ -432,6 +432,11 @@ class TaskerCommands(commands.Cog):
     ):
         await interaction.response.defer(ephemeral=True)
 
+        exists = get(interaction.guild.text_channels, name=channel_name)
+
+        if exists:
+            return await interaction.edit_original_message(content="Can't create channel with this name")
+        
         everyone = get(interaction.guild.roles, name="@everyone")
         owner = get(interaction.guild.roles, name="Owner")
         gm = get(interaction.guild.roles, name="General Manager")
@@ -452,6 +457,12 @@ class TaskerCommands(commands.Cog):
     @commands.has_any_role("Owner", "General Manager")
     async def create_role(self, interaction: Interaction, name: str = SlashOption(name="name", description="The role name")):
         await interaction.response.defer(ephemeral=True)
+
+        exists = get(interaction.guild.roles, name=name)
+
+        if exists:
+            return await interaction.edit_original_message(content="Can't create role with this name")
+        
         await interaction.guild.create_role(name=name)
         await interaction.edit_original_message(content="Role created")
 
