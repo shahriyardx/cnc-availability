@@ -103,7 +103,7 @@ class Tasker(commands.Cog):
                 for member in SUBMITTED_ROLE.members:
                     await member.remove_roles(SUBMITTED_ROLE)
 
-        if not simulation and not self.once:
+        if not simulation or not self.once:
             self._day_task("Friday")
 
     async def sunday_task(self, simulation: bool = False):
@@ -165,7 +165,7 @@ class Tasker(commands.Cog):
 
                     await LINEUPS_CHANNEL.send(content=lineups_message)
 
-        if not simulation and not self.once:
+        if not simulation or not self.once:
             self._day_task("Sunday")
 
     async def monday_task(self, simulation: bool = False):
@@ -218,7 +218,7 @@ class Tasker(commands.Cog):
                     f"{COMMISSIONERS_ROLE.mention} {ADMINS_ROLE.mention}"
                 )
 
-        if not simulation and not self.once:
+        if not simulation or not self.once:
             self._day_task("Monday")
 
     def _day_task(self, day: Days):
