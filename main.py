@@ -37,7 +37,10 @@ class Availability(commands.AutoShardedBot):
             ),
             None,
         )
-        return f"</{command_name}:{cmd.command_ids[guild_id]}>"
+        if cmd:
+            return f"</{command_name}:{cmd.command_ids[guild_id]}>"
+        else:
+            return f"/{command_name}"
 
 
 bot = Availability(command_prefix="a.", intents=intents)
