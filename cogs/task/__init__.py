@@ -48,6 +48,12 @@ class Tasker(commands.Cog):
         ),
     ):
         await interaction.response.defer(ephemeral=True)
+
+        if interaction.user.id != interaction.guild.owner.id:
+            return await interaction.edit_original_message(
+                content="You are not allowed to run this command."
+            )
+
         await self.task_functions[day](simulation=True)
         await interaction.edit_original_message(content="The simulation completed")
 
