@@ -245,7 +245,7 @@ class Tasker(commands.Cog):
         self._day_task("Sunday")
         self._day_task("Monday")
 
-        # self.scheduler.start()
+        self.scheduler.start()
 
 
 def setup(bot: IBot):
