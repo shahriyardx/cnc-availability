@@ -111,7 +111,7 @@ class UilityCommands(commands.Cog):
 
         await interaction.edit_original_message(content="Role color changed")
     
-    @slash_command(description="Get mention of a command")
+    @slash_command(name="get-mention", description="Get mention of a command")
     async def get_mention(self, interaction: Interaction, command_name: SlashOption(description="The command name")):
         await interaction.response.defer()
         mention = self.bot.get_command_mention(interaction.guild.id, command_name)
