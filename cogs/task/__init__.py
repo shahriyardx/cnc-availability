@@ -2,7 +2,15 @@ import datetime
 from typing import List, Union
 
 from aioscheduler import TimedScheduler
-from nextcord import Member, PermissionOverwrite, Role, TextChannel
+from nextcord import (
+    Member,
+    PermissionOverwrite,
+    Role,
+    TextChannel,
+    slash_command,
+    Interaction,
+    SlashOption,
+)
 from nextcord.ext import commands, tasks
 from nextcord.utils import get
 
@@ -23,8 +31,32 @@ class Tasker(commands.Cog):
         }
         self.once = False
 
+    @slash_command(description="Simulate specific day")
+    @commands.is_owner()
+    async def simulate(
+        self,
+        interaction: Interaction,
+        day: str = SlashOption(
+            name="day",
+            description="The day to simulate",
+            required=True,
+            choices={
+                "Friday": "Friday",
+                "Sunday": "Sunday",
+                "Monday": "Monday",
+            },
+        ),
+    ):
+        await interaction.response.defer(ephemeral=True)
+        await self.task_functions[day](simulation=True)
+        await interaction.edit_original_message(content="The simulation completed")
+
     def get_friday_message(self, role: Role):
-        return f"{role.mention} please click {self.bot.get_command_mention(role.guild.id, 'submitavailability')} to submit your availability. Remember you must provide your owner a minimum of four days each week to be considered active."
+        return (
+            f"{role.mention} please click {self.bot.get_command_mention(role.guild.id, 'submitavailability')} "
+            "to submit your availability. Remember you must provide your owner a "
+            "minimum of four days each week to be considered active."
+        )
 
     def get_permissions(self, state: bool):
         permission_overwrites = PermissionOverwrite()
@@ -51,9 +83,10 @@ class Tasker(commands.Cog):
                 target=role, overwrite=self.get_permissions(state=False)
             )
 
-    async def friday_task(self):
+    async def friday_task(self, simulation: bool = False):
         print("[=] Doing Friday task")
-        await self.bot.prisma.lineup.delete_many()
+        if not simulation:
+            await self.bot.prisma.lineup.delete_many()
 
         for guild in self.bot.guilds:
             if guild.id in Data.IGNORED_GUILDS:
@@ -70,10 +103,10 @@ class Tasker(commands.Cog):
                 for member in SUBMITTED_ROLE.members:
                     await member.remove_roles(SUBMITTED_ROLE)
 
-        if not self.once:
+        if not simulation and not self.once:
             self._day_task("Friday")
 
-    async def sunday_task(self):
+    async def sunday_task(self, simulation: bool = False):
         print("[=] Doing sunday task")
         for guild in self.bot.guilds:
             if guild.id in Data.IGNORED_GUILDS:
@@ -132,10 +165,10 @@ class Tasker(commands.Cog):
 
                     await LINEUPS_CHANNEL.send(content=lineups_message)
 
-        if not self.once:
+        if not simulation and not self.once:
             self._day_task("Sunday")
 
-    async def monday_task(self):
+    async def monday_task(self, simulation: bool = False):
         print("[=] Doing Monday task")
         prisma: Prisma = self.bot.prisma
         try:
@@ -185,7 +218,7 @@ class Tasker(commands.Cog):
                     f"{COMMISSIONERS_ROLE.mention} {ADMINS_ROLE.mention}"
                 )
 
-        if not self.once:
+        if not simulation and not self.once:
             self._day_task("Monday")
 
     def _day_task(self, day: Days):

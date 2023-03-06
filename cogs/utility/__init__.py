@@ -37,7 +37,10 @@ class UilityCommands(commands.Cog):
             selected_positions.append(position_roles[position])
 
         await interaction.user.add_roles(*selected_positions)
-        await interaction.edit_original_message(content=f"You have assigned to positions {', '.join(position_view._selects)}", view=None)
+        await interaction.edit_original_message(
+            content=f"You have assigned to positions {', '.join(position_view._selects)}",
+            view=None,
+        )
 
     @slash_command(description="Assign new role to players")
     async def assignrole(

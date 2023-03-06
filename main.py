@@ -36,7 +36,7 @@ class Availability(commands.AutoShardedBot):
         for command in all_commands:
             if command.qualified_name == command_name:
                 cmd = command
-        
+
         if cmd:
             return f"</{command_name}:{cmd.command_ids[guild_id]}>"
         else:
