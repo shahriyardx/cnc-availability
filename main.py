@@ -31,7 +31,7 @@ class Availability(commands.AutoShardedBot):
 
     def get_command_mention(self, guild_id: int, command_name) -> str:
         cmd = None
-        all_commands = self.get_guild(guild_id).get_application_commands()
+        all_commands = self.get_application_commands()
 
         print(all_commands)
 
