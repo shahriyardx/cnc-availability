@@ -19,7 +19,10 @@ class Availability(commands.AutoShardedBot):
         self.prisma = Prisma()
 
     async def on_ready(self):
-        await self.prisma.connect()
+        # try:
+        #     await self.prisma.connect()
+        # except:
+        #     pass
 
         print(f"{self.user} is ready..")
 
@@ -33,14 +36,12 @@ class Availability(commands.AutoShardedBot):
         cmd = None
         all_commands = self.get_application_commands()
 
-        print(all_commands)
-
         for command in all_commands:
             if command.qualified_name == command_name:
                 cmd = command
 
         if cmd:
-            return f"</{command_name}:{cmd.command_ids[guild_id]}>"
+            return f"</{command_name}:{cmd.command_ids[None]}>"
         else:
             return f"/{command_name}"
 
