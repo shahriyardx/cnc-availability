@@ -359,11 +359,14 @@ class TaskerCommands(commands.Cog):
         )
 
         if LINEUP_LOG_CHANNEL:
-            old_message = await LINEUP_LOG_CHANNEL.fetch_message(
-                old_lineup.message_id_team
-            )
-            if old_message:
-                await old_message.delete()
+            try:
+                old_message = await LINEUP_LOG_CHANNEL.fetch_message(
+                    old_lineup.message_id_team
+                )
+                if old_message:
+                    await old_message.delete()
+            except:
+                pass
 
             message = await LINEUP_LOG_CHANNEL.send(embed=embed)
             await self.prisma.lineup.update(
@@ -377,11 +380,14 @@ class TaskerCommands(commands.Cog):
             )
 
             if TEAM_LOG_CHANNEL:
-                old_message = await TEAM_LOG_CHANNEL.fetch_message(
-                    old_lineup.message_id_cnc
-                )
-                if old_message:
-                    await old_message.delete()
+                try:
+                    old_message = await TEAM_LOG_CHANNEL.fetch_message(
+                        old_lineup.message_id_cnc
+                    )
+                    if old_message:
+                        await old_message.delete()
+                except:
+                    pass
 
                 message = await TEAM_LOG_CHANNEL.send(embed=embed)
                 await self.prisma.lineup.update(
