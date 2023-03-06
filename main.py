@@ -33,6 +33,8 @@ class Availability(commands.AutoShardedBot):
         cmd = None
         all_commands = self.get_guild(guild_id).get_application_commands()
 
+        print(all_commands)
+
         for command in all_commands:
             if command.qualified_name == command_name:
                 cmd = command
