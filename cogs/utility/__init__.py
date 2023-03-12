@@ -57,12 +57,21 @@ class UilityCommands(commands.Cog):
     ):
         await interaction.response.defer()
         if interaction.user.id != interaction.guild.owner_id:
-            if not get(interaction.user.roles, name="Owner"):
+            is_owner = get(interaction.user.roles, name="Owner")
+            is_gm = get(interaction.user.roles, name="General Manager")
+            
+            if not is_owner or not is_gm:
                 return await interaction.edit_original_message(
                     content="You can't assign roles"
                 )
 
-            highest_role = get(interaction.guild.roles, name="Owner")
+            if is_owner:
+                highest_role = get(interaction.guild.roles, name="Owner")
+
+            if not is_owner and is_gm:
+                highest_role = get(interaction.guild.roles, name="General Manager")
+                
+
             if role > highest_role:
                 return await interaction.followup.send("Can't assign this role")
 

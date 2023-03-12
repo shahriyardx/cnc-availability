@@ -25,9 +25,9 @@ class Tasker(commands.Cog):
         self.scheduler = TimedScheduler(prefer_utc=True)
         self.start_tasks.start()
         self.task_functions = {
-            "Friday": self.friday_task,
-            "Sunday": self.sunday_task,
-            "Monday": self.monday_task,
+            "Open": self.open_availability_task,
+            "Close": self.close_availability_task,
+            "Lineups": self.lineups_task,
         }
         self.once = False
 
@@ -41,9 +41,9 @@ class Tasker(commands.Cog):
             description="The day to simulate",
             required=True,
             choices={
-                "Friday": "Friday",
-                "Sunday": "Sunday",
-                "Monday": "Monday",
+                "Open Availability Submission": "Open",
+                "Close Availability Submission": "Close",
+                "Open Lineups": "Lineups",
             },
         ),
     ):
@@ -89,8 +89,8 @@ class Tasker(commands.Cog):
                 target=role, overwrite=self.get_permissions(state=False)
             )
 
-    async def friday_task(self, simulation: bool = False):
-        print("[=] Doing Friday task")
+    async def open_availability_task(self, simulation: bool = False):
+        print("[=] Doing open_availability_task")
         if not simulation:
             await self.bot.prisma.lineup.delete_many()
 
@@ -110,10 +110,10 @@ class Tasker(commands.Cog):
                     await member.remove_roles(SUBMITTED_ROLE)
 
         if not simulation or not self.once:
-            self._day_task("Friday")
+            self._day_task("Open", "Friday")
 
-    async def sunday_task(self, simulation: bool = False):
-        print("[=] Doing sunday task")
+    async def close_availability_task(self, simulation: bool = False):
+        print("[=] close_availability_task")
         for guild in self.bot.guilds:
             if guild.id in Data.IGNORED_GUILDS:
                 continue
@@ -172,11 +172,11 @@ class Tasker(commands.Cog):
                     await LINEUPS_CHANNEL.send(content=lineups_message)
 
         if not simulation or not self.once:
-            self._day_task("Sunday")
+            self._day_task("Close", "Monday", hour=17)
 
-    async def monday_task(self, simulation: bool = False):
-        print("[=] Doing Monday task")
-        prisma: Prisma = self.bot.prisma
+    async def lineups_task(self, simulation: bool = False):
+        print("[=] Doing lineups_task")
+        prisma = self.bot.prisma
         try:
             week = datetime.datetime.now().isocalendar().week
         except:
@@ -225,25 +225,25 @@ class Tasker(commands.Cog):
                 )
 
         if not simulation or not self.once:
-            self._day_task("Monday")
+            self._day_task("Lineups", "Monday", hour=17, minute=10)
 
-    def _day_task(self, day: Days):
+    def _day_task(self,task: str, day: Days, hour: int = 17, minute: int = 0):
         print("[+] Crating task for", day)
         now = datetime.datetime.utcnow()
-        date = get_next_date(day=day)
+        date = get_next_date(day=day, hour=hour, minute=minute)
 
         if isinstance(date, datetime.datetime):
             print("[?]", day, "Task will run in ", date - now)
-            self.scheduler.schedule(self.task_functions[day](), date)
+            self.scheduler.schedule(self.task_functions[task](), date)
 
     @tasks.loop(count=1)
     async def start_tasks(self):
         print("Waiting for the bot to ready")
         await self.bot.wait_until_ready()
 
-        self._day_task("Friday")
-        self._day_task("Sunday")
-        self._day_task("Monday")
+        self._day_task("Open", "Friday")
+        self._day_task("Close", "Monday")
+        self._day_task("Lineups", "Monday", minute=10)
 
         self.scheduler.start()
 
