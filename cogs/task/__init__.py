@@ -109,7 +109,10 @@ class Tasker(commands.Cog):
                 for member in SUBMITTED_ROLE.members:
                     await member.remove_roles(SUBMITTED_ROLE)
 
-        if not simulation or not self.once:
+        if simulation:
+            return
+        
+        if not self.once:
             self._day_task("Open", "Friday")
 
     async def close_availability_task(self, simulation: bool = False):
@@ -171,7 +174,9 @@ class Tasker(commands.Cog):
 
                     await LINEUPS_CHANNEL.send(content=lineups_message)
 
-        if not simulation or not self.once:
+        if simulation:
+            return 
+        if not self.once:
             self._day_task("Close", "Monday", hour=17)
 
     async def lineups_task(self, simulation: bool = False):
@@ -224,7 +229,10 @@ class Tasker(commands.Cog):
                     f"{COMMISSIONERS_ROLE.mention} {ADMINS_ROLE.mention}"
                 )
 
-        if not simulation or not self.once:
+        if simulation:
+            return 
+        
+        if not self.once:
             self._day_task("Lineups", "Monday", hour=17, minute=10)
 
     def _day_task(self, task: str, day: Days, hour: int = 17, minute: int = 0):
