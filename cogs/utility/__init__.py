@@ -76,6 +76,41 @@ class UilityCommands(commands.Cog):
 
         await player.add_roles(role)
         await interaction.followup.send(content=f"{role} has been added to {player}")
+    
+    @slash_command(description="Remove roles from player")
+    async def removerole(
+        self,
+        interaction: Interaction,
+        role: Role = SlashOption(
+            name="role",
+            description="Select the role you want to remove",
+        ),
+        player: Member = SlashOption(
+            name="player",
+            description="Select the player you want to remove role from",
+        ),
+    ):
+        await interaction.response.defer()
+        if interaction.user.id != interaction.guild.owner_id:
+            is_owner = get(interaction.user.roles, name="Owner")
+            is_gm = get(interaction.user.roles, name="General Manager")
+
+            if not is_owner and not is_gm:
+                return await interaction.edit_original_message(
+                    content="You can't remove roles"
+                )
+
+            if is_owner:
+                highest_role = get(interaction.guild.roles, name="Owner")
+
+            if not is_owner and is_gm:
+                highest_role = get(interaction.guild.roles, name="General Manager")
+
+            if role > highest_role:
+                return await interaction.followup.send("Can't remove this role")
+
+        await player.remove_roles(role)
+        await interaction.followup.send(content=f"{role} has been removed from {player}")
 
     @slash_command(description="Change psn")
     async def psn(
