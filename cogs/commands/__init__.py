@@ -507,6 +507,10 @@ class TaskerCommands(commands.Cog):
         ),
     ):
         await interaction.response.defer(ephemeral=True)
+
+        if interaction.user.id != interaction.guild.owner.id:
+            return
+        
         for guild in self.bot.guilds:
             if guild.id in Data.IGNORED_GUILDS:
                 continue
