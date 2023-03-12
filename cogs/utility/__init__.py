@@ -67,8 +67,7 @@ class UilityCommands(commands.Cog):
 
             if is_owner:
                 highest_role = get(interaction.guild.roles, name="Owner")
-
-            if not is_owner and is_gm:
+            elif is_gm:
                 highest_role = get(interaction.guild.roles, name="General Manager")
 
             if role > highest_role:
@@ -102,8 +101,7 @@ class UilityCommands(commands.Cog):
 
             if is_owner:
                 highest_role = get(interaction.guild.roles, name="Owner")
-
-            if not is_owner and is_gm:
+            elif is_gm:
                 highest_role = get(interaction.guild.roles, name="General Manager")
 
             if role > highest_role:
