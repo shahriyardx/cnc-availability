@@ -509,8 +509,8 @@ class TaskerCommands(commands.Cog):
         await interaction.response.defer(ephemeral=True)
 
         if interaction.user.id != interaction.guild.owner.id:
-            return
-        
+            return await interaction.followup.send(content="You are not allowed to run this command")
+
         for guild in self.bot.guilds:
             if guild.id in Data.IGNORED_GUILDS:
                 continue
