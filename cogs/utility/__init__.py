@@ -60,7 +60,7 @@ class UilityCommands(commands.Cog):
             is_owner = get(interaction.user.roles, name="Owner")
             is_gm = get(interaction.user.roles, name="General Manager")
 
-            if not is_owner or not is_gm:
+            if not is_owner and not is_gm:
                 return await interaction.edit_original_message(
                     content="You can't assign roles"
                 )

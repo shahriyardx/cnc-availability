@@ -480,7 +480,7 @@ class TaskerCommands(commands.Cog):
         await interaction.guild.create_role(name=name)
         await interaction.edit_original_message(content="Role created")
 
-    async def togglestate(self, channel, roles, state):
+    async def togglestate(self, channel, role, state):
         def get_permissions(state: bool):
             permission_overwrites = PermissionOverwrite()
             permission_overwrites.send_messages = state
@@ -488,10 +488,9 @@ class TaskerCommands(commands.Cog):
 
             return permission_overwrites
     
-        for role in roles:
-            await channel.set_permissions(
-                target=role, overwrite=get_permissions(state=state)
-            )
+        await channel.set_permissions(
+            target=role, overwrite=get_permissions(state=state)
+        )
 
     @slash_command(
         name="toggle-availability",
@@ -520,7 +519,7 @@ class TaskerCommands(commands.Cog):
                 name=Data.PLAYERS_ROLE,
             )
             if SUBMIT_CHANNEL:
-                await self.togglestate(SUBMIT_CHANNEL, [TEAM_ROLE], state)
+                await self.togglestate(SUBMIT_CHANNEL, TEAM_ROLE, state)
 
         await interaction.followup.send(
             content=f"Availavility has been {'Unlocked' if state else 'Locked'}"
