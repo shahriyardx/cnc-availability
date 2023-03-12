@@ -227,7 +227,7 @@ class Tasker(commands.Cog):
         if not simulation or not self.once:
             self._day_task("Lineups", "Monday", hour=17, minute=10)
 
-    def _day_task(self,task: str, day: Days, hour: int = 17, minute: int = 0):
+    def _day_task(self, task: str, day: Days, hour: int = 17, minute: int = 0):
         print("[+] Crating task for", day)
         now = datetime.datetime.utcnow()
         date = get_next_date(day=day, hour=hour, minute=minute)

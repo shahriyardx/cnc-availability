@@ -480,6 +480,52 @@ class TaskerCommands(commands.Cog):
         await interaction.guild.create_role(name=name)
         await interaction.edit_original_message(content="Role created")
 
+    async def togglestate(self, channel, roles, state):
+        def get_permissions(state: bool):
+            permission_overwrites = PermissionOverwrite()
+            permission_overwrites.send_messages = state
+            permission_overwrites.view_channel = state
+
+            return permission_overwrites
+    
+        for role in roles:
+            await channel.set_permissions(
+                target=role, overwrite=get_permissions(state=state)
+            )
+
+    @slash_command(
+        name="toggle-availability",
+        description="Forces availability submit channel top open anytime",
+    )
+    @commands.is_owner()
+    async def toggle_availability(
+        self,
+        interaction: Interaction,
+        state: bool = SlashOption(
+            name="state",
+            description="The channel state",
+            choices={"Lock": False, "Unlock": True},
+        ),
+    ):
+        await interaction.response.defer(ephemeral=True)
+        for guild in self.bot.guilds:
+            if guild.id in Data.IGNORED_GUILDS:
+                continue
+
+            SUBMIT_CHANNEL = get(
+                guild.text_channels, name=Data.AVIAL_SUBMIT_CHANNEL
+            )  # `#submmit-availability`
+            TEAM_ROLE = get(
+                guild.roles,
+                name=Data.PLAYERS_ROLE,
+            )
+            if SUBMIT_CHANNEL:
+                await self.togglestate(SUBMIT_CHANNEL, [TEAM_ROLE], state)
+
+        await interaction.followup.send(
+            content=f"Availavility has been {'Unlocked' if state else 'Locked'}"
+        )
+
 
 def setup(bot: IBot):
     bot.add_cog(TaskerCommands(bot))

@@ -59,7 +59,7 @@ class UilityCommands(commands.Cog):
         if interaction.user.id != interaction.guild.owner_id:
             is_owner = get(interaction.user.roles, name="Owner")
             is_gm = get(interaction.user.roles, name="General Manager")
-            
+
             if not is_owner or not is_gm:
                 return await interaction.edit_original_message(
                     content="You can't assign roles"
@@ -70,7 +70,6 @@ class UilityCommands(commands.Cog):
 
             if not is_owner and is_gm:
                 highest_role = get(interaction.guild.roles, name="General Manager")
-                
 
             if role > highest_role:
                 return await interaction.followup.send("Can't assign this role")
@@ -119,9 +118,13 @@ class UilityCommands(commands.Cog):
             )
 
         await interaction.edit_original_message(content="Role color changed")
-    
+
     @slash_command(name="get-mention", description="Get mention of a command")
-    async def get_mention(self, interaction: Interaction, command_name: str = SlashOption(description="The command name")):
+    async def get_mention(
+        self,
+        interaction: Interaction,
+        command_name: str = SlashOption(description="The command name"),
+    ):
         await interaction.response.defer()
         mention = self.bot.get_command_mention(interaction.guild.id, command_name)
         await interaction.edit_original_message(content=f"{mention} `{mention}`")
