@@ -75,7 +75,7 @@ class UilityCommands(commands.Cog):
 
         await player.add_roles(role)
         await interaction.followup.send(content=f"{role} has been added to {player}")
-    
+
     @slash_command(description="Remove roles from player")
     async def removerole(
         self,
@@ -108,7 +108,9 @@ class UilityCommands(commands.Cog):
                 return await interaction.followup.send("Can't remove this role")
 
         await player.remove_roles(role)
-        await interaction.followup.send(content=f"{role} has been removed from {player}")
+        await interaction.followup.send(
+            content=f"{role} has been removed from {player}"
+        )
 
     @slash_command(description="Change psn")
     async def psn(

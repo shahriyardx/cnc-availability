@@ -160,7 +160,9 @@ class TaskerCommands(commands.Cog):
 
         for player in players:
             if team_role not in player.roles:
-                return await interaction.followup.send(content=f"Player {player.mention} does not have the Team role. Can't submit lineup with him")
+                return await interaction.followup.send(
+                    content=f"Player {player.mention} does not have the Team role. Can't submit lineup with him"
+                )
 
         l_data = await self.prisma.lineup.create(
             data={
@@ -206,7 +208,9 @@ class TaskerCommands(commands.Cog):
             )
 
             if TEAM_LOG_CHANNEL:
-                cmc_log_message = await TEAM_LOG_CHANNEL.send(content=content, embed=embed)
+                cmc_log_message = await TEAM_LOG_CHANNEL.send(
+                    content=content, embed=embed
+                )
                 await self.prisma.lineup.update(
                     where={"id": l_data.id},
                     data={"message_id_team": cmc_log_message.id},
@@ -294,13 +298,26 @@ class TaskerCommands(commands.Cog):
                 content="You can't edit lineups in this channel"
             )
 
-        players = [left_wing, left_defense, right_wing, right_defense, goalie, center]
+        players = [
+            p
+            for p in [
+                left_wing,
+                left_defense,
+                right_wing,
+                right_defense,
+                goalie,
+                center,
+            ]
+            if p
+        ]
         team_role = get(interaction.guild.roles, name=Data.PLAYERS_ROLE)
 
         for player in players:
             if team_role not in player.roles:
-                return await interaction.followup.send(content=f"Player {player.mention} does not have the Team role. Can't submit lineup with him")
-        
+                return await interaction.followup.send(
+                    content=f"Player {player.mention} does not have the Team role. Can't submit lineup with him"
+                )
+
         if not old_lineup or old_lineup.team != team_name:
             return await interaction.followup.send(content="Lineup was not found")
 
@@ -323,7 +340,15 @@ class TaskerCommands(commands.Cog):
             where={"id": old_lineup.id}, data=new_lineup_data
         )
 
-        content = " ".join([player.mention for player in players])
+        new_players = [
+            left_wing_member,
+            right_wing_member,
+            left_defense_member,
+            right_defense_member,
+            center_member,
+            goalie_member,
+        ]
+        content = " ".join([player.mention for player in new_players])
         embed = Embed(
             title=f"Lineups for `{day or old_lineup.day}` at `{time or old_lineup.time}` \n"
         )
@@ -503,7 +528,7 @@ class TaskerCommands(commands.Cog):
             permission_overwrites.view_channel = state
 
             return permission_overwrites
-    
+
         await channel.set_permissions(
             target=role, overwrite=get_permissions(state=state)
         )
@@ -525,7 +550,9 @@ class TaskerCommands(commands.Cog):
         await interaction.response.defer(ephemeral=True)
 
         if interaction.user.id != interaction.guild.owner.id:
-            return await interaction.followup.send(content="You are not allowed to run this command")
+            return await interaction.followup.send(
+                content="You are not allowed to run this command"
+            )
 
         for guild in self.bot.guilds:
             if guild.id in Data.IGNORED_GUILDS:

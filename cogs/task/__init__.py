@@ -111,7 +111,7 @@ class Tasker(commands.Cog):
 
         if simulation:
             return
-        
+
         if not self.once:
             self._day_task("Open", "Friday")
 
@@ -175,7 +175,7 @@ class Tasker(commands.Cog):
                     await LINEUPS_CHANNEL.send(content=lineups_message)
 
         if simulation:
-            return 
+            return
         if not self.once:
             self._day_task("Close", "Monday", hour=17)
 
@@ -230,8 +230,8 @@ class Tasker(commands.Cog):
                 )
 
         if simulation:
-            return 
-        
+            return
+
         if not self.once:
             self._day_task("Lineups", "Monday", hour=17, minute=10)
 
