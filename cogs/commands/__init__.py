@@ -340,15 +340,6 @@ class TaskerCommands(commands.Cog):
             where={"id": old_lineup.id}, data=new_lineup_data
         )
 
-        new_players = [
-            left_wing_member,
-            right_wing_member,
-            left_defense_member,
-            right_defense_member,
-            center_member,
-            goalie_member,
-        ]
-        content = " ".join([player.mention for player in new_players])
         embed = Embed(
             title=f"Lineups for `{day or old_lineup.day}` at `{time or old_lineup.time}` \n"
         )
@@ -394,6 +385,16 @@ class TaskerCommands(commands.Cog):
         )
         embed.set_thumbnail(url=interaction.guild.icon.url)
 
+        new_players = [
+            left_wing_member,
+            right_wing_member,
+            left_defense_member,
+            right_defense_member,
+            center_member,
+            goalie_member,
+        ]
+        content = " ".join([player.mention for player in new_players])
+        
         SUPPORT_GUILD = self.bot.get_guild(Data.SUPPORT_GUILD)
         LINEUP_LOG_CHANNEL = get(
             interaction.guild.text_channels, name=Data.LINEUP_LOG_CHANNEL
