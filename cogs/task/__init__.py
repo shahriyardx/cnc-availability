@@ -160,7 +160,7 @@ class Tasker(commands.Cog):
 
                     submit_message = (
                         f"{' '.join([player.mention for player in not_submitted_players])} "
-                        "did not submitted availability for this week. "
+                        "did not submit availability for this week. "
                         f"{COMMISSIONERS_ROLE.mention} {ADMINS_ROLE.mention}"
                     )
 

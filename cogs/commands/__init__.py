@@ -62,7 +62,7 @@ class TaskerCommands(commands.Cog):
             )
 
         await interaction.edit_original_message(
-            content="On **Wednessday** which times will you be available to play?",
+            content="On **Wednesday** which times will you be available to play?",
             view=wd_times,
         )
         await wd_times.wait()
@@ -98,7 +98,7 @@ class TaskerCommands(commands.Cog):
         message = (
             f"{interaction.user.mention} is available \n"
             f"**Tuesday**: {'/'.join(tu_times.slots) or 'None'} \n"
-            f"**Wednessday**: {'/'.join(wd_times.slots) or 'None'} \n"
+            f"**Wednesday**: {'/'.join(wd_times.slots) or 'None'} \n"
             f"**Thursday**: {'/'.join(th_times.slots) or 'None'}"
         )
 
@@ -142,10 +142,10 @@ class TaskerCommands(commands.Cog):
             },
         ),
         left_wing: Member = SlashOption(description="Select left wing player"),
+        center: Member = SlashOption(description="Select center player"),
         right_wing: Member = SlashOption(description="Select right wing player"),
         left_defense: Member = SlashOption(description="Select left defense player"),
         right_defense: Member = SlashOption(description="Select right defense player"),
-        center: Member = SlashOption(description="Select center player"),
         goalie: Member = SlashOption(description="Select goalie player"),
     ):
         await interaction.response.defer()
@@ -154,6 +154,13 @@ class TaskerCommands(commands.Cog):
             return await interaction.edit_original_message(
                 content="You can't submit lineups in this channel"
             )
+
+        players = [left_wing, left_defense, right_wing, right_defense, goalie, center]
+        team_role = get(interaction.guild.roles, name=Data.PLAYERS_ROLE)
+
+        for player in players:
+            if team_role not in player.roles:
+                return await interaction.followup.send(content=f"Player {player.mention} does not have the Team role. Can't submit lineup with him")
 
         l_data = await self.prisma.lineup.create(
             data={
@@ -169,13 +176,14 @@ class TaskerCommands(commands.Cog):
             }
         )
 
+        content = " ".join([player.mention for player in players])
         embed = Embed(title=f"Lineups for `{day}` at `{time}` \n")
         embed.description = (
             f"Left Wing: {left_wing.mention} \n"
+            f"Center: {center.mention} \n"
             f"Right Wing: {right_wing.mention} \n"
             f"Left Defense: {left_defense.mention} \n"
             f"Right Defense: {right_defense.mention} \n"
-            f"Center: {center.mention} \n"
             f"Goalie: {goalie.mention}"
         )
         embed.set_thumbnail(url=interaction.guild.icon.url)
@@ -186,7 +194,7 @@ class TaskerCommands(commands.Cog):
         )
 
         if LINEUP_LOG_CHANNEL:
-            log_message = await LINEUP_LOG_CHANNEL.send(embed=embed)
+            log_message = await LINEUP_LOG_CHANNEL.send(content=content, embed=embed)
             await self.prisma.lineup.update(
                 where={"id": l_data.id}, data={"message_id_team": log_message.id}
             )
@@ -198,7 +206,7 @@ class TaskerCommands(commands.Cog):
             )
 
             if TEAM_LOG_CHANNEL:
-                cmc_log_message = await TEAM_LOG_CHANNEL.send(embed=embed)
+                cmc_log_message = await TEAM_LOG_CHANNEL.send(content=content, embed=embed)
                 await self.prisma.lineup.update(
                     where={"id": l_data.id},
                     data={"message_id_team": cmc_log_message.id},
@@ -257,6 +265,9 @@ class TaskerCommands(commands.Cog):
         left_wing: Member = SlashOption(
             description="Select left wing player", required=False
         ),
+        center: Member = SlashOption(
+            description="Select center player", required=False
+        ),
         right_wing: Member = SlashOption(
             description="Select right wing player", required=False
         ),
@@ -265,9 +276,6 @@ class TaskerCommands(commands.Cog):
         ),
         right_defense: Member = SlashOption(
             description="Select right defense player", required=False
-        ),
-        center: Member = SlashOption(
-            description="Select center player", required=False
         ),
         goalie: Member = SlashOption(
             description="Select goalie player", required=False
@@ -286,6 +294,13 @@ class TaskerCommands(commands.Cog):
                 content="You can't edit lineups in this channel"
             )
 
+        players = [left_wing, left_defense, right_wing, right_defense, goalie, center]
+        team_role = get(interaction.guild.roles, name=Data.PLAYERS_ROLE)
+
+        for player in players:
+            if team_role not in player.roles:
+                return await interaction.followup.send(content=f"Player {player.mention} does not have the Team role. Can't submit lineup with him")
+        
         if not old_lineup or old_lineup.team != team_name:
             return await interaction.followup.send(content="Lineup was not found")
 
@@ -293,6 +308,7 @@ class TaskerCommands(commands.Cog):
             "day": day or old_lineup.day,
             "time": time or old_lineup.time,
             "left_wing": left_wing.id if left_wing else old_lineup.left_wing,
+            "center": center.id if center else old_lineup.center,
             "right_wing": right_wing.id if right_wing else old_lineup.right_wing,
             "left_defense": left_defense.id
             if left_defense
@@ -300,7 +316,6 @@ class TaskerCommands(commands.Cog):
             "right_defense": right_defense.id
             if right_defense
             else old_lineup.right_defense,
-            "center": center.id if center else old_lineup.center,
             "goalie": goalie.id if goalie else old_lineup.goalie,
         }
 
@@ -308,6 +323,7 @@ class TaskerCommands(commands.Cog):
             where={"id": old_lineup.id}, data=new_lineup_data
         )
 
+        content = " ".join([player.mention for player in players])
         embed = Embed(
             title=f"Lineups for `{day or old_lineup.day}` at `{time or old_lineup.time}` \n"
         )
@@ -368,7 +384,7 @@ class TaskerCommands(commands.Cog):
             except:
                 pass
 
-            message = await LINEUP_LOG_CHANNEL.send(embed=embed)
+            message = await LINEUP_LOG_CHANNEL.send(content=content, embed=embed)
             await self.prisma.lineup.update(
                 where={"id": lineup_id}, data={"message_id_team": message.id}
             )
@@ -389,7 +405,7 @@ class TaskerCommands(commands.Cog):
                 except:
                     pass
 
-                message = await TEAM_LOG_CHANNEL.send(embed=embed)
+                message = await TEAM_LOG_CHANNEL.send(content=content, embed=embed)
                 await self.prisma.lineup.update(
                     where={"id": lineup_id}, data={"message_id_cnc": message.id}
                 )
