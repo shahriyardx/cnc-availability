@@ -217,6 +217,10 @@ class Tasker(commands.Cog):
         self.start_task(self.close_lineup_channel, get_next_date("Friday", hour=2))
 
     def start_task(self, task_func, time):
+        now = datetime.datetime.utcnow()
+        delta = time - now
+
+        print(f"Task scheduled after {delta}")
         self.scheduler.schedule(task_func(), time)
 
     @tasks.loop(count=1)
@@ -228,17 +232,17 @@ class Tasker(commands.Cog):
 
         # Fake times
         now = datetime.datetime.utcnow()
-        f17 = now + datetime.timedelta(seconds=10)
-        m17 = now + datetime.timedelta(seconds=30)
-        t4 = now + datetime.timedelta(seconds=50)
-        f2 = now + datetime.timedelta(seconds=70)
+        # f17 = now + datetime.timedelta(seconds=10)
+        # m17 = now + datetime.timedelta(seconds=30)
+        # t4 = now + datetime.timedelta(seconds=50)
+        # f2 = now + datetime.timedelta(seconds=70)
 
         # Real times
-        # f17 = get_next_date("Friday", hour=17)
-        # m17 = get_next_date("Monday", hour=17)
-        # t4 = get_next_date("Tuesday", hour=4)
-        # f2 = get_next_date("Friday", hour=2)
-
+        f17 = get_next_date("Friday", hour=17)
+        m17 = get_next_date("Monday", hour=17)
+        t4 = get_next_date("Tuesday", hour=4)
+        f2 = get_next_date("Friday", hour=2)
+        
         self.start_task(self.open_availability_task, f17)
         self.start_task(self.close_availability_task, m17)
         self.start_task(self.close_lineup_submit, t4)
