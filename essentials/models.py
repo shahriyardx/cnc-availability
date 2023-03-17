@@ -1,7 +1,12 @@
+import os
 from dataclasses import dataclass
 from typing import Callable, List
+from dotenv import load_dotenv
+
+load_dotenv(".env")
 
 from nextcord.ext.commands import AutoShardedBot
+from nextcord import Guild
 
 from prisma import Prisma
 
@@ -10,6 +15,7 @@ from prisma import Prisma
 class IBot(AutoShardedBot):
     get_command_mention: Callable[[int, str], str]
     prisma: Prisma
+    SUPPORT_GUILD: Guild
 
 
 @dataclass
@@ -30,7 +36,7 @@ Data = Itask(
     AVIAL_LOG_CHANNEL="availability",
     AVIAL_SUBMIT_CHANNEL="submit-availability",
     SUBMITTED_ROLE="Availability Submitted",
-    SUPPORT_GUILD=831166408888942623,
+    SUPPORT_GUILD=int(os.getenv("SUPPORT_GUILD", 831166408888942623)),
     LINEUP_LOG_CHANNEL="lineups",
     LINEUP_SUBMIT_CHANNEL="submit-lineups",
 )

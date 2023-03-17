@@ -32,3 +32,9 @@ model lineups {
   week      Int
   year      Int
 }
+
+model Settings {
+  id                 String  @id @default(cuid())
+  can_submit_lineups Boolean @default(true)
+  can_edit_lineups   Boolean @default(true)
+}

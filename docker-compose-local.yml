@@ -1,0 +1,12 @@
+version: '3.9'
+
+services:
+  database:
+    image: postgres:14-alpine
+    env_file:
+      - ./.env
+    ports:
+      - 5555:5432
+    volumes:
+      - ./database:/var/lib/postgresql/data
+    

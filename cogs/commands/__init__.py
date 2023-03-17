@@ -8,7 +8,7 @@ from nextcord.utils import get
 
 from essentials.models import Data, IBot
 from essentials.views import TimeView
-from essentials.utils import get_team_channel
+from essentials.utils import get_team_name
 
 
 def get_over(state):
@@ -113,7 +113,7 @@ class TaskerCommands(commands.Cog):
         if SUPPORT_GUILD:
             TEAM_LOG_CHANNEL = get(
                 SUPPORT_GUILD.text_channels,
-                name=f"╟・{interaction.guild.name[4:].replace(' ', '-').lower()}",
+                name=f"╟・{get_team_name(interaction.guild.name)}",
             )
 
             if TEAM_LOG_CHANNEL:
@@ -149,6 +149,13 @@ class TaskerCommands(commands.Cog):
         goalie: Member = SlashOption(description="Select goalie player"),
     ):
         await interaction.response.defer()
+
+        settings = await self.bot.prisma.settings.find_first()
+
+        if not settings.can_submit_lineups:
+            return await interaction.followup.send(
+                content="Lineups can't be submitted right now"
+            )
 
         if interaction.channel.name != Data.LINEUP_SUBMIT_CHANNEL:
             return await interaction.edit_original_message(
@@ -204,7 +211,7 @@ class TaskerCommands(commands.Cog):
         if SUPPORT_GUILD:
             TEAM_LOG_CHANNEL = get(
                 SUPPORT_GUILD.text_channels,
-                name=f"╟・{interaction.guild.name[4:].replace(' ', '-').lower()}",
+                name=f"╟・{get_team_name(interaction.guild.name)}",
             )
 
             if TEAM_LOG_CHANNEL:
@@ -286,12 +293,19 @@ class TaskerCommands(commands.Cog):
         ),
     ):
         await interaction.response.defer()
+        settings = await self.bot.prisma.settings.find_first()
+
+        if not settings.can_edit_lineups:
+            return await interaction.followup.send(
+                content="Lineups can't be editted right now"
+            )
+
         old_lineup = await self.prisma.lineup.find_unique(
             where={
                 "id": lineup_id,
             }
         )
-        team_name = get_team_channel(interaction.guild.name)
+        team_name = get_team_name(interaction.guild.name)
 
         if interaction.channel.name != Data.LINEUP_SUBMIT_CHANNEL:
             return await interaction.edit_original_message(
@@ -394,7 +408,7 @@ class TaskerCommands(commands.Cog):
             goalie_member,
         ]
         content = " ".join([player.mention for player in new_players])
-        
+
         SUPPORT_GUILD = self.bot.get_guild(Data.SUPPORT_GUILD)
         LINEUP_LOG_CHANNEL = get(
             interaction.guild.text_channels, name=Data.LINEUP_LOG_CHANNEL
