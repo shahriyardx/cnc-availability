@@ -33,8 +33,9 @@ class Tasker(commands.Cog):
         print("[+] START open_availability_task")
 
         await self.bot.prisma.lineup.delete_many()
+        settings = await self.bot.prisma.settings.find_first()
         await self.bot.prisma.settings.update(
-            where={"id": "main"},
+            where={"id": settings.id},
             data={
                 "can_edit_lineups": False,
                 "can_submit_lineups": False,
@@ -76,8 +77,9 @@ class Tasker(commands.Cog):
         print("[+] START close_availability_task")
 
         # Open lineups submit and edit
+        settings = await self.bot.prisma.settings.find_first()
         await self.bot.prisma.settings.update(
-            where={"id": "main"},
+            where={"id": settings.id},
             data={
                 "can_edit_lineups": True,
                 "can_submit_lineups": True,
@@ -195,8 +197,9 @@ class Tasker(commands.Cog):
 
         # Close lineup submit and edit both again
         print("[+] START close_lineup_channel")
+        settings = await self.bot.prisma.settings.find_first()
         await self.bot.prisma.settings.update(
-            where={"id": "main"},
+            where={"id": settings.id},
             data={
                 "can_edit_lineups": False,
                 "can_submit_lineups": False,
