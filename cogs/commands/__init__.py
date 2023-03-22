@@ -91,8 +91,10 @@ class TaskerCommands(commands.Cog):
 
         SUBMITTED_ROLE = get(interaction.guild.roles, name=Data.SUBMITTED_ROLE)
         SUPPORT_GUILD = self.bot.get_guild(Data.SUPPORT_GUILD)
+        total_games = len(tu_times.slots) + len(wd_times.slots) + len(th_times.slots)
 
-        if SUBMITTED_ROLE:
+
+        if SUBMITTED_ROLE and total_games >= 4:
             await interaction.user.add_roles(SUBMITTED_ROLE)
 
         message = (
