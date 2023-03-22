@@ -334,7 +334,7 @@ class TaskerCommands(commands.Cog):
                     content=f"Player {player.mention} does not have the Team role. Can't submit lineup with him"
                 )
 
-        if not old_lineup or old_lineup.team != team_name:
+        if not old_lineup:
             return await interaction.followup.send(content="Lineup was not found")
 
         new_lineup_data = {
