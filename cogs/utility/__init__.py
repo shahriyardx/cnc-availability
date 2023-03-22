@@ -56,25 +56,35 @@ class UilityCommands(commands.Cog):
         ),
     ):
         await interaction.response.defer()
-        if interaction.user.id != interaction.guild.owner_id:
-            is_owner = get(interaction.user.roles, name="Owner")
-            is_gm = get(interaction.user.roles, name="General Manager")
+        
+        guild_owner = interaction.user.id != interaction.guild.owner_id
+        is_owner = get(interaction.user.roles, name="Owner")
+        is_gm = get(interaction.user.roles, name="General Manager")
 
-            if not is_owner and not is_gm:
-                return await interaction.edit_original_message(
-                    content="You can't assign roles"
-                )
+        async def process():
+            await player.add_roles(role)
+            await interaction.followup.send(
+                content=f"{role} has been added to {player}"
+            )
 
-            if is_owner:
-                highest_role = get(interaction.guild.roles, name="Owner")
-            elif is_gm:
-                highest_role = get(interaction.guild.roles, name="General Manager")
+        if guild_owner:
+            return await process()
 
-            if role > highest_role:
-                return await interaction.followup.send("Can't assign this role")
+        highest_role = (
+            get(interaction.guild.roles, name="Owner")
+            if is_owner
+            else get(interaction.guild.roles, name="General Manager")
+        )        
 
-        await player.add_roles(role)
-        await interaction.followup.send(content=f"{role} has been added to {player}")
+        if not is_owner and not is_gm:
+            return await interaction.edit_original_message(
+                content="You can't assign roles"
+            )
+
+        if role > highest_role:
+            return await interaction.followup.send("Can't assign this role")
+
+        await process()
 
     @slash_command(description="Remove roles from player")
     async def removerole(
@@ -90,27 +100,35 @@ class UilityCommands(commands.Cog):
         ),
     ):
         await interaction.response.defer()
-        if interaction.user.id != interaction.guild.owner_id:
-            is_owner = get(interaction.user.roles, name="Owner")
-            is_gm = get(interaction.user.roles, name="General Manager")
+        
+        guild_owner = interaction.user.id != interaction.guild.owner_id
+        is_owner = get(interaction.user.roles, name="Owner")
+        is_gm = get(interaction.user.roles, name="General Manager")
 
-            if not is_owner and not is_gm:
-                return await interaction.edit_original_message(
-                    content="You can't remove roles"
-                )
+        async def process():
+            await player.add_roles(role)
+            await interaction.followup.send(
+                content=f"{role} has been removed from {player}"
+            )
 
-            if is_owner:
-                highest_role = get(interaction.guild.roles, name="Owner")
-            elif is_gm:
-                highest_role = get(interaction.guild.roles, name="General Manager")
+        if guild_owner:
+            return await process()
 
-            if role > highest_role:
-                return await interaction.followup.send("Can't remove this role")
+        highest_role = (
+            get(interaction.guild.roles, name="Owner")
+            if is_owner
+            else get(interaction.guild.roles, name="General Manager")
+        )        
 
-        await player.remove_roles(role)
-        await interaction.followup.send(
-            content=f"{role} has been removed from {player}"
-        )
+        if not is_owner and not is_gm:
+            return await interaction.edit_original_message(
+                content="You can't remove roles"
+            )
+
+        if role > highest_role:
+            return await interaction.followup.send("Can't remove this role")
+
+        await process()
 
     @slash_command(description="Change psn")
     async def psn(
