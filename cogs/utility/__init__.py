@@ -106,7 +106,7 @@ class UilityCommands(commands.Cog):
         is_gm = get(interaction.user.roles, name="General Manager")
 
         async def process():
-            await player.add_roles(role)
+            await player.remove_roles(role)
             await interaction.followup.send(
                 content=f"{role} has been removed from {player}"
             )
