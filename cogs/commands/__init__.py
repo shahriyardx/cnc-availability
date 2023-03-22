@@ -304,7 +304,7 @@ class TaskerCommands(commands.Cog):
 
         old_lineup = await self.prisma.lineup.find_unique(
             where={
-                "id": lineup_id,
+                "id": lineup_id.strip(),
             }
         )
         team_name = get_team_name(interaction.guild.name)
@@ -428,7 +428,7 @@ class TaskerCommands(commands.Cog):
 
             message = await LINEUP_LOG_CHANNEL.send(content=content, embed=embed)
             await self.prisma.lineup.update(
-                where={"id": lineup_id}, data={"message_id_team": message.id}
+                where={"id": lineup_id.strip()}, data={"message_id_team": message.id}
             )
 
         if SUPPORT_GUILD:
@@ -444,16 +444,17 @@ class TaskerCommands(commands.Cog):
                     )
                     if old_message:
                         await old_message.delete()
-                except:
+                except Exception as e:
+                    print(e)
                     pass
 
                 message = await TEAM_LOG_CHANNEL.send(content=content, embed=embed)
                 await self.prisma.lineup.update(
-                    where={"id": lineup_id}, data={"message_id_cnc": message.id}
+                    where={"id": lineup_id.strip()}, data={"message_id_cnc": message.id}
                 )
 
         await interaction.followup.send(
-            content=f"Lineup ID: `{lineup_id}` has been updated."
+            content=f"Lineup ID: `{lineup_id.strip()}` has been updated."
         )
 
     @slash_command(name="create-category", description="Create category")
