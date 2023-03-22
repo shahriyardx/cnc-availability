@@ -407,7 +407,7 @@ class TaskerCommands(commands.Cog):
             center_member,
             goalie_member,
         ]
-        content = " ".join([player.mention for player in new_players])
+        content = " ".join([player for player in new_players])
 
         SUPPORT_GUILD = self.bot.get_guild(Data.SUPPORT_GUILD)
         LINEUP_LOG_CHANNEL = get(
