@@ -57,7 +57,7 @@ class UilityCommands(commands.Cog):
     ):
         await interaction.response.defer()
         
-        guild_owner = interaction.user.id != interaction.guild.owner_id
+        guild_owner = interaction.user.id == interaction.guild.owner_id
         is_owner = get(interaction.user.roles, name="Owner")
         is_gm = get(interaction.user.roles, name="General Manager")
 
@@ -101,7 +101,7 @@ class UilityCommands(commands.Cog):
     ):
         await interaction.response.defer()
         
-        guild_owner = interaction.user.id != interaction.guild.owner_id
+        guild_owner = interaction.user.id == interaction.guild.owner_id
         is_owner = get(interaction.user.roles, name="Owner")
         is_gm = get(interaction.user.roles, name="General Manager")
 
