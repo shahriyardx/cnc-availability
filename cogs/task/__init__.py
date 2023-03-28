@@ -144,8 +144,9 @@ class Tasker(commands.Cog):
         # Keeps the lineup edit open
 
         print("[+] START close_lineup_submit")
+        settings = await self.bot.prisma.settings.find_first()
         await self.bot.prisma.settings.update(
-            where={"id": "main"},
+            where={"id": settings.id},
             data={
                 "can_edit_lineups": True,
                 "can_submit_lineups": False,
