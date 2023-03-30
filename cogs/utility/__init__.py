@@ -56,7 +56,7 @@ class UilityCommands(commands.Cog):
         ),
     ):
         await interaction.response.defer()
-        
+
         guild_owner = interaction.user.id == interaction.guild.owner_id
         is_owner = get(interaction.user.roles, name="Owner")
         is_gm = get(interaction.user.roles, name="General Manager")
@@ -70,21 +70,21 @@ class UilityCommands(commands.Cog):
         if guild_owner:
             return await process()
 
-        highest_role = (
-            get(interaction.guild.roles, name="Owner")
-            if is_owner
-            else get(interaction.guild.roles, name="General Manager")
-        )        
+        if is_owner or is_gm:
+            highest_role = None
 
-        if not is_owner and not is_gm:
-            return await interaction.edit_original_message(
-                content="You can't assign roles"
-            )
+            if is_owner:
+                highest_role = get(interaction.guild.roles, name="Owner")
 
-        if role > highest_role:
-            return await interaction.followup.send("Can't assign this role")
+            if is_gm:
+                highest_role = get(interaction.guild.roles, name="General Manager")
 
-        await process()
+            if role > highest_role:
+                return await interaction.followup.send("Can't add this role")
+
+            await process()
+
+        await interaction.edit_original_message(content="You can't add roles")
 
     @slash_command(description="Remove roles from player")
     async def removerole(
@@ -100,7 +100,7 @@ class UilityCommands(commands.Cog):
         ),
     ):
         await interaction.response.defer()
-        
+
         guild_owner = interaction.user.id == interaction.guild.owner_id
         is_owner = get(interaction.user.roles, name="Owner")
         is_gm = get(interaction.user.roles, name="General Manager")
@@ -114,21 +114,21 @@ class UilityCommands(commands.Cog):
         if guild_owner:
             return await process()
 
-        highest_role = (
-            get(interaction.guild.roles, name="Owner")
-            if is_owner
-            else get(interaction.guild.roles, name="General Manager")
-        )        
+        if is_owner or is_gm:
+            highest_role = None
 
-        if not is_owner and not is_gm:
-            return await interaction.edit_original_message(
-                content="You can't remove roles"
-            )
+            if is_owner:
+                highest_role = get(interaction.guild.roles, name="Owner")
 
-        if role > highest_role:
-            return await interaction.followup.send("Can't remove this role")
+            if is_gm:
+                highest_role = get(interaction.guild.roles, name="General Manager")
 
-        await process()
+            if role > highest_role:
+                return await interaction.followup.send("Can't remove this role")
+
+            await process()
+
+        await interaction.edit_original_message(content="You can't remove roles")
 
     @slash_command(description="Change psn")
     async def psn(
@@ -181,6 +181,30 @@ class UilityCommands(commands.Cog):
         await interaction.response.defer()
         mention = self.bot.get_command_mention(interaction.guild.id, command_name)
         await interaction.edit_original_message(content=f"{mention} `{mention}`")
+
+    @slash_command(name="kick", description="Kick a member")
+    async def kick(
+        self,
+        interaction: Interaction,
+        member: Member = SlashOption(description="the member to kick", required=True),
+        reason: str = SlashOption(
+            description="kick reason", required=False, default="Kick by {user}"
+        ),
+    ):
+        await interaction.response.defer()
+
+        is_guild_owner = interaction.user.id == interaction.guild.owner_id
+        is_owner = get(interaction.user.roles, name="Owner")
+        is_gm = get(interaction.user.roles, name="General Manager")
+
+        if is_guild_owner or is_owner or is_gm:
+            try:
+                await member.kick(reason=reason.replace("{user}", f"{interaction.user} ({interaction.user.id})"))
+                return await interaction.edit_original_message(content=f"{member} has been kicked")
+            except:
+                return await interaction.edit_original_message(content=f"Failed to kick {member}")
+        
+        return await interaction.edit_original_message(content="You don't have permission to kick anyone")
 
 
 def setup(bot: IBot):
