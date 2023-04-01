@@ -23,12 +23,40 @@ class Tasker(commands.Cog):
         self.bot = bot
         self.scheduler = TimedScheduler(prefer_utc=True)
         self.start_tasks.start()
-    
-    # @slash_command(description="Simulate specific tasks")
-    # async def simulate(self, interaction: Interaction)
-    
 
-    async def open_availability_task(self):
+    @slash_command(description="Simulate specific tasks")
+    async def simulate(
+        self,
+        interaction: Interaction,
+        task: str = SlashOption(
+            description="Select task to smilulate",
+            choices={
+                "Open Availability": "Open Availability",
+                "Close Availability and Open Lineups Submit and Edit": "Close Availability and Open Lineups Submit and Edit",
+                "Close Lineup Submit": "Close Lineup Submit",
+                "Close Lineup Edit": "Close Lineup Edit",
+            },
+        ),
+    ):
+        await interaction.response.defer()
+
+        t = {
+            "Open Availability": self.open_availability_task,
+            "Close Availability and Open Lineups Submit and Edit": self.close_availability_task,
+            "Close Lineup Submit": self.close_lineup_submit,
+            "Close Lineup Edit": self.close_lineup_channel,
+        }
+
+        task_func = t[task]
+
+        try:
+            await task_func(True)
+        except Exception as e:
+            return await interaction.edit_original_message(content=f"**Error**: {e}")
+
+        await interaction.edit_original_message(content="Simulation succeded.")
+
+    async def open_availability_task(self, simulate=False):
         # Runs Friday 5 PM UTC
         # Opens availability
 
@@ -36,9 +64,10 @@ class Tasker(commands.Cog):
         # Close any submission and edition of lineups
         print("[+] START open_availability_task")
 
-        await self.bot.prisma.lineups.delete_many()
-        await self.bot.prisma.lineup.delete_many()
-        await self.bot.prisma.availability.delete_many()
+        if not simulate:
+            await self.bot.prisma.lineups.delete_many()
+            await self.bot.prisma.lineup.delete_many()
+            await self.bot.prisma.availability.delete_many()
 
         settings = await self.bot.prisma.settings.find_first()
 
@@ -74,9 +103,12 @@ class Tasker(commands.Cog):
                     await member.remove_roles(SUBMITTED_ROLE)
 
         print("[+] END open_availability_task")
-        self.start_task(self.open_availability_task, get_next_date("Friday", hour=17))
+        if not simulate:
+            self.start_task(
+                self.open_availability_task, get_next_date("Friday", hour=17)
+            )
 
-    async def close_availability_task(self):
+    async def close_availability_task(self, simulate=False):
         # Runs Monday 5 PM UTC
         # Closes availability submission
         # Open Lineups submit
@@ -99,7 +131,6 @@ class Tasker(commands.Cog):
                 continue
 
             TEAM_ROLE = get(guild.roles, name=Data.PLAYERS_ROLE)
-            SUBMITTED_ROLE = get(guild.roles, name=Data.SUBMITTED_ROLE)
             LINEUPS_CHANNEL = get(guild.text_channels, name=Data.LINEUP_SUBMIT_CHANNEL)
 
             # Lockdown submit channel - No more availability submission
@@ -115,8 +146,10 @@ class Tasker(commands.Cog):
             # Report back in CNC Discord
             not_submitted_players: List[Member] = list()
             for member in TEAM_ROLE.members:
-                avail = await self.bot.prisma.availability.find_first(where={"member_id": member.id})
-                
+                avail = await self.bot.prisma.availability.find_first(
+                    where={"member_id": member.id}
+                )
+
                 if not avail:
                     not_submitted_players.append(member)
                     continue
@@ -151,9 +184,12 @@ class Tasker(commands.Cog):
             )
 
         print("[+] STOP close_availability_task")
-        self.start_task(self.close_availability_task, get_next_date("Monday", hour=17))
+        if not simulate:
+            self.start_task(
+                self.close_availability_task, get_next_date("Monday", hour=17)
+            )
 
-    async def close_lineup_submit(self):
+    async def close_lineup_submit(self, simulate=False):
         # Runs Tuesday 4 AM
         # Keeps the lineup edit open
 
@@ -203,9 +239,10 @@ class Tasker(commands.Cog):
                     )
 
         print("[+] STOP close_lineup_submit")
-        self.start_task(self.close_lineup_submit, get_next_date("Tuesday", hour=4))
+        if not simulate:
+            self.start_task(self.close_lineup_submit, get_next_date("Tuesday", hour=4))
 
-    async def close_lineup_channel(self):
+    async def close_lineup_channel(self, simulate=False):
         # Runs Friday 2 AM UTC
         # Closes the lineup channel
         # Checks who did not play 3 matches
@@ -232,7 +269,8 @@ class Tasker(commands.Cog):
             await lockdown(LINEUPS_CHANNEL, roles=[OWNER_ROLE, GM_ROLE])
 
         print("[+] STOP close_lineup_channel")
-        self.start_task(self.close_lineup_channel, get_next_date("Friday", hour=2))
+        if not simulate:
+            self.start_task(self.close_lineup_channel, get_next_date("Friday", hour=2))
 
     def start_task(self, task_func, time):
         now = datetime.datetime.utcnow()
