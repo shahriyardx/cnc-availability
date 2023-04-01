@@ -23,6 +23,10 @@ class Tasker(commands.Cog):
         self.bot = bot
         self.scheduler = TimedScheduler(prefer_utc=True)
         self.start_tasks.start()
+    
+    # @slash_command(description="Simulate specific tasks")
+    # async def simulate(self, interaction: Interaction)
+    
 
     async def open_availability_task(self):
         # Runs Friday 5 PM UTC
@@ -245,17 +249,17 @@ class Tasker(commands.Cog):
         print("Starting tasks")
 
         # Fake times
-        now = datetime.datetime.utcnow()
-        f17 = now + datetime.timedelta(seconds=3)
-        m17 = f17 + datetime.timedelta(seconds=30)
-        t4 = m17 + datetime.timedelta(seconds=30)
-        f2 = t4 + datetime.timedelta(seconds=30)
+        # now = datetime.datetime.utcnow()
+        # f17 = now + datetime.timedelta(seconds=3)
+        # m17 = f17 + datetime.timedelta(seconds=30)
+        # t4 = m17 + datetime.timedelta(seconds=30)
+        # f2 = t4 + datetime.timedelta(seconds=30)
 
         # Real times
-        # f17 = get_next_date("Friday", hour=17)
-        # m17 = get_next_date("Monday", hour=17)
-        # t4 = get_next_date("Tuesday", hour=4)
-        # f2 = get_next_date("Friday", hour=2)
+        f17 = get_next_date("Friday", hour=17)
+        m17 = get_next_date("Monday", hour=17)
+        t4 = get_next_date("Tuesday", hour=4)
+        f2 = get_next_date("Friday", hour=2)
 
         self.start_task(self.open_availability_task, f17)
         self.start_task(self.close_availability_task, m17)
