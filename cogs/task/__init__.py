@@ -225,7 +225,7 @@ class Tasker(commands.Cog):
         now = datetime.datetime.utcnow()
         delta = time - now
 
-        print(f"Task scheduled after {delta}")
+        print(f"Task scheduled after {delta} {task_func.__name__}")
         self.scheduler.schedule(task_func(), time)
 
     @tasks.loop(count=1)
