@@ -38,3 +38,9 @@ model Settings {
   can_submit_lineups Boolean @default(true)
   can_edit_lineups   Boolean @default(true)
 }
+
+model Availability {
+  id        String @id @default(cuid())
+  member_id BigInt
+  games     Int
+}

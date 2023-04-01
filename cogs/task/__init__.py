@@ -28,11 +28,14 @@ class Tasker(commands.Cog):
         # Runs Friday 5 PM UTC
         # Opens availability
 
-        # Delete all previous lineups
+        # Delete all previous lineups and availability
         # Close any submission and edition of lineups
         print("[+] START open_availability_task")
 
         await self.bot.prisma.lineups.delete_many()
+        await self.bot.prisma.lineup.delete_many()
+        await self.bot.prisma.availability.delete_many()
+
         settings = await self.bot.prisma.settings.find_first()
 
         await self.bot.prisma.settings.update(
@@ -108,7 +111,13 @@ class Tasker(commands.Cog):
             # Report back in CNC Discord
             not_submitted_players: List[Member] = list()
             for member in TEAM_ROLE.members:
-                if SUBMITTED_ROLE.id not in [role.id for role in member.roles]:
+                avail = await self.bot.prisma.availability.find_first(where={"member_id": member.id})
+                
+                if not avail:
+                    not_submitted_players.append(member)
+                    continue
+
+                if avail.games < 4:
                     not_submitted_players.append(member)
 
             cnc_team_channel = get(
@@ -167,7 +176,7 @@ class Tasker(commands.Cog):
             not_played_minimum_3 = []
             for player in TEAM_ROLE.members:
                 lined_up = await self.bot.prisma.lineups.find_many(
-                    where={"memberId": str(player.id), "week": week}
+                    where={"member_id": str(player.id), "week": week}
                 )
 
                 if len(lined_up) < 3:
@@ -237,16 +246,16 @@ class Tasker(commands.Cog):
 
         # Fake times
         now = datetime.datetime.utcnow()
-        # f17 = now + datetime.timedelta(seconds=10)
-        # m17 = now + datetime.timedelta(seconds=30)
-        # t4 = now + datetime.timedelta(seconds=50)
-        # f2 = now + datetime.timedelta(seconds=70)
+        f17 = now + datetime.timedelta(seconds=3)
+        m17 = f17 + datetime.timedelta(seconds=30)
+        t4 = m17 + datetime.timedelta(seconds=30)
+        f2 = t4 + datetime.timedelta(seconds=30)
 
         # Real times
-        f17 = get_next_date("Friday", hour=17)
-        m17 = get_next_date("Monday", hour=17)
-        t4 = get_next_date("Tuesday", hour=4)
-        f2 = get_next_date("Friday", hour=2)
+        # f17 = get_next_date("Friday", hour=17)
+        # m17 = get_next_date("Monday", hour=17)
+        # t4 = get_next_date("Tuesday", hour=4)
+        # f2 = get_next_date("Friday", hour=2)
 
         self.start_task(self.open_availability_task, f17)
         self.start_task(self.close_availability_task, m17)

@@ -93,9 +93,14 @@ class TaskerCommands(commands.Cog):
         SUPPORT_GUILD = self.bot.get_guild(Data.SUPPORT_GUILD)
         total_games = len(tu_times.slots) + len(wd_times.slots) + len(th_times.slots)
 
+        await self.bot.prisma.availability.create(
+            data={
+                "member_id": interaction.user.id,
+                "games": total_games,
+            }
+        )
 
-        if SUBMITTED_ROLE and total_games >= 4:
-            await interaction.user.add_roles(SUBMITTED_ROLE)
+        await interaction.user.add_roles(SUBMITTED_ROLE)
 
         message = (
             f"{interaction.user.mention} is available \n"
