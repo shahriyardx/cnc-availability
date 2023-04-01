@@ -32,8 +32,9 @@ class Tasker(commands.Cog):
         # Close any submission and edition of lineups
         print("[+] START open_availability_task")
 
-        await self.bot.prisma.lineup.delete_many()
+        await self.bot.prisma.lineups.delete_many()
         settings = await self.bot.prisma.settings.find_first()
+
         await self.bot.prisma.settings.update(
             where={"id": settings.id},
             data={
