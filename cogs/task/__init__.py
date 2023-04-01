@@ -40,6 +40,9 @@ class Tasker(commands.Cog):
     ):
         await interaction.response.defer()
 
+        if interaction.user.id != interaction.guild.owner_id:
+            return await interaction.edit_original_message(content="You are allowed to simulate tasks")
+
         t = {
             "Open Availability": self.open_availability_task,
             "Close Availability and Open Lineups Submit and Edit": self.close_availability_task,
