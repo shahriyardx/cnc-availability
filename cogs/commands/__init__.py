@@ -40,6 +40,12 @@ class TaskerCommands(commands.Cog):
     async def submitavailability(self, interaction: Interaction):
         await interaction.response.defer(ephemeral=True)
 
+        submitted = get(interaction.user.roles, name=Data.SUBMITTED_ROLE)
+        if submitted:
+            return await interaction.edit_original_message(
+                content="You have already submitted availability for this week."
+            )
+
         if interaction.channel.name != Data.AVIAL_SUBMIT_CHANNEL:
             return await interaction.edit_original_message(
                 content="You can't submit availability in this channel"
@@ -146,7 +152,7 @@ class TaskerCommands(commands.Cog):
                 "8:30": "8:30",
                 "9:15": "9:15",
                 "10:00": "10:00",
-            },
+            }, 
         ),
         left_wing: Member = SlashOption(description="Select left wing player"),
         center: Member = SlashOption(description="Select center player"),

@@ -12,7 +12,7 @@ from nextcord import (
 from nextcord.ext import commands, tasks
 from nextcord.utils import get
 
-from essentials.time import Days, get_next_date
+from essentials.time import get_next_date
 from essentials.models import Data, IBot
 from essentials.utils import get_team_name
 
@@ -42,7 +42,9 @@ class Tasker(commands.Cog):
         await interaction.response.defer(ephemeral=True)
 
         if interaction.user.id != interaction.guild.owner_id:
-            return await interaction.edit_original_message(content="You are allowed to simulate tasks")
+            return await interaction.edit_original_message(
+                content="You are allowed to simulate tasks"
+            )
 
         t = {
             "Open Availability": self.open_availability_task,
@@ -137,6 +139,9 @@ class Tasker(commands.Cog):
             TEAM_ROLE = get(guild.roles, name=Data.PLAYERS_ROLE)
             LINEUPS_CHANNEL = get(guild.text_channels, name=Data.LINEUP_SUBMIT_CHANNEL)
 
+            if not TEAM_ROLE or not LINEUPS_CHANNEL:
+                continue
+
             # Lockdown submit channel - No more availability submission
             submit_availability_channel = get(
                 guild.text_channels, name=Data.AVIAL_SUBMIT_CHANNEL
@@ -161,6 +166,9 @@ class Tasker(commands.Cog):
                 if avail.games < 4:
                     not_submitted_players.append(member)
 
+            if not SUPPORT_GUILD:
+                continue
+
             cnc_team_channel = get(
                 SUPPORT_GUILD.text_channels,
                 name=f"╟・{get_team_name(guild.name)}",
@@ -178,6 +186,9 @@ class Tasker(commands.Cog):
             # Ask Owner and General Manager to submit for lineups
             OWNER_ROLE = get(guild.roles, name="Owner")
             GM_ROLE = get(guild.roles, name="General Manager")
+
+            if not OWNER_ROLE or not GM_ROLE:
+                continue
 
             await unlockdown(LINEUPS_CHANNEL, roles=[OWNER_ROLE, GM_ROLE])
             await LINEUPS_CHANNEL.send(
@@ -270,7 +281,8 @@ class Tasker(commands.Cog):
             OWNER_ROLE = get(guild.roles, name="Owner")
             GM_ROLE = get(guild.roles, name="General Manager")
 
-            await lockdown(LINEUPS_CHANNEL, roles=[OWNER_ROLE, GM_ROLE])
+            if LINEUPS_CHANNEL and OWNER_ROLE and GM_ROLE:
+                await lockdown(LINEUPS_CHANNEL, roles=[OWNER_ROLE, GM_ROLE])
 
         print("[+] STOP close_lineup_channel")
         if not simulate:
@@ -287,8 +299,9 @@ class Tasker(commands.Cog):
     async def start_tasks(self):
         await self.bot.wait_until_ready()
 
+        print(f"Mode: {os.environ['MODE']}")
+
         if os.environ["MODE"] == "dev":
-            print("Dev mode")
             # Fake times
             now = datetime.datetime.utcnow()
             f17 = now + datetime.timedelta(seconds=3)
@@ -296,7 +309,6 @@ class Tasker(commands.Cog):
             t4 = m17 + datetime.timedelta(seconds=30)
             f2 = t4 + datetime.timedelta(seconds=30)
         else:
-            print("Production Mode")
             # Real times
             f17 = get_next_date("Friday", hour=17)
             m17 = get_next_date("Monday", hour=17)
