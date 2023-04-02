@@ -11,7 +11,7 @@ from nextcord import (
 def get_permissions(state: bool):
     permission_overwrites = PermissionOverwrite()
     permission_overwrites.send_messages = state
-    permission_overwrites.view_channel = state
+    permission_overwrites.view_channel = True
 
     return permission_overwrites
 

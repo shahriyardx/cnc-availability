@@ -227,6 +227,12 @@ class Tasker(commands.Cog):
                 continue
 
             TEAM_ROLE = get(guild.roles, name=Data.PLAYERS_ROLE)
+            LINEUPS_CHANNEL = get(guild.text_channels, name=Data.LINEUP_SUBMIT_CHANNEL)
+
+            if LINEUPS_CHANNEL:
+                await LINEUPS_CHANNEL.send(
+                    ":information_source: Lineup submission has been closed. Only editing old lneups are open now."
+                )
 
             not_played_minimum_3 = []
             for player in TEAM_ROLE.members:
@@ -282,6 +288,10 @@ class Tasker(commands.Cog):
             GM_ROLE = get(guild.roles, name="General Manager")
 
             if LINEUPS_CHANNEL and OWNER_ROLE and GM_ROLE:
+                await LINEUPS_CHANNEL.send(
+                    ":information_source: Lineup editing has been closed for this week."
+                )
+
                 await lockdown(LINEUPS_CHANNEL, roles=[OWNER_ROLE, GM_ROLE])
 
         print("[+] STOP close_lineup_channel")
@@ -299,15 +309,23 @@ class Tasker(commands.Cog):
     async def start_tasks(self):
         await self.bot.wait_until_ready()
 
-        print(f"Mode: {os.environ['MODE']}")
+        mode = os.environ["MODE"]
+        print(f"Mode: {mode}")
 
-        if os.environ["MODE"] == "dev":
+        if mode in ["dev", "devstart"]:
             # Fake times
             now = datetime.datetime.utcnow()
             f17 = now + datetime.timedelta(seconds=3)
             m17 = f17 + datetime.timedelta(seconds=30)
             t4 = m17 + datetime.timedelta(seconds=30)
             f2 = t4 + datetime.timedelta(seconds=30)
+
+            if mode == "devstart":
+                print("[+] Devstart mode")
+                self.start_task(self.open_availability_task, f17)
+                self.start_task(self.close_availability_task, m17)
+                self.start_task(self.close_lineup_submit, t4)
+                self.start_task(self.close_lineup_channel, f2)
         else:
             # Real times
             f17 = get_next_date("Friday", hour=17)
@@ -315,10 +333,10 @@ class Tasker(commands.Cog):
             t4 = get_next_date("Tuesday", hour=4)
             f2 = get_next_date("Friday", hour=2)
 
-        self.start_task(self.open_availability_task, f17)
-        self.start_task(self.close_availability_task, m17)
-        self.start_task(self.close_lineup_submit, t4)
-        self.start_task(self.close_lineup_channel, f2)
+            self.start_task(self.open_availability_task, f17)
+            self.start_task(self.close_availability_task, m17)
+            self.start_task(self.close_lineup_submit, t4)
+            self.start_task(self.close_lineup_channel, f2)
 
         self.scheduler.start()
 
