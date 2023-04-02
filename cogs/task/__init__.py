@@ -1,3 +1,4 @@
+import os
 import datetime
 from typing import List
 
@@ -38,7 +39,7 @@ class Tasker(commands.Cog):
             },
         ),
     ):
-        await interaction.response.defer()
+        await interaction.response.defer(ephemeral=True)
 
         if interaction.user.id != interaction.guild.owner_id:
             return await interaction.edit_original_message(content="You are allowed to simulate tasks")
@@ -279,28 +280,28 @@ class Tasker(commands.Cog):
         now = datetime.datetime.utcnow()
         delta = time - now
 
-        print(f"Task scheduled after {delta} {task_func.__name__}")
+        print(f"[T] Task scheduled after {delta} {task_func.__name__}")
         self.scheduler.schedule(task_func(), time)
 
     @tasks.loop(count=1)
     async def start_tasks(self):
-        print("Waiting...")
         await self.bot.wait_until_ready()
 
-        print("Starting tasks")
-
-        # Fake times
-        # now = datetime.datetime.utcnow()
-        # f17 = now + datetime.timedelta(seconds=3)
-        # m17 = f17 + datetime.timedelta(seconds=30)
-        # t4 = m17 + datetime.timedelta(seconds=30)
-        # f2 = t4 + datetime.timedelta(seconds=30)
-
-        # Real times
-        f17 = get_next_date("Friday", hour=17)
-        m17 = get_next_date("Monday", hour=17)
-        t4 = get_next_date("Tuesday", hour=4)
-        f2 = get_next_date("Friday", hour=2)
+        if os.environ["MODE"] == "dev":
+            print("Dev mode")
+            # Fake times
+            now = datetime.datetime.utcnow()
+            f17 = now + datetime.timedelta(seconds=3)
+            m17 = f17 + datetime.timedelta(seconds=30)
+            t4 = m17 + datetime.timedelta(seconds=30)
+            f2 = t4 + datetime.timedelta(seconds=30)
+        else:
+            print("Production Mode")
+            # Real times
+            f17 = get_next_date("Friday", hour=17)
+            m17 = get_next_date("Monday", hour=17)
+            t4 = get_next_date("Tuesday", hour=4)
+            f2 = get_next_date("Friday", hour=2)
 
         self.start_task(self.open_availability_task, f17)
         self.start_task(self.close_availability_task, m17)
@@ -308,8 +309,6 @@ class Tasker(commands.Cog):
         self.start_task(self.close_lineup_channel, f2)
 
         self.scheduler.start()
-
-        print("All tasks spawned")
 
 
 def setup(bot: IBot):
