@@ -1,6 +1,6 @@
 from typing import Any, List
 
-from nextcord import ButtonStyle, ui
+from nextcord import ButtonStyle, ui, Button
 from nextcord.interactions import Interaction
 
 
@@ -11,7 +11,7 @@ class TimeView(ui.View):
         self.cancelled = False
 
     async def _update(self, interaction: Interaction):
-        buttons: List[Any] = self.children
+        buttons: List[Button] = self.children
 
         for btn in buttons:
             if btn.custom_id in self.slots and btn.custom_id not in [

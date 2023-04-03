@@ -82,7 +82,7 @@ class UilityCommands(commands.Cog):
             if role > highest_role:
                 return await interaction.followup.send("Can't add this role")
 
-            await process()
+            return await process()
 
         await interaction.edit_original_message(content="You can't add roles")
 
@@ -126,7 +126,7 @@ class UilityCommands(commands.Cog):
             if role > highest_role:
                 return await interaction.followup.send("Can't remove this role")
 
-            await process()
+            return await process()
 
         await interaction.edit_original_message(content="You can't remove roles")
 
