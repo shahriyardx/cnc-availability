@@ -34,11 +34,11 @@ class Availability(commands.AutoShardedBot):
 
         print(f"{self.user} is ready..")
 
-    async def on_message(self, message: Message):
-        if message.author.bot:
-            return
+    # async def on_message(self, message: Message):
+    #     if message.author.bot:
+    #         return
 
-        await self.process_commands(message)
+    #     await self.process_commands(message)
 
     def get_command_mention(self, command_name) -> str:
         cmd = None
