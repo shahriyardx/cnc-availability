@@ -74,8 +74,11 @@ class UilityCommands(commands.Cog):
             print("As GM")
             highest_role = get(interaction.guild.roles, name="General Manager")
 
+        if not highest_role:
+            return await interaction.followup.send(content="You can't remove roles")
+
         if role > highest_role:
-            return await interaction.followup.send("Can't add this role")
+            return await interaction.followup.send("Can't remove this role")
 
         if highest_role:
             print(f"Adding role {role} to {player}")
@@ -118,8 +121,11 @@ class UilityCommands(commands.Cog):
             print("As GM")
             highest_role = get(interaction.guild.roles, name="General Manager")
 
+        if not highest_role:
+            return await interaction.followup.send(content="You can't remove roles")
+
         if role > highest_role:
-            return await interaction.followup.send("Can't add this role")
+            return await interaction.followup.send("Can't remove this role")
 
         if highest_role:
             print(f"Adding role {role} to {player}")
@@ -127,8 +133,6 @@ class UilityCommands(commands.Cog):
             return await interaction.followup.send(
                 content=f"{role} has been removed from {player}"
             )
-
-        await interaction.edit_original_message(content="You can't remove roles")
 
     @slash_command(description="Change psn")
     async def psn(
