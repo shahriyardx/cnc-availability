@@ -57,32 +57,32 @@ class UilityCommands(commands.Cog):
     ):
         await interaction.response.defer()
 
-        guild_owner = interaction.user.id == interaction.guild.owner_id
-        is_owner = get(interaction.user.roles, name="Owner")
-        is_gm = get(interaction.user.roles, name="General Manager")
-
-        async def process():
+        if interaction.user.id == interaction.guild.owner_id:
+            print("As Guid owner")
             await player.add_roles(role)
-            await interaction.followup.send(
+            return await interaction.followup.send(
                 content=f"{role} has been added to {player}"
             )
 
-        if guild_owner:
-            return await process()
+        highest_role = None
 
-        if is_owner or is_gm:
-            highest_role = None
+        if get(interaction.user.roles, name="Owner"):
+            print("As Owner")
+            highest_role = get(interaction.guild.roles, name="Owner")
 
-            if is_owner:
-                highest_role = get(interaction.guild.roles, name="Owner")
+        if get(interaction.user.roles, name="General Manager"):
+            print("As GM")
+            highest_role = get(interaction.guild.roles, name="General Manager")
 
-            if is_gm:
-                highest_role = get(interaction.guild.roles, name="General Manager")
+        if role > highest_role:
+            return await interaction.followup.send("Can't add this role")
 
-            if role > highest_role:
-                return await interaction.followup.send("Can't add this role")
-
-            return await process()
+        if highest_role:
+            print(f"Adding role {role} to {player}")
+            await player.add_roles(role)
+            return await interaction.followup.send(
+                content=f"{role} has been added to {player}"
+            )
 
         await interaction.edit_original_message(content="You can't add roles")
 
@@ -101,32 +101,32 @@ class UilityCommands(commands.Cog):
     ):
         await interaction.response.defer()
 
-        guild_owner = interaction.user.id == interaction.guild.owner_id
-        is_owner = get(interaction.user.roles, name="Owner")
-        is_gm = get(interaction.user.roles, name="General Manager")
-
-        async def process():
+        if interaction.user.id == interaction.guild.owner_id:
+            print("As Guid owner")
             await player.remove_roles(role)
-            await interaction.followup.send(
+            return await interaction.followup.send(
                 content=f"{role} has been removed from {player}"
             )
 
-        if guild_owner:
-            return await process()
+        highest_role = None
 
-        if is_owner or is_gm:
-            highest_role = None
+        if get(interaction.user.roles, name="Owner"):
+            print("As Owner")
+            highest_role = get(interaction.guild.roles, name="Owner")
 
-            if is_owner:
-                highest_role = get(interaction.guild.roles, name="Owner")
+        if get(interaction.user.roles, name="General Manager"):
+            print("As GM")
+            highest_role = get(interaction.guild.roles, name="General Manager")
 
-            if is_gm:
-                highest_role = get(interaction.guild.roles, name="General Manager")
+        if role > highest_role:
+            return await interaction.followup.send("Can't add this role")
 
-            if role > highest_role:
-                return await interaction.followup.send("Can't remove this role")
-
-            return await process()
+        if highest_role:
+            print(f"Adding role {role} to {player}")
+            await player.remove_roles(role)
+            return await interaction.followup.send(
+                content=f"{role} has been removed from {player}"
+            )
 
         await interaction.edit_original_message(content="You can't remove roles")
 
@@ -199,12 +199,22 @@ class UilityCommands(commands.Cog):
 
         if is_guild_owner or is_owner or is_gm:
             try:
-                await member.kick(reason=reason.replace("{user}", f"{interaction.user} ({interaction.user.id})"))
-                return await interaction.edit_original_message(content=f"{member} has been kicked")
+                await member.kick(
+                    reason=reason.replace(
+                        "{user}", f"{interaction.user} ({interaction.user.id})"
+                    )
+                )
+                return await interaction.edit_original_message(
+                    content=f"{member} has been kicked"
+                )
             except:
-                return await interaction.edit_original_message(content=f"Failed to kick {member}")
-        
-        return await interaction.edit_original_message(content="You don't have permission to kick anyone")
+                return await interaction.edit_original_message(
+                    content=f"Failed to kick {member}"
+                )
+
+        return await interaction.edit_original_message(
+            content="You don't have permission to kick anyone"
+        )
 
 
 def setup(bot: IBot):
