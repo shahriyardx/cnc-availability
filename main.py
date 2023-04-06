@@ -9,7 +9,6 @@ from prisma import Prisma
 load_dotenv(".env")
 
 intents = Intents.default()
-intents.message_content = True
 intents.members = True
 
 

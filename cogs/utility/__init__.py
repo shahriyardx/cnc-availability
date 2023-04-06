@@ -128,7 +128,7 @@ class UilityCommands(commands.Cog):
             return await interaction.followup.send("Can't remove this role")
 
         if highest_role:
-            print(f"Adding role {role} to {player}")
+            print(f"Removing {role} from {player}")
             await player.remove_roles(role)
             return await interaction.followup.send(
                 content=f"{role} has been removed from {player}"
