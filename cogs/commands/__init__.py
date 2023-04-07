@@ -258,6 +258,7 @@ class TaskerCommands(commands.Cog):
         await interaction.edit_original_message(
             content=f"Lineups for `{day}` at `{time}` have been submitted. ID: {l_data.id}"
         )
+        await interaction.channel.send(content=f"```{l_data.id}```")
 
     @slash_command(description="Press enter and edit lineups")
     async def editlineup(
