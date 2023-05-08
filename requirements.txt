@@ -1,4 +1,6 @@
 nextcord==2.4.2
-prisma
+prisma~=0.8.2
 aiosqlite
-aioscheduler
+aioscheduler~=1.4.2
+gspread~=5.8.0
+python-dotenv~=1.0.0

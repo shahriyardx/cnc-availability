@@ -1,5 +1,5 @@
 from datetime import datetime
-
+import pytz
 from nextcord import CategoryChannel, Embed, Member, PermissionOverwrite, SlashOption
 from nextcord.application_command import slash_command
 from nextcord.ext import commands
@@ -9,24 +9,25 @@ from nextcord.utils import get
 from essentials.models import Data, IBot
 from essentials.utils import get_team_name
 from essentials.views import TimeView
+from utils.gspread import DataSheet
 
 
 def get_over(state):
     overwrites = PermissionOverwrite()
-    overwrites.manage_channels = state # noqa
-    overwrites.manage_permissions = state # noqa
-    overwrites.send_messages = state # noqa
-    overwrites.view_channel = state # noqa
-    overwrites.create_public_threads = state # noqa
-    overwrites.create_private_threads = state # noqa
-    overwrites.send_messages_in_threads = state # noqa
-    overwrites.embed_links = state # noqa
-    overwrites.attach_files = state # noqa
-    overwrites.add_reactions = state # noqa
-    overwrites.use_external_emojis = state # noqa
-    overwrites.mention_everyone = state # noqa
-    overwrites.manage_messages = state # noqa
-    overwrites.read_message_history = state # noqa
+    overwrites.manage_channels = state  # noqa
+    overwrites.manage_permissions = state  # noqa
+    overwrites.send_messages = state  # noqa
+    overwrites.view_channel = state  # noqa
+    overwrites.create_public_threads = state  # noqa
+    overwrites.create_private_threads = state  # noqa
+    overwrites.send_messages_in_threads = state  # noqa
+    overwrites.embed_links = state  # noqa
+    overwrites.attach_files = state  # noqa
+    overwrites.add_reactions = state  # noqa
+    overwrites.use_external_emojis = state  # noqa
+    overwrites.mention_everyone = state  # noqa
+    overwrites.manage_messages = state  # noqa
+    overwrites.read_message_history = state  # noqa
 
     return overwrites
 
@@ -35,6 +36,7 @@ class TaskerCommands(commands.Cog):
     def __init__(self, bot: IBot) -> None:
         self.bot = bot
         self.prisma = bot.prisma
+        self.roster_sheet = DataSheet("OFFICIAL NHL ROSTER SHEET")
 
     @slash_command(description="Press enter and submit your availability")
     async def submitavailability(self, interaction: Interaction):
@@ -90,7 +92,22 @@ class TaskerCommands(commands.Cog):
                 content="❌ Cancelled!",
                 view=None,
             )
+        total_games = len(tu_times.slots) + len(wd_times.slots) + len(th_times.slots)
 
+        if total_games < 4:
+            current_time = datetime.now(pytz.timezone("US/Eastern"))
+
+            self.roster_sheet.append(
+                "IR",
+                [
+                    interaction.guild.name.replace("CNC", "").strip(),
+                    interaction.user.display_name,
+                    f"{current_time.day}-{current_time.month}-{current_time.year}",
+                    "Full Week",
+                    "null",
+                    f"Availability Bot (Total games = {total_games})",
+                ],
+            )
         await interaction.edit_original_message(
             content=f"✅ {interaction.user.mention} Availability Submitted!", view=None
         )
@@ -552,8 +569,8 @@ class TaskerCommands(commands.Cog):
     async def toggle_state(self, channel, role, state):
         def get_permissions(_state: bool):
             permission_overwrites = PermissionOverwrite()
-            permission_overwrites.send_messages = _state # noqa
-            permission_overwrites.view_channel = _state # noqa
+            permission_overwrites.send_messages = _state  # noqa
+            permission_overwrites.view_channel = _state  # noqa
 
             return permission_overwrites
 

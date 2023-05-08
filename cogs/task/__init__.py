@@ -29,7 +29,7 @@ class Tasker(commands.Cog):
             choices={
                 "Open Availability": "Open Availability",
                 "Close Availability and Open Lineups Submit and Edit": (
-                        "Close Availability and Open Lineups Submit and Edit"
+                    "Close Availability and Open Lineups Submit and Edit"
                 ),
                 "Close Lineup Submit": "Close Lineup Submit",
                 "Close Lineup Edit": "Close Lineup Edit",

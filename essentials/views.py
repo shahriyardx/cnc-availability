@@ -1,6 +1,6 @@
 from typing import Any, List
 
-from nextcord import Button, ButtonStyle, ui
+from nextcord import Button, ButtonStyle, ui, ActionRow
 from nextcord.interactions import Interaction
 
 
@@ -27,7 +27,7 @@ class TimeView(ui.View):
 
         await interaction.response.edit_message(view=self)
 
-    @ui.button(label="8:30pm EST", style=ButtonStyle.primary, custom_id="8:30pm EST")
+    @ui.button(label="8:30pm EST", style=ButtonStyle.primary, custom_id="8:30pm EST", row=1)
     async def e3p(self, button: ui.Button, interaction: Interaction):
         self.slots.remove(
             button.custom_id
@@ -35,7 +35,7 @@ class TimeView(ui.View):
 
         await self._update(interaction)
 
-    @ui.button(label="9:15pm EST", style=ButtonStyle.primary, custom_id="9:15pm EST")
+    @ui.button(label="9:15pm EST", style=ButtonStyle.primary, custom_id="9:15pm EST", row=1)
     async def nfp(self, button: ui.Button, interaction: Interaction):
         self.slots.remove(
             button.custom_id
@@ -43,7 +43,7 @@ class TimeView(ui.View):
 
         await self._update(interaction)
 
-    @ui.button(label="10:00pm EST", style=ButtonStyle.primary, custom_id="10:00pm EST")
+    @ui.button(label="10:00pm EST", style=ButtonStyle.primary, custom_id="10:00pm EST", row=1)
     async def tp(self, button: ui.Button, interaction: Interaction):
         self.slots.remove(
             button.custom_id
@@ -51,17 +51,22 @@ class TimeView(ui.View):
 
         await self._update(interaction)
 
-    @ui.button(label="None", style=ButtonStyle.secondary, custom_id="None")
+    @ui.button(label="All", style=ButtonStyle.secondary, custom_id="All", row=2)
+    async def all(self, button: ui.Button, interaction: Interaction):
+        self.slots = ["8:30pm EST", "9:15pm EST", "10:00pm EST"]
+        self.stop()
+
+    @ui.button(label="None", style=ButtonStyle.secondary, custom_id="None", row=2)
     async def none(self, button: ui.Button, interaction: Interaction):
         self.slots = []
         self.stop()
 
-    @ui.button(label="Done", style=ButtonStyle.green, custom_id="Done")
+    @ui.button(label="Done", style=ButtonStyle.green, custom_id="Done", row=2)
     async def done(self, button: ui.Button, interaction: Interaction):
         if self.slots:
             self.stop()
 
-    @ui.button(label="Cancel", style=ButtonStyle.danger, custom_id="Cancel")
+    @ui.button(label="Cancel", style=ButtonStyle.danger, custom_id="Cancel", row=2)
     async def cancel(self, button: ui.Button, interaction: Interaction):
         self.slots = []
         self.cancelled = True
