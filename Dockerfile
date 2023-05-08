@@ -13,6 +13,6 @@ RUN python -m prisma generate
 
 COPY cogs ./cogs
 COPY essentials ./essentials
-COPY main.py requirements.txt .env ./
+COPY main.py requirements.txt credentials.json .env ./
 
 CMD [ "prisma", "db", "push", "&&", "python", "main.py" ]
