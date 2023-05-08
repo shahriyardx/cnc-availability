@@ -1,19 +1,14 @@
-import os
 import datetime
+import os
 from typing import List
 
 from aioscheduler import TimedScheduler
-from nextcord import (
-    Member,
-    slash_command,
-    Interaction,
-    SlashOption,
-)
+from nextcord import Interaction, Member, SlashOption, slash_command
 from nextcord.ext import commands, tasks
 from nextcord.utils import get
 
-from essentials.time import get_next_date
 from essentials.models import Data, IBot
+from essentials.time import get_next_date
 from essentials.utils import get_team_name
 
 from .utils import get_week, lockdown, unlockdown
@@ -30,10 +25,12 @@ class Tasker(commands.Cog):
         self,
         interaction: Interaction,
         task: str = SlashOption(
-            description="Select task to smilulate",
+            description="Select task to simulate",
             choices={
                 "Open Availability": "Open Availability",
-                "Close Availability and Open Lineups Submit and Edit": "Close Availability and Open Lineups Submit and Edit",
+                "Close Availability and Open Lineups Submit and Edit": (
+                        "Close Availability and Open Lineups Submit and Edit"
+                ),
                 "Close Lineup Submit": "Close Lineup Submit",
                 "Close Lineup Edit": "Close Lineup Edit",
             },
@@ -151,7 +148,7 @@ class Tasker(commands.Cog):
             )
             await lockdown(submit_availability_channel, roles=TEAM_ROLE)
 
-            # Check who did not submitted availability
+            # Check who did not submit availability
             # Report back in CNC Discord
             not_submitted_players: List[Member] = list()
             for member in TEAM_ROLE.members:
@@ -179,7 +176,8 @@ class Tasker(commands.Cog):
                     content=(
                         f"{' '.join([player.mention for player in not_submitted_players])} "
                         "did not submit availability for this week. "
-                        f"{get(SUPPORT_GUILD.roles, name='Commissioners').mention} {get(SUPPORT_GUILD.roles, name='Admins').mention}"
+                        f"{get(SUPPORT_GUILD.roles, name='Commissioners').mention} "
+                        f"{get(SUPPORT_GUILD.roles, name='Admins').mention}"
                     )
                 )
 
@@ -255,7 +253,8 @@ class Tasker(commands.Cog):
                     await TEAM_CHANNEL.send(
                         content=(
                             f"Players {players} have not been scheduled at-least 3 matches this week."
-                            f"{get(SUPPORT_GUILD.roles, name='Commissioners').mention} {get(SUPPORT_GUILD.roles, name='Admins').mention}"
+                            f"{get(SUPPORT_GUILD.roles, name='Commissioners').mention} "
+                            f"{get(SUPPORT_GUILD.roles, name='Admins').mention}"
                         )
                     )
 

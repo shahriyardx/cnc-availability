@@ -1,17 +1,13 @@
 import datetime
 from typing import List, Union
 
-from nextcord import (
-    PermissionOverwrite,
-    Role,
-    TextChannel,
-)
+from nextcord import PermissionOverwrite, Role, TextChannel
 
 
 def get_permissions(state: bool):
     permission_overwrites = PermissionOverwrite()
-    permission_overwrites.send_messages = state
-    permission_overwrites.view_channel = True
+    permission_overwrites.send_messages = state  # noqa
+    permission_overwrites.view_channel = True  # noqa
 
     return permission_overwrites
 
@@ -38,7 +34,4 @@ async def lockdown(channel: TextChannel, roles: Union[Role, List[Role]]):
 
 
 def get_week():
-    try:
-        return datetime.datetime.now().isocalendar().week
-    except:
-        return datetime.datetime.now().isocalendar()[1]
+    return datetime.datetime.now().isocalendar()[1]

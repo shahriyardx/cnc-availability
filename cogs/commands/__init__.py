@@ -1,32 +1,32 @@
 from datetime import datetime
 
-from nextcord import Embed, Member, SlashOption, PermissionOverwrite, CategoryChannel
+from nextcord import CategoryChannel, Embed, Member, PermissionOverwrite, SlashOption
 from nextcord.application_command import slash_command
 from nextcord.ext import commands
 from nextcord.interactions import Interaction
 from nextcord.utils import get
 
 from essentials.models import Data, IBot
-from essentials.views import TimeView
 from essentials.utils import get_team_name
+from essentials.views import TimeView
 
 
 def get_over(state):
     overwrites = PermissionOverwrite()
-    overwrites.manage_channels = state
-    overwrites.manage_permissions = state
-    overwrites.send_messages = state
-    overwrites.view_channel = state
-    overwrites.create_public_threads = state
-    overwrites.create_private_threads = state
-    overwrites.send_messages_in_threads = state
-    overwrites.embed_links = state
-    overwrites.attach_files = state
-    overwrites.add_reactions = state
-    overwrites.use_external_emojis = state
-    overwrites.mention_everyone = state
-    overwrites.manage_messages = state
-    overwrites.read_message_history = state
+    overwrites.manage_channels = state # noqa
+    overwrites.manage_permissions = state # noqa
+    overwrites.send_messages = state # noqa
+    overwrites.view_channel = state # noqa
+    overwrites.create_public_threads = state # noqa
+    overwrites.create_private_threads = state # noqa
+    overwrites.send_messages_in_threads = state # noqa
+    overwrites.embed_links = state # noqa
+    overwrites.attach_files = state # noqa
+    overwrites.add_reactions = state # noqa
+    overwrites.use_external_emojis = state # noqa
+    overwrites.mention_everyone = state # noqa
+    overwrites.manage_messages = state # noqa
+    overwrites.read_message_history = state # noqa
 
     return overwrites
 
@@ -152,7 +152,7 @@ class TaskerCommands(commands.Cog):
                 "8:30": "8:30",
                 "9:15": "9:15",
                 "10:00": "10:00",
-            }, 
+            },
         ),
         left_wing: Member = SlashOption(description="Select left wing player"),
         center: Member = SlashOption(description="Select center player"),
@@ -245,10 +245,7 @@ class TaskerCommands(commands.Cog):
             goalie,
         ]
 
-        try:
-            week = datetime.now().isocalendar().week
-        except:
-            week = datetime.now().isocalendar()[1]
+        week = datetime.now().isocalendar()[1]
 
         for member in members:
             await self.prisma.lineups.create(
@@ -435,7 +432,8 @@ class TaskerCommands(commands.Cog):
                 )
                 if old_message:
                     await old_message.delete()
-            except:
+            except Exception as e:
+                print(e)
                 pass
 
             message = await LINEUP_LOG_CHANNEL.send(content=content, embed=embed)
@@ -551,16 +549,16 @@ class TaskerCommands(commands.Cog):
         await interaction.guild.create_role(name=name)
         await interaction.edit_original_message(content="Role created")
 
-    async def togglestate(self, channel, role, state):
-        def get_permissions(state: bool):
+    async def toggle_state(self, channel, role, state):
+        def get_permissions(_state: bool):
             permission_overwrites = PermissionOverwrite()
-            permission_overwrites.send_messages = state
-            permission_overwrites.view_channel = state
+            permission_overwrites.send_messages = _state # noqa
+            permission_overwrites.view_channel = _state # noqa
 
             return permission_overwrites
 
         await channel.set_permissions(
-            target=role, overwrite=get_permissions(state=state)
+            target=role, overwrite=get_permissions(_state=state)
         )
 
     @slash_command(
@@ -596,7 +594,7 @@ class TaskerCommands(commands.Cog):
                 name=Data.PLAYERS_ROLE,
             )
             if SUBMIT_CHANNEL:
-                await self.togglestate(SUBMIT_CHANNEL, TEAM_ROLE, state)
+                await self.toggle_state(SUBMIT_CHANNEL, TEAM_ROLE, state)
 
         await interaction.followup.send(
             content=f"Availavility has been {'Unlocked' if state else 'Locked'}"

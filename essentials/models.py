@@ -1,19 +1,20 @@
 import os
 from dataclasses import dataclass
 from typing import Callable, List
+
 from dotenv import load_dotenv
 
 load_dotenv(".env")
 
-from nextcord.ext.commands import AutoShardedBot
 from nextcord import Guild
+from nextcord.ext.commands import AutoShardedBot
 
 from prisma import Prisma
 
 
 @dataclass
 class IBot(AutoShardedBot):
-    get_command_mention: Callable[[int, str], str]
+    get_command_mention: Callable[[str], str]
     prisma: Prisma
     SUPPORT_GUILD: Guild
 

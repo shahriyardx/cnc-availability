@@ -1,6 +1,6 @@
 from typing import Any, List
 
-from nextcord import ButtonStyle, ui, Button
+from nextcord import Button, ButtonStyle, ui
 from nextcord.interactions import Interaction
 
 
