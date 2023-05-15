@@ -7,9 +7,11 @@ from nextcord import Interaction, Member, SlashOption, slash_command
 from nextcord.ext import commands, tasks
 from nextcord.utils import get
 
+from cogs.commands.utils import append_into_ir
 from essentials.models import Data, IBot
 from essentials.time import get_next_date
 from essentials.utils import get_team_name
+from utils.gspread import DataSheet
 
 from .utils import get_week, lockdown, unlockdown
 
@@ -19,6 +21,7 @@ class Tasker(commands.Cog):
         self.bot = bot
         self.scheduler = TimedScheduler(prefer_utc=True)
         self.start_tasks.start()
+        self.roster_sheet = DataSheet("OFFICIAL NHL ROSTER SHEET")
 
     @slash_command(description="Simulate specific tasks")
     async def simulate(
@@ -151,6 +154,8 @@ class Tasker(commands.Cog):
             # Check who did not submit availability
             # Report back in CNC Discord
             not_submitted_players: List[Member] = list()
+            submitted_less: List[Member] = list()
+
             for member in TEAM_ROLE.members:
                 avail = await self.bot.prisma.availability.find_first(
                     where={"member_id": member.id}
@@ -158,10 +163,11 @@ class Tasker(commands.Cog):
 
                 if not avail:
                     not_submitted_players.append(member)
+                    await append_into_ir(self.bot, guild, member, self.roster_sheet, 0)
                     continue
 
                 if avail.games < 4:
-                    not_submitted_players.append(member)
+                    submitted_less.append(member)
 
             if not SUPPORT_GUILD:
                 continue
@@ -176,6 +182,16 @@ class Tasker(commands.Cog):
                     content=(
                         f"{' '.join([player.mention for player in not_submitted_players])} "
                         "did not submit availability for this week. "
+                        f"{get(SUPPORT_GUILD.roles, name='Commissioners').mention} "
+                        f"{get(SUPPORT_GUILD.roles, name='Admins').mention}"
+                    )
+                )
+
+            if submitted_less:
+                await cnc_team_channel.send(
+                    content=(
+                        f"{' '.join([player.mention for player in submitted_less])} "
+                        "submitted less than 4 games this week"
                         f"{get(SUPPORT_GUILD.roles, name='Commissioners').mention} "
                         f"{get(SUPPORT_GUILD.roles, name='Admins').mention}"
                     )

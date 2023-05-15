@@ -1,5 +1,5 @@
 from datetime import datetime
-import pytz
+
 from nextcord import CategoryChannel, Embed, Member, PermissionOverwrite, SlashOption
 from nextcord.application_command import slash_command
 from nextcord.ext import commands
@@ -10,6 +10,8 @@ from essentials.models import Data, IBot
 from essentials.utils import get_team_name
 from essentials.views import TimeView
 from utils.gspread import DataSheet
+
+from .utils import append_into_ir
 
 
 def get_over(state):
@@ -95,19 +97,14 @@ class TaskerCommands(commands.Cog):
         total_games = len(tu_times.slots) + len(wd_times.slots) + len(th_times.slots)
 
         if total_games < 4:
-            current_time = datetime.now(pytz.timezone("US/Eastern"))
-
-            self.roster_sheet.append(
-                "IR",
-                [
-                    interaction.guild.name.replace("CNC", "").strip(),
-                    interaction.user.display_name,
-                    f"{current_time.day}-{current_time.month}-{current_time.year}",
-                    "Full Week",
-                    "null",
-                    f"Availability Bot (Total games = {total_games})",
-                ],
+            await append_into_ir(
+                self.bot,
+                interaction.guild,
+                interaction.user,
+                self.roster_sheet,
+                total_games,
             )
+
         await interaction.edit_original_message(
             content=f"✅ {interaction.user.mention} Availability Submitted!", view=None
         )
