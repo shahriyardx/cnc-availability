@@ -72,14 +72,14 @@ async def append_into_ir(
             print(e)
     else:
         try:
-            await user.kick(reason="Kicked because of third time being on IR")
+            await user.send(
+                content=f"You have been removed from the team {guild.name.replace('CNC', '').strip()}"
+            )
         except Exception as e:
             print(e)
 
         try:
-            await user.send(
-                content=f"You have been removed from the team {guild.name.replace('CNC', '').strip()}"
-            )
+            await user.kick(reason="Kicked because of third time being on IR")
         except Exception as e:
             print(e)
 

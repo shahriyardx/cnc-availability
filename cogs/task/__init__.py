@@ -62,7 +62,7 @@ class Tasker(commands.Cog):
 
         await interaction.edit_original_message(content="Simulation succeded.")
 
-    async def open_availability_task(self, simulate=False):
+    async def open_availability_task(self, simulate: bool = False):
         # Runs Friday 5 PM UTC
         # Opens availability
 
@@ -114,7 +114,7 @@ class Tasker(commands.Cog):
                 self.open_availability_task, get_next_date("Friday", hour=17)
             )
 
-    async def close_availability_task(self, simulate=False):
+    async def close_availability_task(self, simulate: bool = False):
         # Runs Monday 5 PM UTC
         # Closes availability submission
         # Open Lineups submit
@@ -218,7 +218,7 @@ class Tasker(commands.Cog):
                 self.close_availability_task, get_next_date("Monday", hour=17)
             )
 
-    async def close_lineup_submit(self, simulate=False):
+    async def close_lineup_submit(self, simulate: bool = False):
         # Runs Tuesday 4 AM
         # Keeps the lineup edit open
 
@@ -278,7 +278,7 @@ class Tasker(commands.Cog):
         if not simulate:
             self.start_task(self.close_lineup_submit, get_next_date("Tuesday", hour=4))
 
-    async def close_lineup_channel(self, simulate=False):
+    async def close_lineup_channel(self, simulate: bool = False):
         # Runs Friday 2 AM UTC
         # Closes the lineup channel
         # Checks who did not play 3 matches

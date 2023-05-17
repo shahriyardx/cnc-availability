@@ -1,6 +1,7 @@
 from datetime import datetime
 
-from nextcord import CategoryChannel, Embed, Member, PermissionOverwrite, SlashOption
+from nextcord import (CategoryChannel, Embed, Member, PermissionOverwrite,
+                      SlashOption)
 from nextcord.application_command import slash_command
 from nextcord.ext import commands
 from nextcord.interactions import Interaction

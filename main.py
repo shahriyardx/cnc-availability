@@ -1,7 +1,7 @@
 import os
 
 from dotenv import load_dotenv
-from nextcord import Intents, Message
+from nextcord import Intents
 from nextcord.ext import commands
 
 from essentials.models import Data
@@ -10,13 +10,14 @@ from prisma import Prisma
 load_dotenv(".env")
 
 intents = Intents.default()
-intents.members = True
+intents.members = True # noqa
 
 
 class Availability(commands.AutoShardedBot):
     def __init__(self, command_prefix: str, **kwargs):
         super().__init__(command_prefix, **kwargs)
         self.prisma = Prisma()
+        self.SUPPORT_GUILD = None
 
     async def on_ready(self):
         await self.prisma.connect()
@@ -25,7 +26,7 @@ class Availability(commands.AutoShardedBot):
         settings = await self.prisma.settings.find_first()
 
         if not settings:
-            settings = await self.prisma.settings.create(
+            await self.prisma.settings.create(
                 data={
                     "can_edit_lineups": False,
                     "can_submit_lineups": False,
@@ -33,12 +34,6 @@ class Availability(commands.AutoShardedBot):
             )
 
         print(f"{self.user} is ready..")
-
-    # async def on_message(self, message: Message):
-    #     if message.author.bot:
-    #         return
-
-    #     await self.process_commands(message)
 
     def get_command_mention(self, command_name) -> str:
         cmd = None
