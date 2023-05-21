@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 import gspread
 from gspread import Spreadsheet
+from typing import Union
 
 
 @dataclass
@@ -29,6 +30,8 @@ class DataSheet:
     def append(self, sheet: str, data: list):
         self.sheet.worksheet(sheet).append_row(data)
 
+    def update(self, sheet_name: str, position: str = "A", data: Union[list, str, int] = None):
+        self.sheet.worksheet(sheet_name).update("")
 
 def next_char(start: str, count: int) -> str:
     next_code = ord(start) + count

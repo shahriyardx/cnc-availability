@@ -71,9 +71,33 @@ async def append_into_ir(
         except Exception as e:
             print(e)
     else:
+        team_name = guild.name.split(" ", maxsplit=1)[1]
+
+        sheet.append(
+            "Inactive",
+            [
+                user.display_name,
+                str(user.id),
+                team_name,
+                "Unavailable",
+                "Third time being on IR",
+            ],
+        )
+
+        all_values = sheet.get_values(team_name)
+        for index, value in enumerate(all_values, start=1):
+            if value[0] == user.display_name:
+                sheet.update(team_name, position=f"A{index}", data="Open")
+                sheet.update(team_name, position=f"B{index}", data="")
+                sheet.update(team_name, position=f"C{index}", data="")
+                break
+
         try:
             await user.send(
-                content=f"You have been removed from the team {guild.name.replace('CNC', '').strip()}"
+                content=(
+                    f"You have been removed from the team {team_name} "
+                    "for being third time on IR"
+                )
             )
         except Exception as e:
             print(e)
