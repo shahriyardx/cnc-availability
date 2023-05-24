@@ -72,6 +72,7 @@ async def append_into_ir(
             print(e)
     else:
         team_name = guild.name.split(" ", maxsplit=1)[1]
+        print(user.display_name)
 
         sheet.append(
             "Inactive",
@@ -86,6 +87,7 @@ async def append_into_ir(
 
         all_values = sheet.get_values(team_name)
         for index, value in enumerate(all_values, start=1):
+            print(value[0], value[0] == user.display_name)
             if value[0] == user.display_name:
                 sheet.update(team_name, position=f"A{index}", data="Open")
                 sheet.update(team_name, position=f"B{index}", data="")

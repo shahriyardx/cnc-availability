@@ -94,6 +94,8 @@ class TaskerCommands(commands.Cog):
                 content="❌ Cancelled!",
                 view=None,
             )
+        await interaction.edit_original_message(content="Processing please wait...", view=None)
+
         total_games = len(tu_times.slots) + len(wd_times.slots) + len(th_times.slots)
 
         if total_games < 4:
