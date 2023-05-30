@@ -182,8 +182,6 @@ class Tasker(commands.Cog):
                     content=(
                         f"{' '.join([player.mention for player in not_submitted_players])} "
                         "did not submit availability for this week. "
-                        f"{get(SUPPORT_GUILD.roles, name='Commissioners').mention} "
-                        f"{get(SUPPORT_GUILD.roles, name='Admins').mention}"
                     )
                 )
 

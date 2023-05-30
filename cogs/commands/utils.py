@@ -8,6 +8,8 @@ from nextcord.ext.commands import AutoShardedBot
 from utils.data import inactive_roles, support_server_id
 from utils.gspread import DataSheet
 
+from utils.data import ir_channel, inactive_channel
+
 
 @dataclass
 class IR:
@@ -35,11 +37,12 @@ async def append_into_ir(
     all_values = [IR.create(data) for data in sheet.get_values("IR")]
     items = list(filter(lambda x: x.player == user.display_name, all_values))
     status = "Approved" if len(items) < 2 else "Denied"
+    team_name = guild.name.replace("CNC", "").strip()
 
     sheet.append(
         "IR",
         [
-            guild.name.replace("CNC", "").strip(),
+            team_name,
             user.display_name,
             f"{current_time.day}-{current_time.month}-{current_time.year}",
             "Full Week",
@@ -48,6 +51,10 @@ async def append_into_ir(
             status,
         ],
     )
+
+    channel = bot.get_channel(ir_channel)
+    if channel:
+        await channel.send(f"{user.mention} of the **{team_name}** is on IR this week")
 
     if status == "Approved":
         if len(items) == 0:
@@ -63,7 +70,7 @@ async def append_into_ir(
         try:
             await user.send(
                 content=(
-                    f"i{user.mention} You have been placed on IR because you didn't "
+                    f"{user.mention} You have been placed on IR because you didn't "
                     "submit availability this week or did not submit enough games of availability this week. "
                     f"{next_status}"
                 )
@@ -85,9 +92,12 @@ async def append_into_ir(
             ],
         )
 
+        channel = bot.get_channel(inactive_channel)
+        if channel:
+            await channel.send(f"{user.mention} of the **{team_name}** has been deemed inactive")
+
         all_values = sheet.get_values(team_name)
         for index, value in enumerate(all_values, start=1):
-            print(value[0], value[0] == user.display_name)
             if value[0] == user.display_name:
                 sheet.update(team_name, position=f"A{index}", data="Open")
                 sheet.update(team_name, position=f"B{index}", data="")

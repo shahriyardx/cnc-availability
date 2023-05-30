@@ -86,6 +86,7 @@ inactive_roles_prod = [
     863516734944968704,
 ]
 inactive_roles_dev = [1080891453833744466]
-
 support_server_id = 1055597639028183080 if "dev" in mode else 831166408888942623
 inactive_roles = inactive_roles_dev if "dev" in mode else inactive_roles_prod
+ir_channel = 1112948119353700363 if "dev" in mode else 1105261762435096677
+inactive_channel = 1112948150869704775 if "dev" in mode else 1105262064982827129
