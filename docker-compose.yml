@@ -3,8 +3,6 @@ version: '3.9'
 services:
   database:
     image: postgres:14-alpine
-    # ports:
-    #   - 5555:5432
     env_file:
       - ./.env
     volumes:
@@ -13,6 +11,7 @@ services:
     build: ./
     depends_on:
       - database
+    restart: on-failure
     environment:
       DATABASE_URL: postgresql://postgres:password@database/postgres
     env_file:
