@@ -44,7 +44,7 @@ async def append_into_ir(
         [
             team_name,
             user.display_name,
-            f"{current_time.day}-{current_time.month}-{current_time.year}",
+            f"{current_time.month}/{current_time.day}/{current_time.year}",
             "Full Week",
             "null",
             f"Availability Bot (Total games = {total_games})",
