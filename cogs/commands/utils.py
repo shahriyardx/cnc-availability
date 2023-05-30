@@ -62,7 +62,7 @@ async def append_into_ir(
         elif len(items) == 1:
             next_status = (
                 "This is your second time on IR. The next time you will be removed from your team and "
-                "inactivated in the league which could lead to a 1 year league ban"
+                "inactivated in the league which will lead to a permanent ban."
             )
         else:
             next_status = ""
@@ -107,8 +107,8 @@ async def append_into_ir(
         try:
             await user.send(
                 content=(
-                    f"You have been removed from the team {team_name} "
-                    "for being third time on IR"
+                    f"You have been removed from the {team_name} for not providing "
+                    "enough availability for the third time this season"
                 )
             )
         except Exception as e:
