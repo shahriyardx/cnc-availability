@@ -7,9 +7,11 @@ from nextcord import Interaction, Member, SlashOption, slash_command
 from nextcord.ext import commands, tasks
 from nextcord.utils import get
 
+from cogs.commands.utils import append_into_ir
 from essentials.models import Data, IBot
 from essentials.time import get_next_date
 from essentials.utils import get_team_name
+from utils.gspread import DataSheet
 
 from .utils import get_week, lockdown, unlockdown
 
@@ -19,6 +21,7 @@ class Tasker(commands.Cog):
         self.bot = bot
         self.scheduler = TimedScheduler(prefer_utc=True)
         self.start_tasks.start()
+        self.roster_sheet = DataSheet("OFFICIAL NHL ROSTER SHEET")
 
     @slash_command(description="Simulate specific tasks")
     async def simulate(
@@ -59,7 +62,7 @@ class Tasker(commands.Cog):
 
         await interaction.edit_original_message(content="Simulation succeded.")
 
-    async def open_availability_task(self, simulate=False):
+    async def open_availability_task(self, simulate: bool = False):
         # Runs Friday 5 PM UTC
         # Opens availability
 
@@ -111,7 +114,7 @@ class Tasker(commands.Cog):
                 self.open_availability_task, get_next_date("Friday", hour=17)
             )
 
-    async def close_availability_task(self, simulate=False):
+    async def close_availability_task(self, simulate: bool = False):
         # Runs Monday 5 PM UTC
         # Closes availability submission
         # Open Lineups submit
@@ -151,6 +154,8 @@ class Tasker(commands.Cog):
             # Check who did not submit availability
             # Report back in CNC Discord
             not_submitted_players: List[Member] = list()
+            submitted_less: List[Member] = list()
+
             for member in TEAM_ROLE.members:
                 avail = await self.bot.prisma.availability.find_first(
                     where={"member_id": member.id}
@@ -158,10 +163,11 @@ class Tasker(commands.Cog):
 
                 if not avail:
                     not_submitted_players.append(member)
+                    await append_into_ir(self.bot, guild, member, self.roster_sheet, 0)
                     continue
 
                 if avail.games < 4:
-                    not_submitted_players.append(member)
+                    submitted_less.append(member)
 
             if not SUPPORT_GUILD:
                 continue
@@ -176,6 +182,14 @@ class Tasker(commands.Cog):
                     content=(
                         f"{' '.join([player.mention for player in not_submitted_players])} "
                         "did not submit availability for this week. "
+                    )
+                )
+
+            if submitted_less:
+                await cnc_team_channel.send(
+                    content=(
+                        f"{' '.join([player.mention for player in submitted_less])} "
+                        "submitted less than 4 games this week"
                         f"{get(SUPPORT_GUILD.roles, name='Commissioners').mention} "
                         f"{get(SUPPORT_GUILD.roles, name='Admins').mention}"
                     )
@@ -202,7 +216,7 @@ class Tasker(commands.Cog):
                 self.close_availability_task, get_next_date("Monday", hour=17)
             )
 
-    async def close_lineup_submit(self, simulate=False):
+    async def close_lineup_submit(self, simulate: bool = False):
         # Runs Tuesday 4 AM
         # Keeps the lineup edit open
 
@@ -262,7 +276,7 @@ class Tasker(commands.Cog):
         if not simulate:
             self.start_task(self.close_lineup_submit, get_next_date("Tuesday", hour=4))
 
-    async def close_lineup_channel(self, simulate=False):
+    async def close_lineup_channel(self, simulate: bool = False):
         # Runs Friday 2 AM UTC
         # Closes the lineup channel
         # Checks who did not play 3 matches
