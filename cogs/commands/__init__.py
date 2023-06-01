@@ -99,6 +99,9 @@ class TaskerCommands(commands.Cog):
         total_games = len(tu_times.slots) + len(wd_times.slots) + len(th_times.slots)
 
         if total_games < 4:
+            IR = get(interaction.guild.roles, name="IR")
+            await interaction.user.add_roles(IR)
+
             await append_into_ir(
                 self.bot,
                 interaction.guild,
