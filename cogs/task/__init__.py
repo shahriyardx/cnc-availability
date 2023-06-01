@@ -91,6 +91,7 @@ class Tasker(commands.Cog):
 
             PLAYERS_ROLE = get(guild.roles, name=Data.PLAYERS_ROLE)
             SUBMITTED_ROLE = get(guild.roles, name=Data.SUBMITTED_ROLE)
+            IR_ROLE = get(guild.roles, name="IR")
             AVIAL_SUBMIT_CHANNEL = get(
                 guild.text_channels, name=Data.AVIAL_SUBMIT_CHANNEL
             )
@@ -106,7 +107,10 @@ class Tasker(commands.Cog):
                 await AVIAL_SUBMIT_CHANNEL.send(content=message)
 
                 for member in SUBMITTED_ROLE.members:
-                    await member.remove_roles(SUBMITTED_ROLE)
+                    try:
+                        await member.remove_roles(SUBMITTED_ROLE, IR_ROLE, reason="Open Availability")
+                    except Exception as e:
+                        print(e)
 
         print("[+] END open_availability_task")
         if not simulate:
