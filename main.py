@@ -34,18 +34,6 @@ class Availability(commands.AutoShardedBot):
                 }
             )
 
-        for guild in self.guilds:
-            if guild.id in Data.IGNORED_GUILDS:
-                continue
-
-            IR = get(guild.roles, name="IR")
-            if not IR:
-                try:
-                    await guild.create_role(name="IR")
-                except Exception as e:
-                    print(e)
-                    print(f"Failed to create role on {guild.name}")
-
         print(f"{self.user} is ready..")
 
     def get_command_mention(self, command_name) -> str:
