@@ -251,8 +251,9 @@ class Tasker(commands.Cog):
                 lined_up = await self.bot.prisma.lineups.find_many(
                     where={"member_id": str(player.id), "week": week}
                 )
+                has_ir = get(player.roles, name="IR")
 
-                if len(lined_up) < 3:
+                if len(lined_up) < 3 and not has_ir:
                     not_played_minimum_3.append(player.mention)
 
             if not_played_minimum_3:
