@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 from nextcord import Intents
 from nextcord.ext import commands
+from nextcord.utils import get
 
 from essentials.models import Data
 from prisma import Prisma
@@ -32,6 +33,18 @@ class Availability(commands.AutoShardedBot):
                     "can_submit_lineups": False,
                 }
             )
+
+        for guild in self.guilds:
+            if guild.id in Data.IGNORED_GUILDS:
+                continue
+
+            IR = get(guild.roles, name="IR")
+            if not IR:
+                try:
+                    await guild.create_role(name="IR")
+                except Exception as e:
+                    print(e)
+                    print(f"Failed to create role on {guild.name}")
 
         print(f"{self.user} is ready..")
 
