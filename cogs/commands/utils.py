@@ -4,6 +4,7 @@ from datetime import datetime
 import pytz
 from nextcord import Guild, Member, Object
 from nextcord.ext.commands import AutoShardedBot
+from nextcord.utils import get
 
 from utils.data import inactive_roles, support_server_id
 from utils.gspread import DataSheet
@@ -52,6 +53,9 @@ async def append_into_ir(
         ],
     )
 
+    IR_role = get(guild.roles, name="IR")
+    await user.add_roles(IR_role)
+
     channel = bot.get_channel(ir_channel)
     if channel:
         await channel.send(f"{user.mention} of the **{team_name}** is on IR this week")
@@ -94,7 +98,9 @@ async def append_into_ir(
 
         channel = bot.get_channel(inactive_channel)
         if channel:
-            await channel.send(f"{user.mention} of the **{team_name}** has been deemed inactive")
+            await channel.send(
+                f"{user.mention} of the **{team_name}** has been deemed inactive"
+            )
 
         all_values = sheet.get_values(team_name)
         for index, value in enumerate(all_values, start=1):

@@ -108,7 +108,9 @@ class Tasker(commands.Cog):
 
                 for member in SUBMITTED_ROLE.members:
                     try:
-                        await member.remove_roles(SUBMITTED_ROLE, IR_ROLE, reason="Open Availability")
+                        await member.remove_roles(
+                            SUBMITTED_ROLE, IR_ROLE, reason="Open Availability"
+                        )
                     except Exception as e:
                         print(e)
 
@@ -157,21 +159,26 @@ class Tasker(commands.Cog):
 
             # Check who did not submit availability
             # Report back in CNC Discord
-            not_submitted_players: List[Member] = list()
-            submitted_less: List[Member] = list()
+            playable_members: List[Member] = list()
 
             for member in TEAM_ROLE.members:
+                has_ir = get(member.roles, name="IR")
+                if has_ir:
+                    continue
+
                 avail = await self.bot.prisma.availability.find_first(
                     where={"member_id": member.id}
                 )
 
                 if not avail:
-                    not_submitted_players.append(member)
                     await append_into_ir(self.bot, guild, member, self.roster_sheet, 0)
-                    continue
+                # Else already got into ir
 
-                if avail.games < 4:
-                    submitted_less.append(member)
+            TEAM_ROLE = get(guild.roles, name=Data.PLAYERS_ROLE)
+            for member in TEAM_ROLE.members:
+                has_ir = get(member.roles, name="IR")
+                if not has_ir:
+                    playable_members.append(member)
 
             if not SUPPORT_GUILD:
                 continue
@@ -181,27 +188,17 @@ class Tasker(commands.Cog):
                 name=f"╟・{get_team_name(guild.name)}",
             )
 
-            if not_submitted_players:
-                await cnc_team_channel.send(
-                    content=(
-                        f"{' '.join([player.mention for player in not_submitted_players])} "
-                        "did not submit availability for this week. "
-                    )
-                )
-
-            if submitted_less:
-                await cnc_team_channel.send(
-                    content=(
-                        f"{' '.join([player.mention for player in submitted_less])} "
-                        "submitted less than 4 games this week"
-                        f"{get(SUPPORT_GUILD.roles, name='Commissioners').mention} "
-                        f"{get(SUPPORT_GUILD.roles, name='Admins').mention}"
-                    )
-                )
-
             # Ask Owner and General Manager to submit for lineups
             OWNER_ROLE = get(guild.roles, name="Owner")
             GM_ROLE = get(guild.roles, name="General Manager")
+
+            if len(playable_members) < 13:
+                await cnc_team_channel.send(
+                    content=(
+                        f"The {get_team_name(guild.name)} need {13 - len(playable_members)} ECU "
+                        f"players this week {OWNER_ROLE.mention} {GM_ROLE.mention}"
+                    )
+                )
 
             if not OWNER_ROLE or not GM_ROLE:
                 continue

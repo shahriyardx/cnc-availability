@@ -94,7 +94,9 @@ class TaskerCommands(commands.Cog):
                 content="❌ Cancelled!",
                 view=None,
             )
-        await interaction.edit_original_message(content="Processing please wait...", view=None)
+        await interaction.edit_original_message(
+            content="Processing please wait...", view=None
+        )
 
         total_games = len(tu_times.slots) + len(wd_times.slots) + len(th_times.slots)
 
@@ -365,6 +367,36 @@ class TaskerCommands(commands.Cog):
         if not old_lineup:
             return await interaction.followup.send(content="Lineup was not found")
 
+        old_players = [
+            interaction.guild.get_member(old_lineup.left_wing),
+            interaction.guild.get_member(old_lineup.left_defense),
+            interaction.guild.get_member(old_lineup.right_wing),
+            interaction.guild.get_member(old_lineup.right_defense),
+            interaction.guild.get_member(old_lineup.center),
+            interaction.guild.get_member(old_lineup.goalie),
+        ]
+
+        new_players = [
+            interaction.guild.get_member(left_wing.id)
+            if left_wing
+            else interaction.guild.get_member(old_lineup.left_wing),
+            interaction.guild.get_member(right_wing.id)
+            if right_wing
+            else interaction.guild.get_member(old_lineup.right_wing),
+            interaction.guild.get_member(left_defense.id)
+            if left_defense
+            else interaction.guild.get_member(old_lineup.left_defense),
+            interaction.guild.get_member(right_defense.id)
+            if right_defense
+            else interaction.guild.get_member(old_lineup.right_defense),
+            interaction.guild.get_member(center.id)
+            if center
+            else interaction.guild.get_member(old_lineup.center),
+            interaction.guild.get_member(goalie.id)
+            if goalie
+            else interaction.guild.get_member(old_lineup.goalie),
+        ]
+
         new_lineup_data = {
             "day": day or old_lineup.day,
             "time": time or old_lineup.time,
@@ -388,56 +420,31 @@ class TaskerCommands(commands.Cog):
             title=f"Lineups for `{day or old_lineup.day}` at `{time or old_lineup.time}` \n"
         )
 
-        left_wing_member = (
-            left_wing.mention
-            if left_wing
-            else interaction.guild.get_member(old_lineup.left_wing).mention
-        )
-        right_wing_member = (
-            right_wing.mention
-            if right_wing
-            else interaction.guild.get_member(old_lineup.right_wing).mention
-        )
-        left_defense_member = (
-            left_defense.mention
-            if left_defense
-            else interaction.guild.get_member(old_lineup.left_defense).mention
-        )
-        right_defense_member = (
-            right_defense.mention
-            if right_defense
-            else interaction.guild.get_member(old_lineup.right_defense).mention
-        )
-        center_member = (
-            center.mention
-            if center
-            else interaction.guild.get_member(old_lineup.center).mention
-        )
-        goalie_member = (
-            goalie.mention
-            if goalie
-            else interaction.guild.get_member(old_lineup.goalie).mention
-        )
-
         embed.description = (
-            f"Left Wing: {left_wing_member} \n"
-            f"Right Wing: {right_wing_member} \n"
-            f"Left Defense: {left_defense_member} \n"
-            f"Right Defense: {right_defense_member} \n"
-            f"Center: {center_member} \n"
-            f"Goalie: {goalie_member}"
+            f"Left Wing: {new_players[0].mention} \n"
+            f"Right Wing: {new_players[1].mention} \n"
+            f"Left Defense: {new_players[2].mention} \n"
+            f"Right Defense: {new_players[3].mention} \n"
+            f"Center: {new_players[4].mention} \n"
+            f"Goalie: {new_players[5].mention}"
         )
         embed.set_thumbnail(url=interaction.guild.icon.url)
 
-        new_players = [
-            left_wing_member,
-            right_wing_member,
-            left_defense_member,
-            right_defense_member,
-            center_member,
-            goalie_member,
-        ]
-        content = " ".join([player for player in new_players])
+        content = " ".join([player.mention for player in new_players])
+        week = datetime.now().isocalendar()[1]
+
+        await self.prisma.lineups.delete_many(
+            where={
+                "member_id": {"in": [p.id for p in old_players]},
+                "week": week,
+                "year": datetime.now().year,
+            }
+        )
+
+        for player in new_players:
+            await self.prisma.lineups.create(
+                {"member_id": player.id, "week": week, "year": datetime.now().year}
+            )
 
         SUPPORT_GUILD = self.bot.get_guild(Data.SUPPORT_GUILD)
         LINEUP_LOG_CHANNEL = get(
