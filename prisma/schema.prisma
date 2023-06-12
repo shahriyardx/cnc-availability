@@ -12,7 +12,7 @@ datasource db {
 }
 
 model Lineup {
-  id              String  @id @default(cuid())
+  id              String         @id @default(cuid())
   team            String
   day             String
   time            String
@@ -24,13 +24,16 @@ model Lineup {
   goalie          BigInt
   message_id_cnc  BigInt?
   message_id_team BigInt?
+  lineups         PlayerLineup[]
 }
 
-model lineups {
+model PlayerLineup {
   id        String @id @default(cuid())
   member_id BigInt
   week      Int
   year      Int
+  Lineup    Lineup @relation(fields: [lineupId], references: [id])
+  lineupId  String
 }
 
 model Settings {
@@ -43,4 +46,10 @@ model Availability {
   id        String @id @default(cuid())
   member_id BigInt
   games     Int
+}
+
+model Game {
+  id   String @id @default(cuid())
+  week Int
+  data String
 }

@@ -269,8 +269,8 @@ class TaskerCommands(commands.Cog):
         week = datetime.now().isocalendar()[1]
 
         for member in members:
-            await self.prisma.lineups.create(
-                {"member_id": member.id, "week": week, "year": datetime.now().year}
+            await self.prisma.playerlineup.create(
+                {"member_id": member.id, "week": week, "year": datetime.now().year, "lineupId": l_data.id}
             )
 
         await interaction.edit_original_message(
@@ -433,17 +433,15 @@ class TaskerCommands(commands.Cog):
         content = " ".join([player.mention for player in new_players])
         week = datetime.now().isocalendar()[1]
 
-        await self.prisma.lineups.delete_many(
+        await self.prisma.playerlineup.delete_many(
             where={
-                "member_id": {"in": [p.id for p in old_players]},
-                "week": week,
-                "year": datetime.now().year,
+               "lineupId": lineup_id
             }
         )
 
         for player in new_players:
-            await self.prisma.lineups.create(
-                {"member_id": player.id, "week": week, "year": datetime.now().year}
+            await self.prisma.playerlineup.create(
+                {"member_id": player.id, "week": week, "year": datetime.now().year, "lineupId": lineup_id}
             )
 
         SUPPORT_GUILD = self.bot.get_guild(Data.SUPPORT_GUILD)
