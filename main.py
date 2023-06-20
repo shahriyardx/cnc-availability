@@ -1,4 +1,5 @@
 import os
+import asyncio
 
 import nextcord
 from dotenv import load_dotenv
@@ -43,7 +44,9 @@ class Availability(commands.AutoShardedBot):
         all_roaster = self.roster_sheet.get_values("Data import")
         nick_dict = {member.display_name: member.id for member in self.SUPPORT_GUILD.members}
 
-        for index, row in enumerate(all_roaster):
+        for index, row in enumerate(all_roaster[60:]):
+            await asyncio.sleep(2)
+
             if row[0] in nick_dict:
                 self.roster_sheet.update("Data import", f"D{index + 1}", str(nick_dict[row[0]]))
 
