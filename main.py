@@ -41,7 +41,7 @@ class Availability(commands.AutoShardedBot):
         print(f"{self.user} is ready..")
 
         all_roaster = self.roster_sheet.get_values("Data import")
-        nick_dict = {member.display_name for member in self.SUPPORT_GUILD.members}
+        nick_dict = {member.display_name: member.id for member in self.SUPPORT_GUILD.members}
 
         for index, row in enumerate(all_roaster[:5]):
             if row[0] in nick_dict:
