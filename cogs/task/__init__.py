@@ -379,7 +379,7 @@ class Tasker(commands.Cog):
             t4 = get_next_date("Tuesday", hour=4)
             f2 = get_next_date("Friday", hour=2)
 
-            self.start_task(self.calculate_gp, f16)
+            # self.start_task(self.calculate_gp, f16)
             self.start_task(self.open_availability_task, f17)
             self.start_task(self.close_availability_task, m17)
             self.start_task(self.close_lineup_submit, t4)
