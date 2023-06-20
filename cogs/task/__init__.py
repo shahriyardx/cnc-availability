@@ -18,6 +18,7 @@ from utils.gspread import DataSheet
 from .utils import get_week, lockdown, unlockdown
 from .stats import get_all_team_data
 
+
 class Tasker(commands.Cog):
     def __init__(self, bot: IBot) -> None:
         self.bot = bot
@@ -38,6 +39,7 @@ class Tasker(commands.Cog):
                 ),
                 "Close Lineup Submit": "Close Lineup Submit",
                 "Close Lineup Edit": "Close Lineup Edit",
+                "Calculate Games Played": "Calculate Games Played",
             },
         ),
     ):
@@ -53,6 +55,7 @@ class Tasker(commands.Cog):
             "Close Availability and Open Lineups Submit and Edit": self.close_availability_task,
             "Close Lineup Submit": self.close_lineup_submit,
             "Close Lineup Edit": self.close_lineup_channel,
+            "Calculate Games Played": self.calculate_gp,
         }
 
         task_func = t[task]
@@ -73,7 +76,7 @@ class Tasker(commands.Cog):
         print("[+] START open_availability_task")
 
         if not simulate:
-            await self.bot.prisma.lineups.delete_many()
+            await self.bot.prisma.playerlineup.delete_many()
             await self.bot.prisma.lineup.delete_many()
             await self.bot.prisma.availability.delete_many()
 
@@ -269,6 +272,7 @@ class Tasker(commands.Cog):
                 await lockdown(LINEUPS_CHANNEL, roles=[OWNER_ROLE, GM_ROLE])
 
         print("[+] STOP close_lineup_channel")
+
         if not simulate:
             self.start_task(self.close_lineup_channel, get_next_date("Friday", hour=2))
 
@@ -277,13 +281,18 @@ class Tasker(commands.Cog):
         if not old_game_data:
             return new_game_data[member.display_name]
 
+        if member.display_name not in new_game_data:
+            return 0
+
+        if member.display_name not in old_game_data:
+            return new_game_data[member.display_name]
+
         if member.display_name in new_game_data and member.display_name in old_game_data:
             return new_game_data[member.display_name] - old_game_data[member.display_name]
 
     async def calculate_gp(self, simulate: bool = False):
         week = get_week()
         data = await self.bot.prisma.game.find_first(order=[{"week": "desc"}])
-
         new_game_data = get_all_team_data()
 
         await self.bot.prisma.game.create({
@@ -291,7 +300,10 @@ class Tasker(commands.Cog):
             "data": json.dumps(new_game_data)
         })
 
-        old_game_data = json.loads(data["data"])
+        if data:
+            old_game_data = json.loads(data.data)
+        else:
+            old_game_data = None
 
         for guild in self.bot.guilds:
             if guild.id in Data.IGNORED_GUILDS:
@@ -326,6 +338,9 @@ class Tasker(commands.Cog):
             "data": json.dumps(new_game_data)
         })
 
+        if not simulate:
+            self.start_task(self.close_lineup_channel, get_next_date("Friday", hour=16))
+
     def start_task(self, task_func, time):
         now = datetime.datetime.utcnow()
         delta = time - now
@@ -343,17 +358,19 @@ class Tasker(commands.Cog):
         if mode in ["dev", "devstart"]:
             # Fake times
             now = datetime.datetime.utcnow()
-            f17 = now + datetime.timedelta(seconds=3)
+            f16 = now + datetime.timedelta(seconds=3)
+            f17 = now + datetime.timedelta(seconds=10)
             m17 = f17 + datetime.timedelta(seconds=30)
             t4 = m17 + datetime.timedelta(seconds=30)
             f2 = t4 + datetime.timedelta(seconds=30)
 
             if mode == "devstart":
                 print("[+] Devstart mode")
-                self.start_task(self.open_availability_task, f17)
-                self.start_task(self.close_availability_task, m17)
-                self.start_task(self.close_lineup_submit, t4)
-                self.start_task(self.close_lineup_channel, f2)
+                # self.start_task(self.calculate_gp, f16)
+                # self.start_task(self.open_availability_task, f17)
+                # self.start_task(self.close_availability_task, m17)
+                # self.start_task(self.close_lineup_submit, t4)
+                # self.start_task(self.close_lineup_channel, f2)
         else:
             # Real times
             f16 = get_next_date("Friday", hour=16)
