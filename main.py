@@ -41,14 +41,14 @@ class Availability(commands.AutoShardedBot):
 
         print(f"{self.user} is ready..")
 
-        all_roaster = self.roster_sheet.get_values("Data import")
-        nick_dict = {member.display_name: member.id for member in self.SUPPORT_GUILD.members}
-
-        for index, row in enumerate(all_roaster):
-            await asyncio.sleep(2)
-            print(row[0], index)
-            if row[0] in nick_dict:
-                self.roster_sheet.update("Data import", f"D{index + 1}", str(nick_dict[row[0]]))
+        # all_roaster = self.roster_sheet.get_values("Data import")
+        # nick_dict = {member.display_name: member.id for member in self.SUPPORT_GUILD.members}
+        #
+        # for index, row in enumerate(all_roaster):
+        #     await asyncio.sleep(2)
+        #     print(row[0], index)
+        #     if row[0] in nick_dict:
+        #         self.roster_sheet.update("Data import", f"D{index + 1}", str(nick_dict[row[0]]))
 
     async def on_member_join(self, member: nextcord.Member):
         if member.guild.id in Data.IGNORED_GUILDS:
