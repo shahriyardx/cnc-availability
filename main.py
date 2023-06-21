@@ -57,6 +57,15 @@ class Availability(commands.AutoShardedBot):
         if not team_role:
             return
 
+        role_names = {
+            "LW": "Left Wing",
+            "RW": "Right Wing",
+            "LD": "Left Defense",
+            "RD": "Right Defense",
+            "G": "Goalie",
+            "C": "Center",
+        }
+
         all_roster = self.roster_sheet.get_values("Data import")
         for row in all_roster[1:]:
             try:
@@ -68,8 +77,8 @@ class Availability(commands.AutoShardedBot):
                 await member.add_roles(team_role)
                 await member.edit(nick=row[0])
 
-                primary_position = get(member.guild.roles, name=row[1])
-                secondary_position = get(member.guild.roles, name=row[2])
+                primary_position = get(member.guild.roles, name=role_names.get(row[1]))
+                secondary_position = get(member.guild.roles, name=role_names.get(row[2]))
 
                 if primary_position:
                     await member.add_roles(primary_position)
