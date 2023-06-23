@@ -1,5 +1,5 @@
 import os
-import asyncio
+from typing import Optional
 
 import nextcord
 from dotenv import load_dotenv
@@ -22,7 +22,7 @@ class Availability(commands.AutoShardedBot):
     def __init__(self, command_prefix: str, **kwargs):
         super().__init__(command_prefix, **kwargs)
         self.prisma = Prisma()
-        self.SUPPORT_GUILD = None
+        self.SUPPORT_GUILD: Optional[nextcord.Guild] = None
         self.roster_sheet = DataSheet("NHL Live Draft Sheet")
 
     async def on_ready(self):
@@ -53,8 +53,19 @@ class Availability(commands.AutoShardedBot):
     async def on_member_join(self, member: nextcord.Member):
         if member.guild.id in Data.IGNORED_GUILDS:
             return
+
         team_role = get(member.guild.roles, name="Team")
         if not team_role:
+            return
+
+        cnc_member = self.SUPPORT_GUILD.get_member(member.id)
+        if not cnc_member:
+            return
+
+        team_name = member.guild.name.split(" ", maxsplit=1)[1].strip()
+        right_team = get(cnc_member.roles, name=team_name)
+
+        if not right_team:
             return
 
         role_names = {
