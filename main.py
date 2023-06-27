@@ -8,8 +8,8 @@ from nextcord.ext import commands
 from nextcord.utils import get
 
 from essentials.models import Data
-from utils.gspread import DataSheet
 from prisma import Prisma
+from utils.gspread import DataSheet
 
 load_dotenv(".env")
 
@@ -24,12 +24,16 @@ class Availability(commands.AutoShardedBot):
         self.prisma = Prisma()
         self.SUPPORT_GUILD: Optional[nextcord.Guild] = None
         self.roster_sheet = DataSheet("NHL Live Draft Sheet")
+        self.tasks_enabled = True
+        self.playoffs = False
 
     async def on_ready(self):
         await self.prisma.connect()
         self.SUPPORT_GUILD = self.get_guild(Data.SUPPORT_GUILD)
 
         settings = await self.prisma.settings.find_first()
+        self.tasks_enabled = settings.tasks_enabled
+        self.playoffs = settings.playofss
 
         if not settings:
             await self.prisma.settings.create(
@@ -114,6 +118,7 @@ class Availability(commands.AutoShardedBot):
 bot = Availability(command_prefix="a.", intents=intents)
 
 bot.load_extension("cogs.commands")
+bot.load_extension("cogs.commands.admin")
 bot.load_extension("cogs.task")
 bot.load_extension("cogs.utility")
 

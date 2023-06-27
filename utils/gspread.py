@@ -1,8 +1,8 @@
 from dataclasses import dataclass
+from typing import Union
 
 import gspread
 from gspread import Spreadsheet
-from typing import Union
 
 
 @dataclass

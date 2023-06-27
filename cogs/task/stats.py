@@ -1,6 +1,7 @@
 import pprint
-from bs4 import BeautifulSoup
+
 import requests
+from bs4 import BeautifulSoup
 
 
 def get_rows(soup: BeautifulSoup, div_id: str):

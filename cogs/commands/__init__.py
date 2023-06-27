@@ -1,6 +1,7 @@
 from datetime import datetime
 
-from nextcord import CategoryChannel, Embed, Member, PermissionOverwrite, SlashOption
+from nextcord import (CategoryChannel, Embed, Member, PermissionOverwrite,
+                      SlashOption)
 from nextcord.application_command import slash_command
 from nextcord.ext import commands
 from nextcord.interactions import Interaction
@@ -40,58 +41,6 @@ class TaskerCommands(commands.Cog):
         self.prisma = bot.prisma
         self.roster_sheet = DataSheet("OFFICIAL NHL ROSTER SHEET")
         self.draft_sheet = DataSheet("NHL Live Draft Sheet")
-
-    @slash_command(description="Sync your roles and nickname with Roster sheet")
-    async def sync(self, interaction: Interaction):
-        await interaction.response.defer(ephemeral=True)
-
-        member = interaction.user
-        if member.guild.id in Data.IGNORED_GUILDS:
-            return
-        cnc_member = self.bot.SUPPORT_GUILD.get_member(member.id)
-
-        if not cnc_member:
-            return
-
-        team_name = member.guild.name.split(" ", maxsplit=1)[1].strip()
-        right_team = get(cnc_member.roles, name=team_name)
-
-        if not right_team:
-            return await interaction.edit_original_message(content="Unable to sync, You do not belong to this team")
-
-        role_names = {
-            "LW": "Left Wing",
-            "RW": "Right Wing",
-            "LD": "Left Defense",
-            "RD": "Right Defense",
-            "G": "Goalie",
-            "C": "Center",
-        }
-
-        all_roster = self.draft_sheet.get_values("Data import")
-
-        for row in all_roster[1:]:
-            try:
-                member_id = int(row[3])
-            except (ValueError, TypeError):
-                continue
-
-            if member_id == member.id:
-                team_role = get(member.guild.roles, name="Team")
-                await member.add_roles(team_role)
-                await member.edit(nick=row[0])
-
-                primary_position = get(member.guild.roles, name=role_names.get(row[1]))
-                secondary_position = get(member.guild.roles, name=role_names.get(row[2]))
-
-                if primary_position:
-                    await member.add_roles(primary_position)
-
-                if secondary_position:
-                    await member.add_roles(secondary_position)
-
-                return await interaction.edit_original_message(content="Role and nickname has been synced")
-        return await interaction.edit_original_message(content="Your data is not available on the roster sheet")
 
     @slash_command(description="Press enter and submit your availability")
     async def submitavailability(self, interaction: Interaction):

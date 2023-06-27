@@ -1,6 +1,6 @@
 import datetime
-import os
 import json
+import os
 from typing import List
 
 import nextcord
@@ -15,8 +15,8 @@ from essentials.time import get_next_date
 from essentials.utils import get_team_name
 from utils.gspread import DataSheet
 
-from .utils import get_week, lockdown, unlockdown
 from .stats import get_all_team_data
+from .utils import get_week, lockdown, unlockdown
 
 
 class Tasker(commands.Cog):
@@ -74,6 +74,13 @@ class Tasker(commands.Cog):
         # Delete all previous lineups and availability
         # Close any submission and edition of lineups
         print("[+] START open_availability_task")
+        if not self.bot.tasks_enabled:  # noqa
+            if not simulate:
+                return self.start_task(
+                    self.open_availability_task, get_next_date("Friday", hour=17)
+                )
+
+            return
 
         if not simulate:
             await self.bot.prisma.playerlineup.delete_many()
@@ -132,6 +139,13 @@ class Tasker(commands.Cog):
 
         SUPPORT_GUILD = self.bot.SUPPORT_GUILD
         print("[+] START close_availability_task")
+        if not self.bot.tasks_enabled:  # noqa
+            if not simulate:
+                return self.start_task(
+                    self.open_availability_task, get_next_date("Friday", hour=17)
+                )
+
+            return
 
         # Open lineups submit and edit
         settings = await self.bot.prisma.settings.find_first()
@@ -175,7 +189,7 @@ class Tasker(commands.Cog):
                     where={"member_id": member.id}
                 )
 
-                if not avail:
+                if not avail and not self.bot.playoffs:
                     await append_into_ir(self.bot, guild, member, self.roster_sheet, 0)
                 # Else already got into ir
 
@@ -184,9 +198,6 @@ class Tasker(commands.Cog):
                 has_ir = get(member.roles, name="IR")
                 if not has_ir:
                     playable_members.append(member)
-
-            if not SUPPORT_GUILD:
-                continue
 
             cnc_team_channel = get(
                 SUPPORT_GUILD.text_channels,
@@ -197,7 +208,7 @@ class Tasker(commands.Cog):
             OWNER_ROLE = get(guild.roles, name="Owner")
             GM_ROLE = get(guild.roles, name="General Manager")
 
-            if len(playable_members) < 13:
+            if len(playable_members) < 13 and not self.bot.playoffs:
                 await cnc_team_channel.send(
                     content=(
                         f"The {get_team_name(guild.name)} need {13 - len(playable_members)} ECU "
@@ -227,6 +238,14 @@ class Tasker(commands.Cog):
         # Keeps the lineup edit open
 
         print("[+] START close_lineup_submit")
+        if not self.bot.tasks_enabled:  # noqa
+            if not simulate:
+                return self.start_task(
+                    self.open_availability_task, get_next_date("Friday", hour=17)
+                )
+
+            return
+
         settings = await self.bot.prisma.settings.find_first()
         await self.bot.prisma.settings.update(
             where={"id": settings.id},
@@ -247,6 +266,14 @@ class Tasker(commands.Cog):
 
         # Close lineup submit and edit both again
         print("[+] START close_lineup_channel")
+        if not self.bot.tasks_enabled:  # noqa
+            if not simulate:
+                return self.start_task(
+                    self.open_availability_task, get_next_date("Friday", hour=17)
+                )
+
+            return
+
         settings = await self.bot.prisma.settings.find_first()
         await self.bot.prisma.settings.update(
             where={"id": settings.id},
@@ -277,7 +304,9 @@ class Tasker(commands.Cog):
             self.start_task(self.close_lineup_channel, get_next_date("Friday", hour=2))
 
     @staticmethod
-    def get_played_games(old_game_data: dict, new_game_data: dict, member: nextcord.Member):
+    def get_played_games(
+        old_game_data: dict, new_game_data: dict, member: nextcord.Member
+    ):
         if not old_game_data:
             return new_game_data[member.display_name]
 
@@ -287,18 +316,35 @@ class Tasker(commands.Cog):
         if member.display_name not in old_game_data:
             return new_game_data[member.display_name]
 
-        if member.display_name in new_game_data and member.display_name in old_game_data:
-            return new_game_data[member.display_name] - old_game_data[member.display_name]
+        if (
+            member.display_name in new_game_data
+            and member.display_name in old_game_data
+        ):
+            return (
+                new_game_data[member.display_name] - old_game_data[member.display_name]
+            )
 
     async def calculate_gp(self, simulate: bool = False):
+        if not self.bot.tasks_enabled:  # noqa
+            if not simulate:
+                return self.start_task(
+                    self.open_availability_task, get_next_date("Friday", hour=17)
+                )
+
+            return
+
+        if self.bot.playoffs:
+            return self.start_task(
+                self.open_availability_task, get_next_date("Friday", hour=17)
+            )
+
         week = get_week()
         data = await self.bot.prisma.game.find_first(order=[{"week": "desc"}])
         new_game_data = get_all_team_data()
 
-        await self.bot.prisma.game.create({
-            "week": week,
-            "data": json.dumps(new_game_data)
-        })
+        await self.bot.prisma.game.create(
+            {"week": week, "data": json.dumps(new_game_data)}
+        )
 
         if data:
             old_game_data = json.loads(data.data)
@@ -311,10 +357,14 @@ class Tasker(commands.Cog):
 
             not_minimum = []
             for member in guild.members:
-                games_played = self.get_played_games(old_game_data, new_game_data, member)
+                games_played = self.get_played_games(
+                    old_game_data, new_game_data, member
+                )
                 if games_played < 3:
                     not_minimum.append(member)
-                    await append_into_ir(self.bot, guild, member, self.roster_sheet, games_played)
+                    await append_into_ir(
+                        self.bot, guild, member, self.roster_sheet, games_played
+                    )
 
             if not_minimum:
                 team_name = get_team_name(guild.name)
@@ -333,10 +383,9 @@ class Tasker(commands.Cog):
                         )
                     )
 
-        await self.bot.prisma.game.create({
-            "week": week,
-            "data": json.dumps(new_game_data)
-        })
+        await self.bot.prisma.game.create(
+            {"week": week, "data": json.dumps(new_game_data)}
+        )
 
         if not simulate:
             self.start_task(self.close_lineup_channel, get_next_date("Friday", hour=16))
