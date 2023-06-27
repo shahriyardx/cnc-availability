@@ -20,6 +20,9 @@ class DataSheet:
     def get_values(self, sheet_name: str):
         return self.sheet.worksheet(sheet_name).get_all_values()
 
+    def get_value(self, sheet_name: str, cell: str):
+        return self.sheet.worksheet(sheet_name).get(cell)
+
     def insert(self, sheet: str, data: list, start: str = "A", end: str = None):
         total_values = len(self.sheet.worksheet(sheet).get_all_values()) + 1
         end = end or next_char(start, len(data))

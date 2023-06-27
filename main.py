@@ -18,12 +18,20 @@ intents.members = True # noqa
 intents.guilds = True # noqa
 
 
+def get_number(value):
+    try:
+        return int(value)
+    except (ValueError, TypeError):
+        return None
+
+
 class Availability(commands.AutoShardedBot):
     def __init__(self, command_prefix: str, **kwargs):
         super().__init__(command_prefix, **kwargs)
         self.prisma = Prisma()
         self.SUPPORT_GUILD: Optional[nextcord.Guild] = None
         self.roster_sheet = DataSheet("NHL Live Draft Sheet")
+        self.draft_sheet = DataSheet("OFFICIAL NHL ROSTER SHEET")
         self.tasks_enabled = True
         self.playoffs = False
 
@@ -100,6 +108,24 @@ class Availability(commands.AutoShardedBot):
 
                 if secondary_position:
                     await member.add_roles(secondary_position)
+
+                break
+        else:
+            owner_id = get_number(self.draft_sheet.get_value(team_name, "B27"))
+            gm_id = get_number(self.draft_sheet.get_value(team_name, "B28"))
+            agm_id = get_number(self.draft_sheet.get_value(team_name, "B29"))
+
+            if owner_id == member.id:
+                owner_role = get(member.guild.roles, name="Owner")
+                await member.add_roles(owner_role)
+
+            if gm_id == member.id:
+                gm_role = get(member.guild.roles, name="General Manager")
+                await member.add_roles(gm_role)
+
+            if agm_id:
+                agm_role = get(member.guild.roles, name="AGM")
+                await member.add_roles(agm_role)
 
     def get_command_mention(self, command_name) -> str:
         cmd = None
