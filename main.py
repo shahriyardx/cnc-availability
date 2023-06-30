@@ -118,14 +118,18 @@ class Availability(commands.AutoShardedBot):
         if owner_id == member.id:
             nick = self.draft_sheet.get_value(team_name, "A27")
             owner_role = get(member.guild.roles, name="Owner")
+            team_role = get(member.guild.roles, name="Team")
             await member.add_roles(owner_role)
+            await member.remove_roles(team_role)
             if nick:
                 await member.edit(nick=nick)
 
         if gm_id == member.id:
             nick = self.draft_sheet.get_value(team_name, "A28")
             gm_role = get(member.guild.roles, name="General Manager")
+            team_role = get(member.guild.roles, name="Team")
             await member.add_roles(gm_role)
+            await member.remove_roles(team_role)
 
             if nick:
                 await member.edit(nick=nick)
