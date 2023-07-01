@@ -115,6 +115,8 @@ class Availability(commands.AutoShardedBot):
         gm_id = get_number(self.draft_sheet.get_value(team_name, "B28"))
         agm_id = get_number(self.draft_sheet.get_value(team_name, "B29"))
 
+        print(owner_id, member.id, owner_id == member.id)
+
         if owner_id == member.id:
             nick = self.draft_sheet.get_value(team_name, "A27")
             owner_role = get(member.guild.roles, name="Owner")
