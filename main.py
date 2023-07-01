@@ -19,6 +19,7 @@ intents.guilds = True # noqa
 
 
 def get_number(value):
+    print(f'Value: {value}')
     try:
         return int(value)
     except (ValueError, TypeError):
