@@ -67,8 +67,6 @@ class Availability(commands.AutoShardedBot):
         if member.guild.id in Data.IGNORED_GUILDS:
             return
 
-        print(f"Joined {member.display_name}")
-
         team_role = get(member.guild.roles, name="Team")
         if not team_role:
             return
@@ -78,9 +76,8 @@ class Availability(commands.AutoShardedBot):
             return
 
         team_name = member.guild.name.split(" ", maxsplit=1)[1].strip()
-        print(f"On {team_name}")
         right_team = get(cnc_member.roles, name=team_name)
-        print(right_team)
+
         if not right_team:
             return
 
@@ -94,7 +91,6 @@ class Availability(commands.AutoShardedBot):
         }
 
         all_roster = self.roster_sheet.get_values("Data import")
-        print(len(all_roster))
         for row in all_roster[1:]:
             try:
                 member_id = int(row[3])
@@ -119,8 +115,6 @@ class Availability(commands.AutoShardedBot):
         owner_id = get_number(self.draft_sheet.get_value(team_name, "B27")[0][0])
         gm_id = get_number(self.draft_sheet.get_value(team_name, "B28")[0][0])
         agm_id = get_number(self.draft_sheet.get_value(team_name, "B29")[0][0])
-
-        print(owner_id, member.id, owner_id == member.id)
 
         if owner_id == member.id:
             nick = self.draft_sheet.get_value(team_name, "A27")[0][0]
