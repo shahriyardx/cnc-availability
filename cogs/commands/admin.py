@@ -125,10 +125,11 @@ class UtilityCommands(commands.Cog):
             },
         )
 
-        self.bot.tasks_enabled = status
+        self.bot.playoffs = status
         await interaction.edit_original_message(
             content=f"Playoffs has been {'Enabled' if status else 'Disabled'}"
         )
+
 
 def setup(bot: IBot):
     bot.add_cog(UtilityCommands(bot))

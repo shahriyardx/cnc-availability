@@ -189,7 +189,7 @@ class Tasker(commands.Cog):
                     where={"member_id": member.id}
                 )
 
-                if not avail and not self.bot.playoffs:
+                if not avail and not self.bot.playoffs: # noqa
                     await append_into_ir(self.bot, guild, member, self.roster_sheet, 0)
                 # Else already got into ir
 
