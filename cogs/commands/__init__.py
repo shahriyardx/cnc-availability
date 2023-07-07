@@ -465,10 +465,10 @@ class TaskerCommands(commands.Cog):
             interaction.guild.text_channels, name=Data.LINEUP_LOG_CHANNEL
         )
 
-        if LINEUP_LOG_CHANNEL:
+        if LINEUP_LOG_CHANNEL and old_lineup.message_id_team:
             try:
                 old_message = await LINEUP_LOG_CHANNEL.fetch_message(
-                    old_lineup.message_id_team
+                    int(old_lineup.message_id_team)
                 )
                 if old_message:
                     await old_message.delete()
@@ -481,7 +481,7 @@ class TaskerCommands(commands.Cog):
                 where={"id": lineup_id.strip()}, data={"message_id_team": message.id}
             )
 
-        if SUPPORT_GUILD:
+        if SUPPORT_GUILD and old_lineup.message_id_cnc:
             TEAM_LOG_CHANNEL = get(
                 SUPPORT_GUILD.text_channels,
                 name=f"╟・{team_name}",
@@ -490,7 +490,7 @@ class TaskerCommands(commands.Cog):
             if TEAM_LOG_CHANNEL:
                 try:
                     old_message = await TEAM_LOG_CHANNEL.fetch_message(
-                        old_lineup.message_id_cnc
+                        int(old_lineup.message_id_cnc)
                     )
                     if old_message:
                         await old_message.delete()
