@@ -200,11 +200,15 @@ class TaskerCommands(commands.Cog):
 
         players = [left_wing, left_defense, right_wing, right_defense, goalie, center]
         team_role = get(interaction.guild.roles, name=Data.PLAYERS_ROLE)
+        owner_role = get(interaction.guild.roles, name="Owner")
+        gm_role = get(interaction.guild.roles, name="General Manager")
 
         for player in players:
-            if team_role not in player.roles:
+            if team_role in player.roles or owner_role in player.roles or gm_role in player.roles:
+                continue
+            else:
                 return await interaction.followup.send(
-                    content=f"Player {player.mention} does not have the Team role. Can't submit lineup with him"
+                    content=f"Player {player.mention} is not eligible for lineup"
                 )
 
         l_data = await self.prisma.lineup.create(
@@ -364,11 +368,15 @@ class TaskerCommands(commands.Cog):
             if p
         ]
         team_role = get(interaction.guild.roles, name=Data.PLAYERS_ROLE)
+        owner_role = get(interaction.guild.roles, name="Owner")
+        gm_role = get(interaction.guild.roles, name="General Manager")
 
         for player in players:
-            if team_role not in player.roles:
+            if team_role in player.roles or owner_role in player.roles or gm_role in player.roles:
+                continue
+            else:
                 return await interaction.followup.send(
-                    content=f"Player {player.mention} does not have the Team role. Can't submit lineup with him"
+                    content=f"Player {player.mention} is not eligible for lineup"
                 )
 
         if not old_lineup:
