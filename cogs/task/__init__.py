@@ -189,7 +189,7 @@ class Tasker(commands.Cog):
                     where={"member_id": member.id}
                 )
 
-                if not avail and not self.bot.playoffs: # noqa
+                if not avail and not self.bot.playoffs:  # noqa
                     await append_into_ir(self.bot, guild, member, self.roster_sheet, 0)
                 # Else already got into ir
 
@@ -208,7 +208,7 @@ class Tasker(commands.Cog):
             OWNER_ROLE = get(guild.roles, name="Owner")
             GM_ROLE = get(guild.roles, name="General Manager")
 
-            if len(playable_members) < 13 and not self.bot.playoffs: # noqa
+            if len(playable_members) < 13 and not self.bot.playoffs:  # noqa
                 await cnc_team_channel.send(
                     content=(
                         f"The {get_team_name(guild.name)} need {13 - len(playable_members)} ECU "
@@ -333,7 +333,7 @@ class Tasker(commands.Cog):
 
             return
 
-        if self.bot.playoffs:
+        if self.bot.playoffs: # noqa
             return self.start_task(
                 self.open_availability_task, get_next_date("Friday", hour=17)
             )

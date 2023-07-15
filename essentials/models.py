@@ -3,13 +3,12 @@ from dataclasses import dataclass
 from typing import Callable, List
 
 from dotenv import load_dotenv
-
-load_dotenv(".env")
-
 from nextcord import Guild
 from nextcord.ext.commands import AutoShardedBot
 
 from prisma import Prisma
+
+load_dotenv(".env")
 
 
 @dataclass

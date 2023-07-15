@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Optional
 
 import pytz
 from nextcord import Guild, Member, Object
@@ -9,7 +10,6 @@ from nextcord.utils import get
 from utils.data import (inactive_channel, inactive_roles, ir_channel,
                         support_server_id)
 from utils.gspread import DataSheet
-from typing import Optional
 
 
 @dataclass

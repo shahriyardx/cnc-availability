@@ -204,7 +204,11 @@ class TaskerCommands(commands.Cog):
         gm_role = get(interaction.guild.roles, name="General Manager")
 
         for player in players:
-            if team_role in player.roles or owner_role in player.roles or gm_role in player.roles:
+            if (
+                team_role in player.roles
+                or owner_role in player.roles
+                or gm_role in player.roles
+            ):
                 continue
             else:
                 return await interaction.followup.send(
@@ -372,7 +376,11 @@ class TaskerCommands(commands.Cog):
         gm_role = get(interaction.guild.roles, name="General Manager")
 
         for player in players:
-            if team_role in player.roles or owner_role in player.roles or gm_role in player.roles:
+            if (
+                team_role in player.roles
+                or owner_role in player.roles
+                or gm_role in player.roles
+            ):
                 continue
             else:
                 return await interaction.followup.send(

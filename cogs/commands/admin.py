@@ -89,7 +89,9 @@ class UtilityCommands(commands.Cog):
         await interaction.response.defer(ephemeral=True)
 
         if interaction.user.id not in [696939596667158579, 810256917497905192]:
-            return await interaction.followup.send(content="You don't have permission to run this command")
+            return await interaction.followup.send(
+                content="You don't have permission to run this command"
+            )
 
         settings = await self.prisma.settings.find_first()
         await self.prisma.settings.update(
@@ -106,16 +108,18 @@ class UtilityCommands(commands.Cog):
 
     @slash_command(description="Enable of disable playoffs")
     async def toggle_playoffs(
-            self,
-            interaction: Interaction,
-            status: bool = SlashOption(
-                name="status", description="True = Enabled, False = Disabled", required=True
-            ),
+        self,
+        interaction: Interaction,
+        status: bool = SlashOption(
+            name="status", description="True = Enabled, False = Disabled", required=True
+        ),
     ):
         await interaction.response.defer(ephemeral=True)
 
         if interaction.user.id not in [696939596667158579, 810256917497905192]:
-            return await interaction.followup.send(content="You don't have permission to run this command")
+            return await interaction.followup.send(
+                content="You don't have permission to run this command"
+            )
 
         settings = await self.prisma.settings.find_first()
         await self.prisma.settings.update(
