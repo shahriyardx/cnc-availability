@@ -10,6 +10,12 @@ from nextcord.utils import get
 from essentials.models import Data, IBot
 from utils.gspread import DataSheet
 
+def get_number(value):
+    print(f'Value: {value}')
+    try:
+        return int(value)
+    except (ValueError, TypeError):
+        return None
 
 class UtilityCommands(commands.Cog):
     def __init__(self, bot: IBot) -> None:
@@ -71,11 +77,35 @@ class UtilityCommands(commands.Cog):
                 if secondary_position:
                     await member.add_roles(secondary_position)
 
-                return await interaction.edit_original_message(
-                    content="Role and nickname has been synced"
-                )
+        owner_id = get_number(self.draft_sheet.get_value(team_name, "B27")[0][0])
+        gm_id = get_number(self.draft_sheet.get_value(team_name, "B28")[0][0])
+        agm_id = get_number(self.draft_sheet.get_value(team_name, "B29")[0][0])
+
+        if owner_id == member.id:
+            nick = self.draft_sheet.get_value(team_name, "A27")[0][0]
+            owner_role = get(member.guild.roles, name="Owner")
+            team_role = get(member.guild.roles, name="Team")
+            await member.add_roles(owner_role)
+            await member.remove_roles(team_role)
+            if nick:
+                await member.edit(nick=nick)
+
+        if gm_id == member.id:
+            nick = self.draft_sheet.get_value(team_name, "A28")[0][0]
+            gm_role = get(member.guild.roles, name="General Manager")
+            team_role = get(member.guild.roles, name="Team")
+            await member.add_roles(gm_role)
+            await member.remove_roles(team_role)
+
+            if nick:
+                await member.edit(nick=nick)
+
+        if agm_id:
+            agm_role = get(member.guild.roles, name="AGM")
+            await member.add_roles(agm_role)
+
         return await interaction.edit_original_message(
-            content="Your data is not available on the roster sheet"
+            content="Your roles has been synced"
         )
 
     @slash_command(description="Enable or disable tasks")
