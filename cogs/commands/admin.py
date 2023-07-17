@@ -54,14 +54,14 @@ class UtilityCommands(commands.Cog):
             "C": "Center",
         }
 
-        owner_id = get_number(self.draft_sheet.get_value(team_name, "B27")[0][0])
-        gm_id = get_number(self.draft_sheet.get_value(team_name, "B28")[0][0])
-        agm_id = get_number(self.draft_sheet.get_value(team_name, "B29")[0][0])
+        owner_id = get_number(self.roster_sheet.get_value(team_name, "B27")[0][0])
+        gm_id = get_number(self.roster_sheet.get_value(team_name, "B28")[0][0])
+        agm_id = get_number(self.roster_sheet.get_value(team_name, "B29")[0][0])
 
         print(owner_id, gm_id, agm_id, member.id)
 
         if owner_id == member.id:
-            nick = self.draft_sheet.get_value(team_name, "A27")[0][0]
+            nick = self.roster_sheet.get_value(team_name, "A27")[0][0]
             owner_role = get(member.guild.roles, name="Owner")
             team_role = get(member.guild.roles, name="Team")
             await member.add_roles(owner_role)
@@ -70,7 +70,7 @@ class UtilityCommands(commands.Cog):
                 await member.edit(nick=nick)
 
         elif gm_id == member.id:
-            nick = self.draft_sheet.get_value(team_name, "A28")[0][0]
+            nick = self.roster_sheet.get_value(team_name, "A28")[0][0]
             gm_role = get(member.guild.roles, name="General Manager")
             team_role = get(member.guild.roles, name="Team")
             await member.add_roles(gm_role)
