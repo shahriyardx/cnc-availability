@@ -1,7 +1,4 @@
-from datetime import datetime
-
-from nextcord import (CategoryChannel, Embed, Member, PermissionOverwrite,
-                      SlashOption)
+from nextcord import SlashOption
 from nextcord.application_command import slash_command
 from nextcord.ext import commands
 from nextcord.interactions import Interaction
@@ -10,12 +7,14 @@ from nextcord.utils import get
 from essentials.models import Data, IBot
 from utils.gspread import DataSheet
 
+
 def get_number(value):
     print(f'Value: {value}')
     try:
         return int(value)
     except (ValueError, TypeError):
         return None
+
 
 class UtilityCommands(commands.Cog):
     def __init__(self, bot: IBot) -> None:
@@ -100,7 +99,7 @@ class UtilityCommands(commands.Cog):
             if nick:
                 await member.edit(nick=nick)
 
-        if agm_id:
+        if agm_id == member.id:
             agm_role = get(member.guild.roles, name="AGM")
             await member.add_roles(agm_role)
 

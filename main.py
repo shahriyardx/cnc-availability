@@ -135,7 +135,7 @@ class Availability(commands.AutoShardedBot):
             if nick:
                 await member.edit(nick=nick)
 
-        if agm_id:
+        if agm_id == member.id:
             agm_role = get(member.guild.roles, name="AGM")
             await member.add_roles(agm_role)
 
