@@ -208,11 +208,14 @@ class Tasker(commands.Cog):
             OWNER_ROLE = get(guild.roles, name="Owner")
             GM_ROLE = get(guild.roles, name="General Manager")
 
+            OWNERS = get(SUPPORT_GUILD.roles, name="Owners")
+            COMISSIONERS = get(SUPPORT_GUILD.roles, nanme="Commissioners")
+
             if len(playable_members) < 13 and not self.bot.playoffs:  # noqa
                 await cnc_team_channel.send(
                     content=(
                         f"The {get_team_name(guild.name)} need {13 - len(playable_members)} ECU "
-                        f"players this week {OWNER_ROLE.mention} {GM_ROLE.mention}"
+                        f"players this week {OWNERS.mention} {COMISSIONERS.mention}"
                     )
                 )
 
