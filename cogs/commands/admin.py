@@ -54,6 +54,30 @@ class UtilityCommands(commands.Cog):
             "C": "Center",
         }
 
+        all_roster = self.draft_sheet.get_values("Data import")
+
+        for row in all_roster[1:]:
+            try:
+                member_id = int(row[3])
+            except (ValueError, TypeError):
+                continue
+
+            if member_id == member.id:
+                team_role = get(member.guild.roles, name="Team")
+                await member.add_roles(team_role)
+                await member.edit(nick=row[0])
+
+                primary_position = get(member.guild.roles, name=role_names.get(row[1]))
+                secondary_position = get(
+                    member.guild.roles, name=role_names.get(row[2])
+                )
+
+                if primary_position:
+                    await member.add_roles(primary_position)
+
+                if secondary_position:
+                    await member.add_roles(secondary_position)
+
         owner_id = get_number(self.roster_sheet.get_value(team_name, "B27")[0][0])
         gm_id = get_number(self.roster_sheet.get_value(team_name, "B28")[0][0])
         agm_id = get_number(self.roster_sheet.get_value(team_name, "B29")[0][0])
@@ -82,31 +106,6 @@ class UtilityCommands(commands.Cog):
         elif agm_id == member.id:
             agm_role = get(member.guild.roles, name="AGM")
             await member.add_roles(agm_role)
-
-        else:
-            all_roster = self.draft_sheet.get_values("Data import")
-
-            for row in all_roster[1:]:
-                try:
-                    member_id = int(row[3])
-                except (ValueError, TypeError):
-                    continue
-
-                if member_id == member.id:
-                    team_role = get(member.guild.roles, name="Team")
-                    await member.add_roles(team_role)
-                    await member.edit(nick=row[0])
-
-                    primary_position = get(member.guild.roles, name=role_names.get(row[1]))
-                    secondary_position = get(
-                        member.guild.roles, name=role_names.get(row[2])
-                    )
-
-                    if primary_position:
-                        await member.add_roles(primary_position)
-
-                    if secondary_position:
-                        await member.add_roles(secondary_position)
 
         return await interaction.edit_original_message(
             content="Your roles has been synced"
