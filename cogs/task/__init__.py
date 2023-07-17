@@ -126,6 +126,12 @@ class Tasker(commands.Cog):
                     except Exception as e:
                         print(e)
 
+                for member in IR_ROLE.members:
+                    try:
+                        await member.remove_roles(IR_ROLE, reason="Open Availability")
+                    except Exception as e:
+                        print(e)
+
         print("[+] END open_availability_task")
         if not simulate:
             self.start_task(
