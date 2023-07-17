@@ -36,6 +36,8 @@ class UtilityCommands(commands.Cog):
             return
 
         team_name = member.guild.name.split(" ", maxsplit=1)[1].strip()
+        print(f"'{team_name}'")
+
         right_team = get(cnc_member.roles, name=team_name)
 
         if not right_team:
