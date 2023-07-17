@@ -173,8 +173,8 @@ class TaskerCommands(commands.Cog):
             description="Select time of the game",
             choices={
                 "8:30": "8:30",
-                "9:15": "9:15",
-                "10:00": "10:00",
+                "9:10": "9:10",
+                "9:50": "9:50",
             },
         ),
         left_wing: Member = SlashOption(description="Select left wing player"),
@@ -315,8 +315,8 @@ class TaskerCommands(commands.Cog):
             description="Select time of the game",
             choices={
                 "8:30": "8:30",
-                "9:15": "9:15",
-                "10:00": "10:00",
+                "9:10": "9:10",
+                "9:50": "9:50",
             },
             required=False,
         ),

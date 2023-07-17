@@ -412,28 +412,28 @@ class Tasker(commands.Cog):
             now = datetime.datetime.utcnow()
             f16 = now + datetime.timedelta(seconds=3)
             f17 = now + datetime.timedelta(seconds=10)
-            m17 = f17 + datetime.timedelta(seconds=30)
-            t4 = m17 + datetime.timedelta(seconds=30)
+            m16 = f17 + datetime.timedelta(seconds=30)
+            t4 = m16 + datetime.timedelta(seconds=30)
             f2 = t4 + datetime.timedelta(seconds=30)
 
             if mode == "devstart":
                 print("[+] Devstart mode")
                 # self.start_task(self.calculate_gp, f16)
                 # self.start_task(self.open_availability_task, f17)
-                # self.start_task(self.close_availability_task, m17)
+                # self.start_task(self.close_availability_task, m16)
                 # self.start_task(self.close_lineup_submit, t4)
                 # self.start_task(self.close_lineup_channel, f2)
         else:
             # Real times
             f16 = get_next_date("Friday", hour=16)
             f17 = get_next_date("Friday", hour=17)
-            m17 = get_next_date("Monday", hour=17)
+            m16 = get_next_date("Monday", hour=16)
             t4 = get_next_date("Tuesday", hour=4)
             f2 = get_next_date("Friday", hour=2)
 
-            # self.start_task(self.calculate_gp, f16)
+            self.start_task(self.calculate_gp, f16)
             self.start_task(self.open_availability_task, f17)
-            self.start_task(self.close_availability_task, m17)
+            self.start_task(self.close_availability_task, m16)
             self.start_task(self.close_lineup_submit, t4)
             self.start_task(self.close_lineup_channel, f2)
 

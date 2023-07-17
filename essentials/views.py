@@ -38,7 +38,7 @@ class TimeView(ui.View):
         await self._update(interaction)
 
     @ui.button(
-        label="9:15pm EST", style=ButtonStyle.primary, custom_id="9:15pm EST", row=1
+        label="9:10pm EST", style=ButtonStyle.primary, custom_id="9:10pm EST", row=1
     )
     async def nfp(self, button: ui.Button, interaction: Interaction):
         self.slots.remove(
@@ -48,7 +48,7 @@ class TimeView(ui.View):
         await self._update(interaction)
 
     @ui.button(
-        label="10:00pm EST", style=ButtonStyle.primary, custom_id="10:00pm EST", row=1
+        label="9:50pm EST", style=ButtonStyle.primary, custom_id="9:50pm EST", row=1
     )
     async def tp(self, button: ui.Button, interaction: Interaction):
         self.slots.remove(
@@ -59,7 +59,7 @@ class TimeView(ui.View):
 
     @ui.button(label="All", style=ButtonStyle.secondary, custom_id="All", row=2)
     async def all(self, button: ui.Button, interaction: Interaction):
-        self.slots = ["8:30pm EST", "9:15pm EST", "10:00pm EST"]
+        self.slots = ["8:30pm EST", "9:10pm EST", "9:50pm EST"]
         self.stop()
 
     @ui.button(label="None", style=ButtonStyle.secondary, custom_id="None", row=2)
