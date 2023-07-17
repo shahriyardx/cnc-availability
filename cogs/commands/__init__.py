@@ -374,8 +374,14 @@ class TaskerCommands(commands.Cog):
         team_role = get(interaction.guild.roles, name=Data.PLAYERS_ROLE)
         owner_role = get(interaction.guild.roles, name="Owner")
         gm_role = get(interaction.guild.roles, name="General Manager")
+        ir_role = get(interaction.guild.roles, name="IR")
 
         for player in players:
+            if ir_role in player.roles:
+                return await interaction.followup.send(
+                    content=f"Player {player.mention} is not eligible for lineup. Reason: Player is on IR"
+                )
+
             if (
                 team_role in player.roles
                 or owner_role in player.roles
@@ -384,7 +390,10 @@ class TaskerCommands(commands.Cog):
                 continue
             else:
                 return await interaction.followup.send(
-                    content=f"Player {player.mention} is not eligible for lineup"
+                    content=(
+                        f"Player {player.mention} is not eligible for lineup. "
+                        "Reason: Member does not have Team, Owner or General Manager role"
+                    )
                 )
 
         if not old_lineup:
