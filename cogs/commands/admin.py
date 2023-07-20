@@ -65,7 +65,7 @@ class UtilityCommands(commands.Cog):
             if member_id == member.id:
                 team_role = get(member.guild.roles, name="Team")
                 await member.add_roles(team_role)
-                await member.edit(nick=row[0])
+                await member.edit(nick=cnc_member.nick or cnc_member.display_name)
 
                 primary_position = get(member.guild.roles, name=role_names.get(row[1]))
                 secondary_position = get(
@@ -85,23 +85,18 @@ class UtilityCommands(commands.Cog):
         print(owner_id, gm_id, agm_id, member.id)
 
         if owner_id == member.id:
-            nick = self.roster_sheet.get_value(team_name, "A27")[0][0]
             owner_role = get(member.guild.roles, name="Owner")
             team_role = get(member.guild.roles, name="Team")
             await member.add_roles(owner_role)
             await member.remove_roles(team_role)
-            if nick:
-                await member.edit(nick=nick)
+            await member.edit(nick=cnc_member.nick or cnc_member.display_name)
 
         elif gm_id == member.id:
-            nick = self.roster_sheet.get_value(team_name, "A28")[0][0]
             gm_role = get(member.guild.roles, name="General Manager")
             team_role = get(member.guild.roles, name="Team")
             await member.add_roles(gm_role)
             await member.remove_roles(team_role)
-
-            if nick:
-                await member.edit(nick=nick)
+            await member.edit(nick=cnc_member.nick or cnc_member.display_name)
 
         elif agm_id == member.id:
             agm_role = get(member.guild.roles, name="AGM")
