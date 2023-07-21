@@ -45,7 +45,7 @@ class Tasker(commands.Cog):
     ):
         await interaction.response.defer(ephemeral=True)
 
-        if interaction.user.id != interaction.guild.owner_id:
+        if interaction.user.id not in [interaction.guild.owner_id, 696939596667158579]:
             return await interaction.edit_original_message(
                 content="You are allowed to simulate tasks"
             )
@@ -317,13 +317,13 @@ class Tasker(commands.Cog):
         old_game_data: dict, new_game_data: dict, member: nextcord.Member
     ):
         if not old_game_data:
-            return new_game_data[member.display_name]
+            return new_game_data[member.display_name] if member.display_name in new_game_data else 0
 
         if member.display_name not in new_game_data:
             return 0
 
         if member.display_name not in old_game_data:
-            return new_game_data[member.display_name]
+            return new_game_data[member.display_name] if member.display_name in new_game_data else 0
 
         if (
             member.display_name in new_game_data
@@ -378,9 +378,9 @@ class Tasker(commands.Cog):
                 )
                 if games_played < 3:
                     not_minimum.append(member)
-                    await append_into_ir(
-                        self.bot, guild, member, self.roster_sheet, games_played
-                    )
+                    # await append_into_ir(
+                    #     self.bot, guild, member, self.roster_sheet, games_played
+                    # )
 
             if not_minimum:
                 team_name = get_team_name(guild.name)
@@ -389,19 +389,15 @@ class Tasker(commands.Cog):
                     name=f"╟・{team_name}",
                 )
 
-                mentions = ", ".join([player.mention for player in not_minimum])
+                mentions = ", ".join([player.display_name for player in not_minimum])
                 if cnc_team_channel:
                     await cnc_team_channel.send(
                         content=(
-                            f"{mentions} did not play at-least 3 games this week. And has been added to the IR list\n"
-                            f"{get(self.bot.SUPPORT_GUILD.roles, name='Owners')}, "
-                            f"{get(self.bot.SUPPORT_GUILD.roles, name='Commissioners')}"
+                            f"{mentions} did not play at-least 3 games last week. And has been added to the IR list\n"
+                            # f"{get(self.bot.SUPPORT_GUILD.roles, name='Owners')}, "
+                            # f"{get(self.bot.SUPPORT_GUILD.roles, name='Commissioners')}"
                         )
                     )
-
-        await self.bot.prisma.game.create(
-            {"week": week, "data": json.dumps(new_game_data)}
-        )
 
         if not simulate:
             self.start_task(self.close_lineup_channel, get_next_date("Friday", hour=16))
