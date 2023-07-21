@@ -378,6 +378,9 @@ class Tasker(commands.Cog):
                 games_played = self.get_played_games(
                     old_game_data, new_game_data, member
                 )
+
+                print(games_played, member.display_name)
+
                 if games_played < 3:
                     not_minimum.append(member)
                     # await append_into_ir(
@@ -395,7 +398,8 @@ class Tasker(commands.Cog):
                 if cnc_team_channel:
                     await cnc_team_channel.send(
                         content=(
-                            f"{mentions} did not play at-least 3 games last week. And has been added to the IR list\n"
+                            f"{mentions} did not play at-least 3 games last week. And has been added to the IR list\n "
+                            "**[IMPORTANT]:** This is a test message."
                             # f"{get(self.bot.SUPPORT_GUILD.roles, name='Owners')}, "
                             # f"{get(self.bot.SUPPORT_GUILD.roles, name='Commissioners')}"
                         )
