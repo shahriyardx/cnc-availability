@@ -349,11 +349,16 @@ class Tasker(commands.Cog):
 
         week = get_week()
         data = await self.bot.prisma.game.find_first(order=[{"week": "desc"}])
-        new_game_data = get_all_team_data()
+        current_week_data = await self.bot.prisma.game.find_first(where={"week": week})
 
-        await self.bot.prisma.game.create(
-            {"week": week, "data": json.dumps(new_game_data)}
-        )
+        if current_week_data:
+            print("Data for current week found")
+            new_game_data = json.loads(current_week_data.data)
+        else:
+            new_game_data = get_all_team_data()
+            await self.bot.prisma.game.create(
+                {"week": week, "data": json.dumps(new_game_data)}
+            )
 
         if data:
             old_game_data = json.loads(data.data)
@@ -365,7 +370,9 @@ class Tasker(commands.Cog):
                 continue
 
             not_minimum = []
-            for member in guild.members:
+            team = get(guild.roles, name="Team")
+
+            for member in team.members:
                 games_played = self.get_played_games(
                     old_game_data, new_game_data, member
                 )
