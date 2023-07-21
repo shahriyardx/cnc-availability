@@ -365,6 +365,9 @@ class Tasker(commands.Cog):
         else:
             old_game_data = None
 
+        if week == data.week:
+            old_game_data = None
+
         for guild in self.bot.guilds:
             if guild.id in Data.IGNORED_GUILDS:
                 continue
