@@ -1,3 +1,4 @@
+import nextcord
 from nextcord import SlashOption
 from nextcord.application_command import slash_command
 from nextcord.ext import commands
@@ -6,6 +7,7 @@ from nextcord.utils import get
 
 from essentials.models import Data, IBot
 from utils.gspread import DataSheet
+from essentials.data import team_names
 
 
 def get_number(value):
@@ -161,6 +163,58 @@ class UtilityCommands(commands.Cog):
         await interaction.edit_original_message(
             content=f"Playoffs has been {'Enabled' if status else 'Disabled'}"
         )
+
+    @slash_command(description="Reset ir of a player")
+    async def resetir(self, interaction: Interaction, player: nextcord.Member = SlashOption(description="The player to reset ir", required=True)):
+        await interaction.response.defer()
+
+        if interaction.guild_id != 831166408888942623:
+            return await interaction.followup.send(f"This server is not allowed")
+
+        guild_map = {}
+        for guild in self.bot.guilds:
+            guild_map[guild.name] = guild
+
+        member: nextcord.Member = None # noqa
+        team_name: str = None # noqa
+        team_guild: nextcord.Guild = None # noqa
+
+        for role in player.roles:
+            if role.name in team_names:
+                team_name = role.name
+                team_guild = guild_map.get(f"CNC {role.name}")
+                if team_guild:
+                    guild_member = team_guild.get_member(player.id)
+                    if guild_member:
+                        member = guild_member
+                        break
+
+        if not member:
+            return await interaction.followup.send(content="Unable to find the team of this player.")
+
+        sub_role = get(team_guild.roles, name="Availability Submitted")
+        ir_role = get(team_guild.roles, name="IR")
+
+        if sub_role:
+            await member.remove_roles(sub_role)
+        if ir_role:
+            await member.remove_roles(ir_role)
+
+        ir_entry: list = self.roster_sheet.get_values("IR")
+        ir_entry.reverse()
+        for index, entry in enumerate(ir_entry):
+            if entry[1] == player.display_name and entry[0] == team_name:
+                self.roster_sheet.delete_row("IR", len(ir_entry) - (index + 1))
+
+        chat = get(team_guild.text_channels, name="chat")
+        if chat:
+            await chat.send(content=(
+                f"{member.mention} Your Availability has been reset "
+                "please Submit availability again."
+                )
+            )
+
+        await interaction.edit_original_message(content=f"{player.mention}'s IR has been reset succesfully")
 
 
 def setup(bot: IBot):

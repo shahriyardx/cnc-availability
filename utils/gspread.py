@@ -38,6 +38,9 @@ class DataSheet:
     ):
         self.sheet.worksheet(sheet_name).update(position, data)
 
+    def delete_row(self, sheet_name: str, index: int):
+        self.sheet.worksheet(sheet_name).delete_row(index)
+
 
 def next_char(start: str, count: int) -> str:
     next_code = ord(start) + count

@@ -51,6 +51,7 @@ async def append_into_ir(
             "null",
             f"Availability Bot (Total games = {total_games})",
             status,
+            str(user.id),
         ],
     )
 
