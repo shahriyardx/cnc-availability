@@ -203,7 +203,7 @@ class UtilityCommands(commands.Cog):
         ir_entry: list = self.roster_sheet.get_values("IR")
         ir_entry.reverse()
         for index, entry in enumerate(ir_entry):
-            if entry[1] == player.display_name and entry[0] == team_name:
+            if entry[1] == player.display_name:
                 self.roster_sheet.delete_row("IR", len(ir_entry) - index)
 
         chat = get(team_guild.text_channels, name="chat")
