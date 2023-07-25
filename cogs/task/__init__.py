@@ -220,7 +220,7 @@ class Tasker(commands.Cog):
             if len(playable_members) < 13 and not self.bot.playoffs:  # noqa
                 await cnc_team_channel.send(
                     content=(
-                        f"The {get_team_name(guild.name)} need {13 - len(playable_members)} ECU "
+                        f"The {get_team_name(guild.name)} need {11 - len(playable_members)} ECU "
                         f"players this week {OWNERS.mention} {COMISSIONERS.mention}"
                     )
                 )
