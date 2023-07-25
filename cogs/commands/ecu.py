@@ -164,13 +164,11 @@ class ECUCommand(commands.Cog):
             if member:
                 msg = await member.send(
                     content=(
-                        f"Team: {team.name} | Position: {search_position} | Channel ID: {interaction.channel_id}\n"
-                        f"{member.mention}, You have been randomly choosen for the **{team.name}** this week. "
-                        "Every week we assign undrafted players only to teams that do not need roster minimums "
-                        "This is your time to shine to get noticed and get stats, who knows maybe signed by a team.\n"
-                        "**Hit the thumbs up if you are available to play 3 games this week minimum (you are "
-                        "guaranteed to get at least 3). We play Tuesday, Wednesday, "
-                        "and Thursday at 8:30/9:10/9:50 pm EST.**"
+                        f"Team: {team.name} | Position: {search_position} | Channel ID: {interaction.channel_id}\n\n"
+                        f"{member.mention}, You are one of the undrafted players chosen to play "
+                        f"for the {team.name} this week. \n\n"
+                        "- We Play: Tues, Wed, and Thurs at 8:30/9:10/9:50 pm EST."
+                        "- Hit the thumbs up if you can play at least 3 games this week."
                     )
                 )
 
