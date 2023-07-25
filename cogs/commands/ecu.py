@@ -166,9 +166,9 @@ class ECUCommand(commands.Cog):
                     content=(
                         f"Team: {team.name} | Position: {search_position} | Channel ID: {interaction.channel_id}\n\n"
                         f"{member.mention}, You are one of the undrafted players chosen to play "
-                        f"for the {team.name} this week. \n\n"
-                        "- We Play: Tues, Wed, and Thurs at 8:30/9:10/9:50 pm EST."
-                        "- Hit the thumbs up if you can play at least 3 games this week."
+                        f"for the **{team.name}** this week. \n\n"
+                        "- We Play: Tues, Wed, and Thurs at 8:30/9:10/9:50 pm EST.\n"
+                        "- **Hit the thumbs up if you can play at least 3 games this week.**"
                     )
                 )
 
