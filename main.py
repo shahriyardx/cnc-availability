@@ -100,7 +100,8 @@ class Availability(commands.AutoShardedBot):
             except (TypeError, ValueError):
                 continue
 
-            if uid == member.id and team_name == f"CNC {row[0]}":
+            print(uid, member.id, member.guild.name, f"CNC {row[0]}")
+            if uid == member.id and member.guild.name == f"CNC {row[0]}":
                 ecu_role = get(member.guild.roles, name="ECU")
                 if not ecu_role:
                     ecu_role = await member.guild.create_role(name="ECU")
