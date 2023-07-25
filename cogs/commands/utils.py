@@ -7,8 +7,7 @@ from nextcord import Guild, Member, Object
 from nextcord.ext.commands import AutoShardedBot
 from nextcord.utils import get
 
-from utils.data import (inactive_channel, inactive_roles, ir_channel,
-                        support_server_id)
+from utils.data import inactive_channel, inactive_roles, ir_channel, support_server_id
 from utils.gspread import DataSheet
 
 

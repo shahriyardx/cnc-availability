@@ -33,6 +33,7 @@ class Availability(commands.AutoShardedBot):
         self.SUPPORT_GUILD: Optional[nextcord.Guild] = None
         self.roster_sheet = DataSheet("NHL Live Draft Sheet")
         self.draft_sheet = DataSheet("OFFICIAL NHL ROSTER SHEET")
+        self.ecu_sheet = DataSheet("ECU Sheet")
         self.tasks_enabled = True
         self.playoffs = False
 
@@ -91,6 +92,33 @@ class Availability(commands.AutoShardedBot):
         }
 
         all_roster = self.roster_sheet.get_values("Data import")
+        all_ecu = self.ecu_sheet.get_values("ecuData")
+
+        for row in all_ecu[1:]:
+            try:
+                uid = int(row[3])
+            except (TypeError, ValueError):
+                continue
+
+            if uid == member.id and team_name == f"CNC {row[0]}":
+                ecu_role = get(member.guild.roles, name="ECU")
+                if not ecu_role:
+                    ecu_role = await member.guild.create_role(name="ECU")
+
+                await member.add_roles(ecu_role)
+                chat = get(member.guild.text_channels, name="chat")
+                if chat:
+                    owner_role = get(member.guild.roles, name="Owner")
+                    gm_role = get(member.guild.roles, name="General Manager")
+                    agm_role = get(member.guild.roles, name="AGM")
+
+                    mentions = ", ".join([role.mention for role in [owner_role, gm_role, agm_role] if role])
+
+                    await chat.send(content=(
+                        f"{mentions} - {member.mention} has arrived to be your ECU this entire "
+                        f"week and is guaranteed 3 games"
+                    ))
+
         for row in all_roster[1:]:
             try:
                 member_id = int(row[3])
@@ -157,6 +185,7 @@ bot = Availability(command_prefix="a.", intents=intents)
 
 bot.load_extension("cogs.commands")
 bot.load_extension("cogs.commands.admin")
+bot.load_extension("cogs.commands.ecu")
 bot.load_extension("cogs.task")
 bot.load_extension("cogs.utility")
 

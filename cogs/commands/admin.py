@@ -11,7 +11,7 @@ from essentials.data import team_names
 
 
 def get_number(value):
-    print(f'Value: {value}')
+    print(f"Value: {value}")
     try:
         return int(value)
     except (ValueError, TypeError):
@@ -165,7 +165,13 @@ class UtilityCommands(commands.Cog):
         )
 
     @slash_command(description="Reset ir of a player")
-    async def resetir(self, interaction: Interaction, player: nextcord.Member = SlashOption(description="The player to reset ir", required=True)):
+    async def resetir(
+        self,
+        interaction: Interaction,
+        player: nextcord.Member = SlashOption(
+            description="The player to reset ir", required=True
+        ),
+    ):
         await interaction.response.defer()
 
         if interaction.guild_id != 831166408888942623:
@@ -175,9 +181,9 @@ class UtilityCommands(commands.Cog):
         for guild in self.bot.guilds:
             guild_map[guild.name] = guild
 
-        member: nextcord.Member = None # noqa
-        team_name: str = None # noqa
-        team_guild: nextcord.Guild = None # noqa
+        member: nextcord.Member = None  # noqa
+        team_name: str = None  # noqa
+        team_guild: nextcord.Guild = None  # noqa
 
         for role in player.roles:
             if role.name in team_names:
@@ -190,7 +196,9 @@ class UtilityCommands(commands.Cog):
                         break
 
         if not member:
-            return await interaction.followup.send(content="Unable to find the team of this player.")
+            return await interaction.followup.send(
+                content="Unable to find the team of this player."
+            )
 
         sub_role = get(team_guild.roles, name="Availability Submitted")
         ir_role = get(team_guild.roles, name="IR")
@@ -208,13 +216,16 @@ class UtilityCommands(commands.Cog):
 
         chat = get(team_guild.text_channels, name="chat")
         if chat:
-            await chat.send(content=(
-                f"{member.mention} Your Availability has been reset "
-                "please Submit availability again."
+            await chat.send(
+                content=(
+                    f"{member.mention} Your Availability has been reset "
+                    "please Submit availability again."
                 )
             )
 
-        await interaction.edit_original_message(content=f"{player.mention}'s IR has been reset succesfully")
+        await interaction.edit_original_message(
+            content=f"{player.mention}'s IR has been reset succesfully"
+        )
 
 
 def setup(bot: IBot):

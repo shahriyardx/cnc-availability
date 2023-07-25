@@ -199,7 +199,7 @@ class Tasker(commands.Cog):
                     await append_into_ir(self.bot, guild, member, self.roster_sheet, 0)
                 # Else already got into ir
 
-            TEAM_ROLE = get(guild.roles, name=Data.PLAYERS_ROLE)
+            TEAM_ROLE = get(guild.roles, name="Team")
             for member in TEAM_ROLE.members:
                 has_ir = get(member.roles, name="IR")
                 if not has_ir:
@@ -316,10 +316,15 @@ class Tasker(commands.Cog):
     def get_played_games(
         old_game_data: dict, new_game_data: dict, member: nextcord.Member
     ):
-
         if old_game_data and new_game_data:
-            if member.display_name in old_game_data and member.display_name in new_game_data:
-                return new_game_data[member.display_name] - old_game_data[member.display_name]
+            if (
+                member.display_name in old_game_data
+                and member.display_name in new_game_data
+            ):
+                return (
+                    new_game_data[member.display_name]
+                    - old_game_data[member.display_name]
+                )
 
             elif member.display_name in new_game_data:
                 return new_game_data[member.display_name]
@@ -341,7 +346,7 @@ class Tasker(commands.Cog):
 
             return
 
-        if self.bot.playoffs: # noqa
+        if self.bot.playoffs:  # noqa
             return self.start_task(
                 self.open_availability_task, get_next_date("Friday", hour=17)
             )
