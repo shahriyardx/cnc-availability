@@ -189,7 +189,7 @@ class ECUCommand(commands.Cog):
         if interaction.guild_id not in [1055597639028183080, 831166408888942623]:
             return
 
-        await interaction.response.defer(ephemeral=True)
+        await interaction.response.defer()
 
         try:
             sheet_data = self.roster.get_values(team.name)
