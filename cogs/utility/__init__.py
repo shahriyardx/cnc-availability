@@ -186,39 +186,39 @@ class UilityCommands(commands.Cog):
         mention = self.bot.get_command_mention(interaction.guild.id, command_name)
         await interaction.edit_original_message(content=f"{mention} `{mention}`")
 
-    @slash_command(name="kick", description="Kick a member")
-    async def kick(
-        self,
-        interaction: Interaction,
-        member: Member = SlashOption(description="the member to kick", required=True),
-        reason: str = SlashOption(
-            description="kick reason", required=False, default="Kick by {user}"
-        ),
-    ):
-        await interaction.response.defer()
-
-        is_guild_owner = interaction.user.id == interaction.guild.owner_id
-        is_owner = get(interaction.user.roles, name="Owner")
-        is_gm = get(interaction.user.roles, name="General Manager")
-
-        if is_guild_owner or is_owner or is_gm:
-            try:
-                await member.kick(
-                    reason=reason.replace(
-                        "{user}", f"{interaction.user} ({interaction.user.id})"
-                    )
-                )
-                return await interaction.edit_original_message(
-                    content=f"{member} has been kicked"
-                )
-            except:
-                return await interaction.edit_original_message(
-                    content=f"Failed to kick {member}"
-                )
-
-        return await interaction.edit_original_message(
-            content="You don't have permission to kick anyone"
-        )
+    # @slash_command(name="kick", description="Kick a member")
+    # async def kick(
+    #     self,
+    #     interaction: Interaction,
+    #     member: Member = SlashOption(description="the member to kick", required=True),
+    #     reason: str = SlashOption(
+    #         description="kick reason", required=False, default="Kick by {user}"
+    #     ),
+    # ):
+    #     await interaction.response.defer()
+    #
+    #     is_guild_owner = interaction.user.id == interaction.guild.owner_id
+    #     is_owner = get(interaction.user.roles, name="Owner")
+    #     is_gm = get(interaction.user.roles, name="General Manager")
+    #
+    #     if is_guild_owner or is_owner or is_gm:
+    #         try:
+    #             await member.kick(
+    #                 reason=reason.replace(
+    #                     "{user}", f"{interaction.user} ({interaction.user.id})"
+    #                 )
+    #             )
+    #             return await interaction.edit_original_message(
+    #                 content=f"{member} has been kicked"
+    #             )
+    #         except:
+    #             return await interaction.edit_original_message(
+    #                 content=f"Failed to kick {member}"
+    #             )
+    #
+    #     return await interaction.edit_original_message(
+    #         content="You don't have permission to kick anyone"
+    #     )
 
 
 def setup(bot: IBot):

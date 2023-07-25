@@ -510,13 +510,20 @@ class TaskerCommands(commands.Cog):
                 where={"id": lineup_id.strip()}, data={"message_id_team": message.id}
             )
 
+        print(SUPPORT_GUILD, old_lineup.message_id_cnc)
+
         if SUPPORT_GUILD and old_lineup.message_id_cnc:
             TEAM_LOG_CHANNEL = get(
                 SUPPORT_GUILD.text_channels,
                 name=f"╟・{team_name}",
             )
 
+            if not TEAM_LOG_CHANNEL:
+                print(f"Team channle not found ╟・{team_name}")
+
             if TEAM_LOG_CHANNEL:
+                print(f"CNC Message id: {int(old_lineup.message_id_cnc)}")
+
                 try:
                     old_message = await TEAM_LOG_CHANNEL.fetch_message(
                         int(old_lineup.message_id_cnc)
