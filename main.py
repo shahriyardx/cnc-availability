@@ -70,30 +70,16 @@ class Availability(commands.AutoShardedBot):
 
         team_role = get(member.guild.roles, name="Team")
         if not team_role:
+            print("No team")
             return
 
         cnc_member = self.SUPPORT_GUILD.get_member(member.id)
         if not cnc_member:
+            print("No member of CNC")
             return
 
-        team_name = member.guild.name.split(" ", maxsplit=1)[1].strip()
-        right_team = get(cnc_member.roles, name=team_name)
-
-        if not right_team:
-            return
-
-        role_names = {
-            "LW": "Left Wing",
-            "RW": "Right Wing",
-            "LD": "Left Defense",
-            "RD": "Right Defense",
-            "G": "Goalie",
-            "C": "Center",
-        }
-
-        all_roster = self.roster_sheet.get_values("Data import")
         all_ecu = self.ecu_sheet.get_values("ecuData")
-
+        print(all_ecu)
         for row in all_ecu[1:]:
             try:
                 uid = int(row[3])
@@ -118,6 +104,23 @@ class Availability(commands.AutoShardedBot):
                         f"{mentions} - {member.mention} has arrived to be your ECU this entire "
                         f"week and is guaranteed 3 games"
                     ))
+
+        team_name = member.guild.name.split(" ", maxsplit=1)[1].strip()
+        right_team = get(cnc_member.roles, name=team_name)
+
+        if not right_team:
+            return
+
+        role_names = {
+            "LW": "Left Wing",
+            "RW": "Right Wing",
+            "LD": "Left Defense",
+            "RD": "Right Defense",
+            "G": "Goalie",
+            "C": "Center",
+        }
+
+        all_roster = self.roster_sheet.get_values("Data import")
 
         for row in all_roster[1:]:
             try:
