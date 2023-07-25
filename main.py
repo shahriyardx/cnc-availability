@@ -104,7 +104,6 @@ class Availability(commands.AutoShardedBot):
                 ecu_role = get(member.guild.roles, name="ECU")
                 if not ecu_role:
                     ecu_role = await member.guild.create_role(name="ECU")
-
                 await member.add_roles(ecu_role)
                 chat = get(member.guild.text_channels, name="chat")
                 if chat:

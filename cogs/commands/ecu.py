@@ -133,7 +133,7 @@ class ECUCommand(commands.Cog):
         if cnc_channel:
             await cnc_channel.send(content=f"$add {author.mention}")
 
-        await author.send(content=f"Welcome to **{team}** {team_invites.get(team)})")
+        await author.send(content=f"Welcome to **{team}** {team_invites.get(team)}")
         self.ecu.append(
             "ecuData",
             [
@@ -157,8 +157,11 @@ class ECUCommand(commands.Cog):
         print(nicks)
         for nick in nicks:
             member = get(interaction.guild.members, nick=nick)
+            if not member:
+                print(f"Unable to find member with nick {nick}")
+                continue
+
             if member:
-                pass
                 msg = await member.send(
                     content=(
                         f"Team: {team.name} | Position: {search_position} | Channel ID: {interaction.channel_id}\n"
