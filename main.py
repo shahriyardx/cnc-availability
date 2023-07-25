@@ -64,6 +64,16 @@ class Availability(commands.AutoShardedBot):
         #     if row[0] in nick_dict:
         #         self.roster_sheet.update("Data import", f"D{index + 1}", str(nick_dict[row[0]]))
 
+        for guild in self.guilds:
+            ecu_role = get(guild.roles, name="ECU")
+            decu_role = get(guild.roles, name="Daily ECU")
+
+            if not ecu_role:
+                await guild.create_role(name="ECU")
+
+            if not decu_role:
+                await guild.create_role(name="Daily ECU")
+
     async def on_member_join(self, member: nextcord.Member):
         if member.guild.id in Data.IGNORED_GUILDS:
             return
@@ -89,9 +99,11 @@ class Availability(commands.AutoShardedBot):
             print(uid, member.id, member.guild.name, f"CNC {row[0]}")
             if uid == member.id and member.guild.name == f"CNC {row[0]}":
                 ecu_role = get(member.guild.roles, name="ECU")
+                avail_role = get(member.guild.roles, name="Availability Submitted")
                 if not ecu_role:
                     ecu_role = await member.guild.create_role(name="ECU")
-                await member.add_roles(ecu_role)
+                await member.add_roles(ecu_role, avail_role)
+
                 chat = get(member.guild.text_channels, name="chat")
                 if chat:
                     owner_role = get(member.guild.roles, name="Owner")

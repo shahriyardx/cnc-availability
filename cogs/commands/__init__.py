@@ -199,6 +199,7 @@ class TaskerCommands(commands.Cog):
 
         players = [left_wing, left_defense, right_wing, right_defense, goalie, center]
         team_role = get(interaction.guild.roles, name=Data.PLAYERS_ROLE)
+        ecu_role = get(interaction.guild.roles, name="ECU")
         owner_role = get(interaction.guild.roles, name="Owner")
         gm_role = get(interaction.guild.roles, name="General Manager")
         ir_role = get(interaction.guild.roles, name="IR")
@@ -213,6 +214,7 @@ class TaskerCommands(commands.Cog):
                 team_role in player.roles
                 or owner_role in player.roles
                 or gm_role in player.roles
+                or ecu_role in player.roles
             ):
                 continue
             else:
@@ -381,6 +383,7 @@ class TaskerCommands(commands.Cog):
         ]
         team_role = get(interaction.guild.roles, name=Data.PLAYERS_ROLE)
         owner_role = get(interaction.guild.roles, name="Owner")
+        ecu_role = get(interaction.guild.roles, name="ECU")
         gm_role = get(interaction.guild.roles, name="General Manager")
         ir_role = get(interaction.guild.roles, name="IR")
 
@@ -394,6 +397,7 @@ class TaskerCommands(commands.Cog):
                 team_role in player.roles
                 or owner_role in player.roles
                 or gm_role in player.roles
+                or ecu_role in player.roles
             ):
                 continue
             else:
