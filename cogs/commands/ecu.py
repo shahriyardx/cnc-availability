@@ -186,6 +186,9 @@ class ECUCommand(commands.Cog):
             description="Select the position", required=False
         ),
     ):
+        if interaction.channel_id not in [1055597639028183080, 831166408888942623]:
+            return
+
         await interaction.response.defer(ephemeral=True)
 
         try:
