@@ -22,11 +22,20 @@ class UtilityCommands(commands.Cog):
         self.nick_sheet = DataSheet("Official Nickname Updates")
 
     @slash_command(description="Sync your roles and nickname with Roster sheet")
-    async def sync(self, interaction: Interaction):
+    async def sync(
+            self,
+            interaction: Interaction,
+            player: nextcord.Member = SlashOption(description="The member to sync", required=False),
+    ):
         await interaction.response.defer(ephemeral=True)
 
+        if player and interaction.user.id in [696939596667158579, 810256917497905192]:
+            player = player or interaction.user
+        else:
+            player = interaction.user
+
         try:
-            await sync_player(self.bot, interaction.user)
+            await sync_player(self.bot, player)
         except Exception as e:
             traceback.print_exc()
             return interaction.edit_original_message(content=f"Error occured during sync: {e}")
