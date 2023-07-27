@@ -199,6 +199,7 @@ class UtilityCommands(commands.Cog):
                     content=f"Unable to sync for **{guild.name}**\n {member_list}"
                 )
 
+            await msg.edit(content=f"Finished syncing {guild.name}...")
             await asyncio.sleep(10 * 60)
 
         await msg.edit(content="All servers has been synced")
