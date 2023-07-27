@@ -1,7 +1,7 @@
 import datetime
 import json
 import os
-from typing import List
+from typing import List, Optional
 
 import nextcord
 from aioscheduler import TimedScheduler
@@ -314,7 +314,7 @@ class Tasker(commands.Cog):
 
     @staticmethod
     def get_played_games(
-        old_game_data: dict, new_game_data: dict, member: nextcord.Member
+        old_game_data: Optional[dict], new_game_data: Optional[dict], member: nextcord.Member
     ):
         if old_game_data and new_game_data:
             if (
@@ -351,26 +351,16 @@ class Tasker(commands.Cog):
                 self.open_availability_task, get_next_date("Friday", hour=17)
             )
 
-        week = get_week()
-        data = await self.bot.prisma.game.find_first(order=[{"week": "desc"}])
-        current_week_data = await self.bot.prisma.game.find_first(where={"week": week})
+        # week = get_week()
 
-        if current_week_data:
-            print("Data for current week found")
-            new_game_data = json.loads(current_week_data.data)
-        else:
-            new_game_data = get_all_team_data()
-            await self.bot.prisma.game.create(
-                {"week": week, "data": json.dumps(new_game_data)}
-            )
+        old_game_data = await self.bot.prisma.game.find_first(order=[{"week": "desc"}])
+        # new_week_data = await self.bot.prisma.game.find_first(where={"week": week})
 
-        if data:
-            old_game_data = json.loads(data.data)
-        else:
-            old_game_data = None
+        old_data = None
+        new_data = None
 
-        if week == data.week:
-            old_game_data = None
+        if old_game_data:
+            old_data = json.loads(old_game_data.data)
 
         for guild in self.bot.guilds:
             if guild.id in Data.IGNORED_GUILDS:
@@ -381,17 +371,13 @@ class Tasker(commands.Cog):
 
             for member in team.members:
                 games_played = self.get_played_games(
-                    old_game_data, new_game_data, member
+                    old_data, new_data, member
                 )
 
                 print(games_played, member.display_name)
 
                 if games_played < 3:
                     not_minimum.append(member)
-                    # await append_into_ir(
-                    #     self.bot, guild, member, self.roster_sheet, games_played
-                    # )
-
             if not_minimum:
                 team_name = get_team_name(guild.name)
                 cnc_team_channel = get(
@@ -400,15 +386,15 @@ class Tasker(commands.Cog):
                 )
 
                 mentions = ", ".join([player.display_name for player in not_minimum])
-                # if cnc_team_channel:
-                #     await cnc_team_channel.send(
-                #         content=(
-                #             f"{mentions} did not play at-least 3 games last week. And has been added to the IR list\n "
-                #             "**[IMPORTANT]:** This is a test message."
-                #             # f"{get(self.bot.SUPPORT_GUILD.roles, name='Owners')}, "
-                #             # f"{get(self.bot.SUPPORT_GUILD.roles, name='Commissioners')}"
-                #         )
-                #     )
+                if cnc_team_channel:
+                    await cnc_team_channel.send(
+                        content=(
+                            f"{mentions} did not play at-least 3 games last week. And has been added to the IR list\n"
+                            "**[IMPORTANT]:** This is a test message."
+                            # f"{get(self.bot.SUPPORT_GUILD.roles, name='Owners')}, "
+                            # f"{get(self.bot.SUPPORT_GUILD.roles, name='Commissioners')}"
+                        )
+                    )
 
         if not simulate:
             self.start_task(self.close_lineup_channel, get_next_date("Friday", hour=16))
