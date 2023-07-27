@@ -171,27 +171,29 @@ class UtilityCommands(commands.Cog):
             return
 
         await interaction.response.defer()
-        await interaction.edit_original_message(content="Sync for all member is now processing...")
-        await asyncio.sleep(2)
+        await interaction.edit_original_message(content="Sync process has been started")
+        msg = await interaction.guild.get_channel(interaction.channel_id).send(content="Sync all is about to start..")
 
         for guild in self.bot.guilds:
             if guild.id in Data.IGNORED_GUILDS:
                 continue
 
-            await interaction.edit_original_message(content=f"Syncing {guild.name}...")
             unable_to_sync = []
+            await msg.edit(content=f"Syncing {guild.name}...")
             for member in guild.members:
                 try:
                     await sync_player(self.bot, member)
                     await asyncio.sleep(10)
-                except Exception as e:
-                    unable_to_sync.append([member, str(e)])
+                except: # noqa
+                    exc = traceback.format_exc()
+                    print(exc)
+                    unable_to_sync.append([member, exc])
                     continue
 
             if unable_to_sync:
                 member_list = ""
                 for us in unable_to_sync:
-                    member_list += f"- {us[0].display_name} {us[0].id} - {us[1]}"
+                    member_list += f"- {us[0].display_name} {us[0].id} \n```sh\n{us[1]}\n```"
 
                 await interaction.guild.get_channel(interaction.channel_id).send(
                     content=f"Unable to sync for **{guild.name}**\n {member_list}"
@@ -199,7 +201,7 @@ class UtilityCommands(commands.Cog):
 
             await asyncio.sleep(10 * 60)
 
-        await interaction.edit_original_message(content="All servers has been synced")
+        await msg.edit(content="All servers has been synced")
 
 
 def setup(bot: IBot):
