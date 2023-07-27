@@ -1,3 +1,5 @@
+import traceback
+import asyncio
 import nextcord
 from nextcord import SlashOption
 from nextcord.application_command import slash_command
@@ -8,14 +10,7 @@ from nextcord.utils import get
 from essentials.models import Data, IBot
 from utils.gspread import DataSheet
 from essentials.data import team_names
-
-
-def get_number(value):
-    print(f"Value: {value}")
-    try:
-        return int(value)
-    except (ValueError, TypeError):
-        return None
+from .utils import sync_player
 
 
 class UtilityCommands(commands.Cog):
@@ -24,88 +19,20 @@ class UtilityCommands(commands.Cog):
         self.prisma = bot.prisma
         self.roster_sheet = DataSheet("OFFICIAL NHL ROSTER SHEET")
         self.draft_sheet = DataSheet("NHL Live Draft Sheet")
+        self.nick_sheet = DataSheet("Official Nickname Updates")
 
     @slash_command(description="Sync your roles and nickname with Roster sheet")
     async def sync(self, interaction: Interaction):
         await interaction.response.defer(ephemeral=True)
 
-        member = interaction.user
-        if member.guild.id in Data.IGNORED_GUILDS:
-            return
-        cnc_member = self.bot.SUPPORT_GUILD.get_member(member.id)
-
-        if not cnc_member:
-            return
-
-        team_name = member.guild.name.split(" ", maxsplit=1)[1].strip()
-        print(f"'{team_name}'")
-
-        right_team = get(cnc_member.roles, name=team_name)
-
-        if not right_team:
-            return await interaction.edit_original_message(
-                content="Unable to sync, You do not belong to this team"
-            )
-
-        role_names = {
-            "LW": "Left Wing",
-            "RW": "Right Wing",
-            "LD": "Left Defense",
-            "RD": "Right Defense",
-            "G": "Goalie",
-            "C": "Center",
-        }
-
-        all_roster = self.draft_sheet.get_values("Data import")
-
-        for row in all_roster[1:]:
-            try:
-                member_id = int(row[3])
-            except (ValueError, TypeError):
-                continue
-
-            if member_id == member.id:
-                team_role = get(member.guild.roles, name="Team")
-                await member.add_roles(team_role)
-                await member.edit(nick=cnc_member.nick or cnc_member.display_name)
-
-                primary_position = get(member.guild.roles, name=role_names.get(row[1]))
-                secondary_position = get(
-                    member.guild.roles, name=role_names.get(row[2])
-                )
-
-                if primary_position:
-                    await member.add_roles(primary_position)
-
-                if secondary_position:
-                    await member.add_roles(secondary_position)
-
-        owner_id = get_number(self.roster_sheet.get_value(team_name, "B27")[0][0])
-        gm_id = get_number(self.roster_sheet.get_value(team_name, "B28")[0][0])
-        agm_id = get_number(self.roster_sheet.get_value(team_name, "B29")[0][0])
-
-        print(owner_id, gm_id, agm_id, member.id)
-
-        if owner_id == member.id:
-            owner_role = get(member.guild.roles, name="Owner")
-            team_role = get(member.guild.roles, name="Team")
-            await member.add_roles(owner_role)
-            await member.remove_roles(team_role)
-            await member.edit(nick=cnc_member.nick or cnc_member.display_name)
-
-        elif gm_id == member.id:
-            gm_role = get(member.guild.roles, name="General Manager")
-            team_role = get(member.guild.roles, name="Team")
-            await member.add_roles(gm_role)
-            await member.remove_roles(team_role)
-            await member.edit(nick=cnc_member.nick or cnc_member.display_name)
-
-        elif agm_id == member.id:
-            agm_role = get(member.guild.roles, name="AGM")
-            await member.add_roles(agm_role)
+        try:
+            await sync_player(self.bot, interaction.user)
+        except Exception as e:
+            traceback.print_exc()
+            return interaction.edit_original_message(content=f"Error occured during sync: {e}")
 
         return await interaction.edit_original_message(
-            content="Your roles has been synced"
+            content="Sync finished"
         )
 
     @slash_command(description="Enable or disable tasks")
@@ -187,7 +114,6 @@ class UtilityCommands(commands.Cog):
 
         for role in player.roles:
             if role.name in team_names:
-                team_name = role.name
                 team_guild = guild_map.get(f"CNC {role.name}")
                 if team_guild:
                     guild_member = team_guild.get_member(player.id)
@@ -226,6 +152,42 @@ class UtilityCommands(commands.Cog):
         await interaction.edit_original_message(
             content=f"{player.mention}'s IR has been reset succesfully"
         )
+
+    @slash_command(description="Sync nicknames from sheet")
+    async def syncall(
+        self,
+        interaction: Interaction,
+    ):
+        await interaction.response.defer()
+        await interaction.edit_original_message(content="Sync for all member is now processing...")
+        await asyncio.sleep(2)
+
+        for guild in self.bot.guilds:
+            if guild.id in Data.IGNORED_GUILDS:
+                continue
+
+            await interaction.edit_original_message(content=f"Syncing {guild.name}...")
+            unable_to_sync = []
+            for member in guild.members:
+                try:
+                    await sync_player(self.bot, member)
+                    await asyncio.sleep(10)
+                except Exception as e:
+                    unable_to_sync.append([member, str(e)])
+                    continue
+
+            if unable_to_sync:
+                member_list = ""
+                for us in unable_to_sync:
+                    member_list += f"- {us[0].display_name} {us[0].id} - {us[1]}"
+
+                await interaction.guild.get_channel(interaction.channel_id).send(
+                    content=f"Unable to sync for **{guild.name}**\n {member_list}"
+                )
+
+            await asyncio.sleep(10 * 60)
+
+        await interaction.edit_original_message(content="All servers has been synced")
 
 
 def setup(bot: IBot):

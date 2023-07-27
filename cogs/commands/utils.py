@@ -3,12 +3,87 @@ from datetime import datetime
 from typing import Optional
 
 import pytz
+import nextcord
 from nextcord import Guild, Member, Object
 from nextcord.ext.commands import AutoShardedBot
 from nextcord.utils import get
+from essentials.models import IBot
 
 from utils.data import inactive_channel, inactive_roles, ir_channel, support_server_id
 from utils.gspread import DataSheet
+
+
+roster_sheet = DataSheet("OFFICIAL NHL ROSTER SHEET")
+draft_sheet = DataSheet("NHL Live Draft Sheet")
+nick_sheet = DataSheet("Official Nickname Updates")
+
+
+def get_number(value):
+    try:
+        return int(value)
+    except (ValueError, TypeError):
+        return None
+
+
+position_roles = {
+    "LW": "Left Wing",
+    "RW": "Right Wing",
+    "LD": "Left Defense",
+    "RD": "Right Defense",
+    "G": "Goalie",
+    "C": "Center",
+}
+
+
+async def add_roles(member: nextcord.Member, roles: list):
+    roles = [role for role in roles if role]
+    await member.add_roles(*roles)
+
+
+async def sync_player(bot: IBot, member: nextcord.Member):
+    team_name = member.guild.name.split(" ", maxsplit=1)[1].strip()
+    cnc_member = bot.SUPPORT_GUILD.get_member(member.id)
+    if not bot.SUPPORT_GUILD.get_member(member.id):
+        return
+
+    right_team = get(cnc_member.roles, name=team_name)
+    if not right_team:
+        return
+
+    # Checking if team member
+    all_roster = draft_sheet.get_values("Data import")
+    for row in all_roster[1:]:
+        if get_number(row[3]) == member.id:
+            roles_to_add = [
+                get(member.guild.roles, name="Team"),
+                get(member.guild.roles, name=position_roles.get(row[1])),
+                get(member.guild.roles, name=position_roles.get(row[2]))
+            ]
+            await add_roles(member, roles_to_add)
+
+    # checking owner gm and agm
+    owner_id = get_number(roster_sheet.get_value(team_name, "B27")[0][0])
+    gm_id = get_number(roster_sheet.get_value(team_name, "B28")[0][0])
+    agm_id = get_number(roster_sheet.get_value(team_name, "B29")[0][0])
+
+    if owner_id == member.id:
+        await member.add_roles(get(member.guild.roles, name="Owner"))
+        await member.remove_roles(get(member.guild.roles, name="Team"))
+
+    elif gm_id == member.id:
+        await member.add_roles(get(member.guild.roles, name="General Manager"))
+        await member.remove_roles(get(member.guild.roles, name="Team"))
+        await member.edit(nick=cnc_member.nick or cnc_member.display_name)
+
+    elif agm_id == member.id:
+        await member.add_roles(get(member.guild.roles, name="AGM"))
+
+    # importing nick
+    nick_data = nick_sheet.get_values("data")
+    for row in nick_data[1:]:
+        if get_number(row[0]) == member.id:
+            await member.edit(nick=row[1])
+            await cnc_member.edit(nick=row[1])
 
 
 @dataclass
