@@ -11,7 +11,7 @@ from essentials.models import Data, IBot
 from utils.gspread import DataSheet
 from essentials.data import team_names
 from .utils import sync_player
-
+import datetime
 
 class UtilityCommands(commands.Cog):
     def __init__(self, bot: IBot) -> None:
@@ -199,7 +199,7 @@ class UtilityCommands(commands.Cog):
                     content=f"Unable to sync for **{guild.name}**\n {member_list}"
                 )
 
-            await msg.edit(content=f"Finished syncing {guild.name}...")
+            await msg.edit(content=f"Finished syncing {guild.name}. Next server sync in 10 minutes")
             await asyncio.sleep(10 * 60)
 
         await msg.edit(content="All servers has been synced")
