@@ -182,6 +182,7 @@ class UtilityCommands(commands.Cog):
             await msg.edit(content=f"Syncing {guild.name}...")
             for member in guild.members:
                 try:
+                    print(f"Syncing {member.display_name}")
                     await sync_player(self.bot, member)
                     await asyncio.sleep(10)
                 except: # noqa
