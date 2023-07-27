@@ -167,6 +167,9 @@ class UtilityCommands(commands.Cog):
         self,
         interaction: Interaction,
     ):
+        if interaction.user.id not in [696939596667158579, 810256917497905192]:
+            return
+
         await interaction.response.defer()
         await interaction.edit_original_message(content="Sync for all member is now processing...")
         await asyncio.sleep(2)

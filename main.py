@@ -10,6 +10,7 @@ from nextcord.utils import get
 from essentials.models import Data
 from prisma import Prisma
 from utils.gspread import DataSheet
+from cogs.commands.utils import sync_player
 
 load_dotenv(".env")
 
@@ -78,109 +79,7 @@ class Availability(commands.AutoShardedBot):
         if member.guild.id in Data.IGNORED_GUILDS:
             return
 
-        team_role = get(member.guild.roles, name="Team")
-        if not team_role:
-            print("No team")
-            return
-
-        cnc_member = self.SUPPORT_GUILD.get_member(member.id)
-        if not cnc_member:
-            print("No member of CNC")
-            return
-
-        all_ecu = self.ecu_sheet.get_values("ecuData")
-        print(all_ecu)
-        for row in all_ecu[1:]:
-            try:
-                uid = int(row[3])
-            except (TypeError, ValueError):
-                continue
-
-            print(uid, member.id, member.guild.name, f"CNC {row[0]}")
-            if uid == member.id and member.guild.name == f"CNC {row[0]}":
-                ecu_role = get(member.guild.roles, name="ECU")
-                avail_role = get(member.guild.roles, name="Availability Submitted")
-                if not ecu_role:
-                    ecu_role = await member.guild.create_role(name="ECU")
-                await member.add_roles(ecu_role, avail_role)
-
-                chat = get(member.guild.text_channels, name="chat")
-                if chat:
-                    owner_role = get(member.guild.roles, name="Owner")
-                    gm_role = get(member.guild.roles, name="General Manager")
-                    agm_role = get(member.guild.roles, name="AGM")
-
-                    mentions = ", ".join([role.mention for role in [owner_role, gm_role, agm_role] if role])
-
-                    await chat.send(content=(
-                        f"{mentions} - {member.mention} has arrived to be your ECU this entire "
-                        f"week and is guaranteed 3 games"
-                    ))
-
-        team_name = member.guild.name.split(" ", maxsplit=1)[1].strip()
-        right_team = get(cnc_member.roles, name=team_name)
-
-        if not right_team:
-            return
-
-        role_names = {
-            "LW": "Left Wing",
-            "RW": "Right Wing",
-            "LD": "Left Defense",
-            "RD": "Right Defense",
-            "G": "Goalie",
-            "C": "Center",
-        }
-
-        all_roster = self.roster_sheet.get_values("Data import")
-
-        for row in all_roster[1:]:
-            try:
-                member_id = int(row[3])
-            except (ValueError, TypeError):
-                continue
-
-            if member_id == member.id:
-                await member.add_roles(team_role)
-                await member.edit(nick=row[0])
-
-                primary_position = get(member.guild.roles, name=role_names.get(row[1]))
-                secondary_position = get(member.guild.roles, name=role_names.get(row[2]))
-
-                if primary_position:
-                    await member.add_roles(primary_position)
-
-                if secondary_position:
-                    await member.add_roles(secondary_position)
-
-                break
-
-        owner_id = get_number(self.draft_sheet.get_value(team_name, "B27")[0][0])
-        gm_id = get_number(self.draft_sheet.get_value(team_name, "B28")[0][0])
-        agm_id = get_number(self.draft_sheet.get_value(team_name, "B29")[0][0])
-
-        if owner_id == member.id:
-            nick = self.draft_sheet.get_value(team_name, "A27")[0][0]
-            owner_role = get(member.guild.roles, name="Owner")
-            team_role = get(member.guild.roles, name="Team")
-            await member.add_roles(owner_role)
-            await member.remove_roles(team_role)
-            if nick:
-                await member.edit(nick=nick)
-
-        if gm_id == member.id:
-            nick = self.draft_sheet.get_value(team_name, "A28")[0][0]
-            gm_role = get(member.guild.roles, name="General Manager")
-            team_role = get(member.guild.roles, name="Team")
-            await member.add_roles(gm_role)
-            await member.remove_roles(team_role)
-
-            if nick:
-                await member.edit(nick=nick)
-
-        if agm_id == member.id:
-            agm_role = get(member.guild.roles, name="AGM")
-            await member.add_roles(agm_role)
+        await sync_player(self, member) # noqa
 
     def get_command_mention(self, command_name) -> str:
         cmd = None
