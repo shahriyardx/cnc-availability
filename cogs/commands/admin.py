@@ -181,6 +181,9 @@ class UtilityCommands(commands.Cog):
             unable_to_sync = []
             await msg.edit(content=f"Syncing {guild.name}...")
             for member in guild.members:
+                if member.bot:
+                    continue
+
                 try:
                     print(f"Syncing {member.display_name}")
                     await sync_player(self.bot, member)
@@ -201,7 +204,7 @@ class UtilityCommands(commands.Cog):
                 )
 
             await msg.edit(content=f"Finished syncing {guild.name}. Next server sync in 10 minutes")
-            await asyncio.sleep(10 * 60)
+            await asyncio.sleep(3 * 60)
 
         await msg.edit(content="All servers has been synced")
 
