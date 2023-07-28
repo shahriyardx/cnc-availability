@@ -1,3 +1,4 @@
+import traceback
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
@@ -81,8 +82,17 @@ async def sync_player(bot: IBot, member: nextcord.Member):
     nick_data = nick_sheet.get_values("data")
     for row in nick_data[1:]:
         if get_number(row[0]) == member.id:
-            await member.edit(nick=row[1])
-            await cnc_member.edit(nick=row[1])
+            try:
+                await cnc_member.edit(nick=row[1])
+            except Exception as e:
+                traceback.print_exc()
+                print(e)
+
+            try:
+                await member.edit(nick=row[1])
+            except Exception as e:
+                traceback.print_exc()
+                print(e)
 
 
 @dataclass

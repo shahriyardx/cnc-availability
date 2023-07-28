@@ -216,6 +216,46 @@ class UtilityCommands(commands.Cog):
 
         await msg.edit(content="All servers has been synced")
 
+    @slash_command(description="sync nickname in official cnc discord")
+    async def syncnick(
+        self,
+        interaction: Interaction,
+        member: nextcord.Member = SlashOption(description="member to sync nick" ,required=False)
+    ):
+        await interaction.response.defer()
+
+        if interaction.user.id not in [696939596667158579, 810256917497905192]:
+            return await interaction.followup.send(
+                content="You don't have permission to run this command"
+            )
+
+        await interaction.edit_original_message(content="Nickname sync started")
+
+        nick_data = self.nick_sheet.get_values("data")
+        nicks = {}
+
+        for row in nick_data[1:]:
+            try:
+                uid = int(row[0].strip())
+            except ValueError:
+                continue
+
+            member = interaction.guild.get_member(uid)
+            if member:
+                nicks[uid] = row[1].strip()
+
+        all_members = [member for member in interaction.guild.members if not member.bot]
+        if member:
+            all_members = [member]
+
+        for member in all_members:
+            if member.id in nicks:
+                await member.edit(nick=nicks[member.id])
+                if len(all_members) > 1:
+                    await asyncio.sleep(5)
+
+        await interaction.guild.get_channel(interaction.channel_id).send(content="Nick sync has been finished")
+
 
 def setup(bot: IBot):
     bot.add_cog(UtilityCommands(bot))
