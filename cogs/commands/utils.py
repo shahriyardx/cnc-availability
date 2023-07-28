@@ -83,14 +83,17 @@ async def sync_player(bot: IBot, member: nextcord.Member):
     for row in nick_data[1:]:
         if get_number(row[0]) == member.id:
             try:
+                print(cnc_member)
                 await cnc_member.edit(nick=row[1])
             except Exception as e:
                 traceback.print_exc()
-                print(e)
+                print(f"Failed in CNC Discord")
 
             try:
+                print(member)
                 await member.edit(nick=row[1])
             except Exception as e:
+                print(f"Failed in team discord")
                 traceback.print_exc()
                 print(e)
 
