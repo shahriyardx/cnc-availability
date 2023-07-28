@@ -220,7 +220,7 @@ class UtilityCommands(commands.Cog):
     async def syncnick(
         self,
         interaction: Interaction,
-        member: nextcord.Member = SlashOption(description="member to sync nick", required=False)
+        target: nextcord.Member = SlashOption(description="member to sync nick", required=False)
     ):
         await interaction.response.defer()
 
@@ -240,14 +240,13 @@ class UtilityCommands(commands.Cog):
             except ValueError:
                 continue
 
-            member = interaction.guild.get_member(uid)
-            if member:
+            is_member = interaction.guild.get_member(uid)
+            if is_member:
                 nicks[uid] = row[1].strip()
-        print(nicks)
 
         all_members = [member for member in interaction.guild.members if not member.bot]
-        if member:
-            all_members = [member]
+        if target:
+            all_members = [target]
 
         print(all_members)
 
