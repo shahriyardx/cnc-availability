@@ -351,16 +351,24 @@ class Tasker(commands.Cog):
                 self.open_availability_task, get_next_date("Friday", hour=17)
             )
 
-        # week = get_week()
+        week = get_week()
+        last_week = week - 1
 
-        old_game_data = await self.bot.prisma.game.find_first(order=[{"week": "desc"}])
-        # new_week_data = await self.bot.prisma.game.find_first(where={"week": week})
-
-        old_data = None
-        new_data = None
+        old_game_data = await self.bot.prisma.game.find_first(where={"week": last_week})
+        new_week_data = await self.bot.prisma.game.find_first(where={"week": week})
 
         if old_game_data:
             old_data = json.loads(old_game_data.data)
+        else:
+            old_data = None
+
+        if new_week_data:
+            new_data = json.loads(new_week_data.data)
+        else:
+            new_data = get_all_team_data()
+            await self.bot.prisma.game.create(
+                {"week": week, "data": json.dumps(new_data)}
+            )
 
         for guild in self.bot.guilds:
             if guild.id in Data.IGNORED_GUILDS:
@@ -373,8 +381,6 @@ class Tasker(commands.Cog):
                 games_played = self.get_played_games(
                     old_data, new_data, member
                 )
-
-                print(games_played, member.display_name)
 
                 if games_played < 3:
                     not_minimum.append(member)

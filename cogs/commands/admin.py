@@ -166,6 +166,7 @@ class UtilityCommands(commands.Cog):
     async def syncall(
         self,
         interaction: Interaction,
+        team: nextcord.Role = SlashOption(description="Team role", required=False),
     ):
         if interaction.user.id not in [696939596667158579, 810256917497905192]:
             return
@@ -174,7 +175,14 @@ class UtilityCommands(commands.Cog):
         await interaction.edit_original_message(content="Sync process has been started")
         msg = await interaction.guild.get_channel(interaction.channel_id).send(content="Sync all is about to start..")
 
-        for guild in self.bot.guilds:
+        guilds = self.bot.guilds
+        if team:
+            for guild in self.bot.guilds:
+                if f"CNC {team.name}" == guild.name:
+                    guilds = [guild]
+                    break
+
+        for guild in guilds:
             if guild.id in Data.IGNORED_GUILDS:
                 continue
 
