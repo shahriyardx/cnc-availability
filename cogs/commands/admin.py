@@ -220,7 +220,7 @@ class UtilityCommands(commands.Cog):
     async def syncnick(
         self,
         interaction: Interaction,
-        member: nextcord.Member = SlashOption(description="member to sync nick" ,required=False)
+        member: nextcord.Member = SlashOption(description="member to sync nick", required=False)
     ):
         await interaction.response.defer()
 
@@ -243,14 +243,19 @@ class UtilityCommands(commands.Cog):
             member = interaction.guild.get_member(uid)
             if member:
                 nicks[uid] = row[1].strip()
+        print(nicks)
 
         all_members = [member for member in interaction.guild.members if not member.bot]
         if member:
             all_members = [member]
 
-        for member in all_members:
-            if member.id in nicks:
-                await member.edit(nick=nicks[member.id])
+        print(all_members)
+
+        for m in all_members:
+            print(m.id in nicks)
+
+            if m.id in nicks:
+                await m.edit(nick=nicks[m.id])
                 if len(all_members) > 1:
                     await asyncio.sleep(5)
 
