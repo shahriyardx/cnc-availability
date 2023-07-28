@@ -104,6 +104,8 @@ class Tasker(commands.Cog):
             PLAYERS_ROLE = get(guild.roles, name=Data.PLAYERS_ROLE)
             SUBMITTED_ROLE = get(guild.roles, name=Data.SUBMITTED_ROLE)
             IR_ROLE = get(guild.roles, name="IR")
+            ECU_ROLE = get(guild.roles, name="ECU")
+
             AVIAL_SUBMIT_CHANNEL = get(
                 guild.text_channels, name=Data.AVIAL_SUBMIT_CHANNEL
             )
@@ -131,6 +133,15 @@ class Tasker(commands.Cog):
                         await member.remove_roles(IR_ROLE, reason="Open Availability")
                     except Exception as e:
                         print(e)
+
+                for member in ECU_ROLE.members:
+                    try:
+                        await member.kick()
+                    except:
+                        try:
+                            await member.remove_roles(ECU_ROLE)
+                        except:
+                            pass
 
         print("[+] END open_availability_task")
         if not simulate:
@@ -166,6 +177,16 @@ class Tasker(commands.Cog):
         for guild in self.bot.guilds:
             if guild.id in Data.IGNORED_GUILDS:
                 continue
+
+            ECU_ROLE = get(guild.roles, name="ECU")
+            for member in ECU_ROLE.members:
+                try:
+                    await member.kick()
+                except: # noqa
+                    try:
+                        await member.remove_roles(ECU_ROLE)
+                    except: # noqa
+                        pass
 
             TEAM_ROLE = get(guild.roles, name=Data.PLAYERS_ROLE)
             LINEUPS_CHANNEL = get(guild.text_channels, name=Data.LINEUP_SUBMIT_CHANNEL)
