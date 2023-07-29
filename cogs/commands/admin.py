@@ -286,6 +286,38 @@ class UtilityCommands(commands.Cog):
 
         await interaction.followup.send(content=data)
 
+    @slash_command(description="See a player's stats")
+    async def player_stats(
+        self,
+        interaction: Interaction,
+        player: nextcord.Member = SlashOption(description='The player', required=False)
+    ):
+        await interaction.response.defer()
+        old_game_data = await self.bot.prisma.game.find_many(order={"week": "asc"})
+        datas = [[json.loads(data.data), data.week] for data in old_game_data]
+
+        games_played = {}
+
+        for data_week in datas:
+            data = data_week[0]
+            week = data_week[1]
+
+            games_played[week] = 0
+
+            if player.nick in data:
+                current_week_data = data[player.nick]
+                games_played[week] = current_week_data
+
+        message = f"# Stats for {player.nick}\n"
+        for index, key in enumerate(games_played.keys()):
+            last_played = games_played.get(key - 1, 0)
+            this_played = games_played.get(key, 0)
+            total_played = this_played - last_played
+
+            message += f"- Week {index + 1}: **{total_played}** Games\n"
+
+        await interaction.followup.send(content=message)
+
 
 def setup(bot: IBot):
     bot.add_cog(UtilityCommands(bot))
