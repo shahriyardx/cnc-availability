@@ -293,6 +293,10 @@ class UtilityCommands(commands.Cog):
         player: nextcord.Member = SlashOption(description='The player', required=False)
     ):
         await interaction.response.defer()
+
+        if not player:
+            player = interaction.user
+
         old_game_data = await self.bot.prisma.game.find_many(order={"week": "asc"})
         datas = [[json.loads(data.data), data.week] for data in old_game_data]
 
