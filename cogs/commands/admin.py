@@ -316,7 +316,7 @@ class UtilityCommands(commands.Cog):
         for index, key in enumerate(games_played.keys()):
             last_played = games_played.get(key - 1, 0)
             this_played = games_played.get(key, 0)
-            total_played = this_played - last_played
+            total_played = max(this_played - last_played, 0)
 
             message += f"- Week {index + 1}: **{total_played}** Games\n"
 
