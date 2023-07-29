@@ -417,7 +417,6 @@ class Tasker(commands.Cog):
                     await cnc_team_channel.send(
                         content=(
                             f"{mentions} did not play at-least 3 games last week. And has been added to the IR list\n"
-                            "**[IMPORTANT]:** This is a test message."
                             # f"{get(self.bot.SUPPORT_GUILD.roles, name='Owners')}, "
                             # f"{get(self.bot.SUPPORT_GUILD.roles, name='Commissioners')}"
                         )

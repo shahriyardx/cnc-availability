@@ -11,7 +11,7 @@ from essentials.models import Data, IBot
 from utils.gspread import DataSheet
 from essentials.data import team_names
 from .utils import sync_player
-import datetime
+from ..task.utils import report_games_played
 
 class UtilityCommands(commands.Cog):
     def __init__(self, bot: IBot) -> None:
@@ -259,6 +259,19 @@ class UtilityCommands(commands.Cog):
                     await asyncio.sleep(5)
 
         await interaction.guild.get_channel(interaction.channel_id).send(content="Nick sync has been finished")
+
+    @slash_command(description="Report stats of a specific server")
+    async def report_stats(
+        self,
+        interaction: Interaction,
+        team: nextcord.Role = SlashOption(description="The team role", required=True)
+    ):
+        await interaction.response.defer()
+
+        guild = get(self.bot.guilds, name=f"CNC {team.name}")
+        await report_games_played(self.bot, guild)
+
+        await interaction.followup.send("Simulation completed")
 
 
 def setup(bot: IBot):
