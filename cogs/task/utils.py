@@ -49,48 +49,29 @@ def get_week():
 def get_played_games(
     old_game_data: Optional[dict], new_game_data: Optional[dict], member: nextcord.Member
 ):
-    if old_game_data and new_game_data:
-        if (
-            member.display_name in old_game_data
-            and member.display_name in new_game_data
-        ):
-            return (
-                new_game_data[member.display_name]
-                - old_game_data[member.display_name]
-            )
+    if not old_game_data:
+        old_game_data = dict()
 
-        elif member.display_name in new_game_data:
-            return new_game_data[member.display_name]
+    if not new_game_data:
+        new_game_data = dict()
 
-        else:
-            return 0
+    # in both
+    if member.display_name in old_game_data and member.display_name in new_game_data:
+        return new_game_data[member.display_name] - old_game_data[member.display_name]
 
-    if new_game_data and member.display_name in new_game_data:
+    # not in both
+    if member.display_name not in old_game_data and member.display_name not in new_game_data:
+        return -1
+
+    # in any of them
+    if member.display_name in new_game_data:
         return new_game_data[member.display_name]
 
-    return 0
-
-
-async def report_games_played(bot: IBot, guild: nextcord.Guild):
-    week = get_week()
-    last_week = week - 1
-
-    old_game_data = await bot.prisma.game.find_first(where={"week": last_week})
-    new_week_data = await bot.prisma.game.find_first(where={"week": week})
-
-    if old_game_data:
-        old_data = json.loads(old_game_data.data)
     else:
-        old_data = None
+        return 0
 
-    if new_week_data:
-        new_data = json.loads(new_week_data.data)
-    else:
-        new_data = get_all_team_data()
-        await bot.prisma.game.create(
-            {"week": week, "data": json.dumps(new_data)}
-        )
 
+async def report_games_played(bot: IBot, guild: nextcord.Guild, old_data: dict, new_data: dict):
     if guild.id in Data.IGNORED_GUILDS:
         return
 
@@ -101,6 +82,9 @@ async def report_games_played(bot: IBot, guild: nextcord.Guild):
         games_played = get_played_games(
             old_data, new_data, member
         )
+
+        if games_played == -1:
+            continue
 
         if games_played < 3:
             not_minimum.append([member, games_played])

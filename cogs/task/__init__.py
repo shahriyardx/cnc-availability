@@ -16,7 +16,7 @@ from essentials.utils import get_team_name
 from utils.gspread import DataSheet
 
 from .stats import get_all_team_data
-from .utils import get_week, lockdown, unlockdown
+from .utils import get_week, lockdown, unlockdown, report_games_played
 
 
 class Tasker(commands.Cog):
@@ -338,22 +338,17 @@ class Tasker(commands.Cog):
         old_game_data: Optional[dict], new_game_data: Optional[dict], member: nextcord.Member
     ):
         if old_game_data and new_game_data:
-            if (
-                member.display_name in old_game_data
-                and member.display_name in new_game_data
-            ):
-                return (
-                    new_game_data[member.display_name]
-                    - old_game_data[member.display_name]
-                )
-
+            if member.display_name not in old_game_data and member.display_name not in new_game_data:
+                return -1
+            elif member.display_name in old_game_data and member.display_name in new_game_data:
+                return new_game_data[member.display_name] - old_game_data[member.display_name]
             elif member.display_name in new_game_data:
                 return new_game_data[member.display_name]
 
             else:
                 return 0
 
-        if new_game_data and member.display_name in new_game_data:
+        if member.display_name in new_game_data:
             return new_game_data[member.display_name]
 
         return 0
@@ -381,7 +376,7 @@ class Tasker(commands.Cog):
         if old_game_data:
             old_data = json.loads(old_game_data.data)
         else:
-            old_data = None
+            old_data = dict()
 
         if new_week_data:
             new_data = json.loads(new_week_data.data)
@@ -392,35 +387,7 @@ class Tasker(commands.Cog):
             )
 
         for guild in self.bot.guilds:
-            if guild.id in Data.IGNORED_GUILDS:
-                continue
-
-            not_minimum = []
-            team = get(guild.roles, name="Team")
-
-            for member in team.members:
-                games_played = self.get_played_games(
-                    old_data, new_data, member
-                )
-
-                if games_played < 3:
-                    not_minimum.append(member)
-            if not_minimum:
-                team_name = get_team_name(guild.name)
-                cnc_team_channel = get(
-                    self.bot.SUPPORT_GUILD.text_channels,
-                    name=f"╟・{team_name}",
-                )
-
-                mentions = ", ".join([player.display_name for player in not_minimum])
-                if cnc_team_channel:
-                    await cnc_team_channel.send(
-                        content=(
-                            f"{mentions} did not play at-least 3 games last week. And has been added to the IR list\n"
-                            # f"{get(self.bot.SUPPORT_GUILD.roles, name='Owners')}, "
-                            # f"{get(self.bot.SUPPORT_GUILD.roles, name='Commissioners')}"
-                        )
-                    )
+            await report_games_played(self.bot, guild, old_data, new_data)
 
         if not simulate:
             self.start_task(self.close_lineup_channel, get_next_date("Friday", hour=16))

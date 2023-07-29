@@ -60,7 +60,10 @@ async def sync_player(bot: IBot, member: nextcord.Member):
                 get(member.guild.roles, name=position_roles.get(row[1])),
                 get(member.guild.roles, name=position_roles.get(row[2]))
             ]
-            await add_roles(member, roles_to_add)
+            for role in roles_to_add:
+                if role not in member.roles:
+                    await add_roles(member, roles_to_add)
+                    break
 
     # checking owner gm and agm
     owner_id = get_number(roster_sheet.get_value(team_name, "B27")[0][0])

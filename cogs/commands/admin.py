@@ -195,7 +195,7 @@ class UtilityCommands(commands.Cog):
                 try:
                     print(f"Syncing {member.display_name}")
                     await sync_player(self.bot, member)
-                    await asyncio.sleep(10)
+                    await asyncio.sleep(5)
                 except: # noqa
                     exc = traceback.format_exc()
                     print(exc)
@@ -248,11 +248,7 @@ class UtilityCommands(commands.Cog):
         if target:
             all_members = [target]
 
-        print(all_members)
-
         for m in all_members:
-            print(m.id in nicks)
-
             if m.id in nicks:
                 await m.edit(nick=nicks[m.id])
                 if len(all_members) > 1:
