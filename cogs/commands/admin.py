@@ -1,3 +1,4 @@
+import json
 import traceback
 import asyncio
 import nextcord
@@ -11,7 +12,8 @@ from essentials.models import Data, IBot
 from utils.gspread import DataSheet
 from essentials.data import team_names
 from .utils import sync_player
-from ..task.utils import report_games_played
+from ..task.utils import report_games_played, get_week
+
 
 class UtilityCommands(commands.Cog):
     def __init__(self, bot: IBot) -> None:
@@ -264,10 +266,25 @@ class UtilityCommands(commands.Cog):
     ):
         await interaction.response.defer()
 
-        guild = get(self.bot.guilds, name=f"CNC {team.name}")
-        await report_games_played(self.bot, guild)
+        week = get_week()
+        last_week = week - 1
 
-        await interaction.followup.send("Simulation completed")
+        old_data = dict()
+        new_data = dict()
+
+        old_game_data = await self.bot.prisma.game.find_first(where={"week": last_week})
+        new_week_data = await self.bot.prisma.game.find_first(where={"week": week})
+
+        if old_game_data:
+            old_data = json.loads(old_game_data.data)
+
+        if new_week_data:
+            new_data = json.loads(new_week_data.data)
+
+        guild = get(self.bot.guilds, name=f"CNC {team.name}")
+        data = await report_games_played(self.bot, guild, old_data, new_data, return_first=True)
+
+        await interaction.followup.send(content=data)
 
 
 def setup(bot: IBot):

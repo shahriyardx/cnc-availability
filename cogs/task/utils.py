@@ -5,8 +5,6 @@ import nextcord
 from nextcord import PermissionOverwrite, Role, TextChannel
 from nextcord.utils import get
 from essentials.models import IBot, Data
-import json
-from .stats import get_all_team_data
 
 
 def get_permissions(state: bool):
@@ -71,7 +69,9 @@ def get_played_games(
         return 0
 
 
-async def report_games_played(bot: IBot, guild: nextcord.Guild, old_data: dict, new_data: dict):
+async def report_games_played(
+    bot: IBot, guild: nextcord.Guild, old_data: dict, new_data: dict, return_first: bool = False
+):
     if guild.id in Data.IGNORED_GUILDS:
         return
 
@@ -100,11 +100,10 @@ async def report_games_played(bot: IBot, guild: nextcord.Guild, old_data: dict, 
         for player_data in not_minimum:
             mentions += f"- {player_data[0].mention} ({player_data[0].id}) played **{player_data[1]}** games\n"
 
+        if return_first:
+            return mentions
+
         if cnc_team_channel:
-            await cnc_team_channel.send(
-                content=(
-                    f"{mentions} did not play at-least 3 games last week.\n"
-                    # f"{get(self.bot.SUPPORT_GUILD.roles, name='Owners')}, "
-                    # f"{get(self.bot.SUPPORT_GUILD.roles, name='Commissioners')}"
-                )
-            )
+            await cnc_team_channel.send(content=mentions)
+            # f"{get(bot.SUPPORT_GUILD.roles, name='Owners')}, "
+            # f"{get(bot.SUPPORT_GUILD.roles, name='Commissioners')}"

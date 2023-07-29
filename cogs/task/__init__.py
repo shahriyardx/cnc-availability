@@ -350,13 +350,13 @@ class Tasker(commands.Cog):
         week = get_week()
         last_week = week - 1
 
+        old_data = dict()
+
         old_game_data = await self.bot.prisma.game.find_first(where={"week": last_week})
         new_week_data = await self.bot.prisma.game.find_first(where={"week": week})
 
         if old_game_data:
             old_data = json.loads(old_game_data.data)
-        else:
-            old_data = dict()
 
         if new_week_data:
             new_data = json.loads(new_week_data.data)
