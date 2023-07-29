@@ -96,7 +96,10 @@ async def report_games_played(bot: IBot, guild: nextcord.Guild, old_data: dict, 
             name=f"╟・{team_name}",
         )
 
-        mentions = ", ".join([f"{player[0].display_name} - {player[1]}" for player in not_minimum])
+        mentions = "### Players who did not play minimum 3 games this week\n"
+        for player_data in not_minimum:
+            mentions += f"- {player_data[0].mention} ({player_data[0].id}) played **{player_data[1]}** games\n"
+
         if cnc_team_channel:
             await cnc_team_channel.send(
                 content=(
