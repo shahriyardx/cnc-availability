@@ -116,7 +116,7 @@ async def report_games_played(bot: IBot, guild: nextcord.Guild):
         if cnc_team_channel:
             await cnc_team_channel.send(
                 content=(
-                    f"{mentions} did not play at-least 3 games last week. And has been added to the IR list\n"
+                    f"{mentions} did not play at-least 3 games last week.\n"
                     # f"{get(self.bot.SUPPORT_GUILD.roles, name='Owners')}, "
                     # f"{get(self.bot.SUPPORT_GUILD.roles, name='Commissioners')}"
                 )
