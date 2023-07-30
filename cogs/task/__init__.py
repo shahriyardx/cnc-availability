@@ -407,7 +407,7 @@ class Tasker(commands.Cog):
             # Real times
             f16 = get_next_date("Friday", hour=16)
             f17 = get_next_date("Friday", hour=17)
-            m16 = get_next_date("Sunday", hour=16)
+            m16 = get_next_date("Monday", hour=16)
             t4 = get_next_date("Tuesday", hour=4)
             f2 = get_next_date("Friday", hour=2)
 
