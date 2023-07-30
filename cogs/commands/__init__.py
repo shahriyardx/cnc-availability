@@ -46,9 +46,16 @@ class TaskerCommands(commands.Cog):
         await interaction.response.defer(ephemeral=True)
 
         submitted = get(interaction.user.roles, name=Data.SUBMITTED_ROLE)
+        ir = get(interaction.user.roles, name="IR")
+
         if submitted:
             return await interaction.edit_original_message(
                 content="You have already submitted availability for this week."
+            )
+
+        if ir:
+            return await interaction.edit_original_message(
+                content="You don't have permission to submit avail for this week."
             )
 
         if interaction.channel.name != Data.AVIAL_SUBMIT_CHANNEL:

@@ -120,29 +120,28 @@ class Tasker(commands.Cog):
                 await unlockdown(channel=AVIAL_SUBMIT_CHANNEL, roles=PLAYERS_ROLE)
                 await AVIAL_SUBMIT_CHANNEL.send(content=message)
 
-                # for member in SUBMITTED_ROLE.members:
-                #     try:
-                #         await member.remove_roles(
-                #             SUBMITTED_ROLE, IR_ROLE, reason="Open Availability"
-                #         )
-                #     except Exception as e:
-                #         print(e)
-
-                for member in IR_ROLE.members:
+                for member in SUBMITTED_ROLE.members:
                     try:
-                        if SUBMITTED_ROLE not in member.roles:
-                            await member.remove_roles(IR_ROLE, reason="Open Availability")
+                        await member.remove_roles(
+                            SUBMITTED_ROLE, IR_ROLE, reason="Open Availability"
+                        )
                     except Exception as e:
                         print(e)
 
-                # for member in ECU_ROLE.members:
-                #     try:
-                #         await member.kick()
-                #     except:
-                #         try:
-                #             await member.remove_roles(ECU_ROLE)
-                #         except:
-                #             pass
+                for member in IR_ROLE.members:
+                    try:
+                        await member.remove_roles(IR_ROLE, reason="Open Availability")
+                    except Exception as e:
+                        print(e)
+
+                for member in ECU_ROLE.members:
+                    try:
+                        await member.kick()
+                    except: # noqa
+                        try:
+                            await member.remove_roles(ECU_ROLE)
+                        except: # noqa
+                            pass
 
         print("[+] END open_availability_task")
         if not simulate:

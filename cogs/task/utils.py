@@ -77,8 +77,11 @@ async def report_games_played(
 
     not_minimum = []
     team = get(guild.roles, name="Team")
+    ecu = get(guild.roles, name="ECU")
 
-    for member in team.members:
+    checking_members: List[nextcord.Member] = [*team.members, *ecu.members]
+
+    for member in checking_members:
         games_played = get_played_games(
             old_data, new_data, member
         )
@@ -87,7 +90,7 @@ async def report_games_played(
             continue
 
         if games_played < 3:
-            not_minimum.append([member, games_played])
+            not_minimum.append([member, games_played, ecu in member.roles])
 
     if not_minimum:
         team_name = get_team_name(guild.name)
@@ -98,7 +101,7 @@ async def report_games_played(
 
         mentions = "### Players who did not play minimum 3 games this week\n"
         for player_data in not_minimum:
-            mentions += f"- {player_data[0].mention} ({player_data[0].id}) played **{player_data[1]}** games\n"
+            mentions += f"- {player_data[0].mention} ({player_data[0].id}){' (ECU)' if player_data[2] else ''} played **{player_data[1]}** games\n"
 
         if return_first:
             return mentions
