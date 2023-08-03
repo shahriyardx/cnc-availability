@@ -58,7 +58,7 @@ async def sync_player(bot: IBot, member: nextcord.Member):
             roles_to_add = [
                 get(member.guild.roles, name="Team"),
                 get(member.guild.roles, name=position_roles.get(row[1])),
-                get(member.guild.roles, name=position_roles.get(row[2]))
+                get(member.guild.roles, name=position_roles.get(row[2])),
             ]
             for role in roles_to_add:
                 if role not in member.roles:
@@ -189,9 +189,7 @@ async def append_into_ir(
 
         channel = bot.get_channel(inactive_channel)
         if channel:
-            await channel.send(
-                f"{user.mention} of the **{team_name}** has been deemed inactive"
-            )
+            await channel.send(f"{user.mention} of the **{team_name}** has been deemed inactive")
 
         all_values = sheet.get_values(team_name)
         for index, value in enumerate(all_values, start=1):
@@ -221,8 +219,6 @@ async def append_into_ir(
             member = support_server.get_member(user.id)
             if member:
                 try:
-                    await member.remove_roles(
-                        *[Object(role_id) for role_id in inactive_roles]
-                    )
+                    await member.remove_roles(*[Object(role_id) for role_id in inactive_roles])
                 except Exception as e:
                     print(e)

@@ -28,16 +28,12 @@ def get_roles_array(roles: Union[Role, List[Role]]):
 
 async def unlockdown(channel: TextChannel, roles: Union[Role, List[Role]]):
     for role in get_roles_array(roles):
-        await channel.set_permissions(
-            target=role, overwrite=get_permissions(state=True)
-        )
+        await channel.set_permissions(target=role, overwrite=get_permissions(state=True))
 
 
 async def lockdown(channel: TextChannel, roles: Union[Role, List[Role]]):
     for role in get_roles_array(roles):
-        await channel.set_permissions(
-            target=role, overwrite=get_permissions(state=False)
-        )
+        await channel.set_permissions(target=role, overwrite=get_permissions(state=False))
 
 
 def get_week():
@@ -45,7 +41,9 @@ def get_week():
 
 
 def get_played_games(
-    old_game_data: Optional[dict], new_game_data: Optional[dict], member: nextcord.Member
+    old_game_data: Optional[dict],
+    new_game_data: Optional[dict],
+    member: nextcord.Member,
 ):
     if not old_game_data:
         old_game_data = dict()
@@ -70,7 +68,11 @@ def get_played_games(
 
 
 async def report_games_played(
-    bot: IBot, guild: nextcord.Guild, old_data: dict, new_data: dict, return_first: bool = False
+    bot: IBot,
+    guild: nextcord.Guild,
+    old_data: dict,
+    new_data: dict,
+    return_first: bool = False,
 ):
     if guild.id in Data.IGNORED_GUILDS:
         return
@@ -82,9 +84,7 @@ async def report_games_played(
     checking_members: List[nextcord.Member] = [*team.members, *ecu.members]
 
     for member in checking_members:
-        games_played = get_played_games(
-            old_data, new_data, member
-        )
+        games_played = get_played_games(old_data, new_data, member)
 
         if games_played == -1:
             continue

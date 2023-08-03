@@ -6,9 +6,7 @@ class Member:
     display_name: str
 
 
-def get_played_games(
-        old_game_data: dict, new_game_data: dict, member: Member
-):
+def get_played_games(old_game_data: dict, new_game_data: dict, member: Member):
     if old_game_data and new_game_data:
         if member.display_name in old_game_data and member.display_name in new_game_data:
             return new_game_data[member.display_name] - old_game_data[member.display_name]

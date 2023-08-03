@@ -15,12 +15,12 @@ from cogs.commands.utils import sync_player
 load_dotenv(".env")
 
 intents = Intents.default()
-intents.members = True # noqa
-intents.guilds = True # noqa
+intents.members = True  # noqa
+intents.guilds = True  # noqa
 
 
 def get_number(value):
-    print(f'Value: {value}')
+    print(f"Value: {value}")
     try:
         return int(value)
     except (ValueError, TypeError):
@@ -37,6 +37,7 @@ class Availability(commands.AutoShardedBot):
         self.ecu_sheet = DataSheet("ECU Sheet")
         self.tasks_enabled = True
         self.playoffs = False
+        self.rollout_application_commands = False
 
     async def on_ready(self):
         await self.prisma.connect()
@@ -79,7 +80,7 @@ class Availability(commands.AutoShardedBot):
         if member.guild.id in Data.IGNORED_GUILDS:
             return
 
-        await sync_player(self, member) # noqa
+        await sync_player(self, member)  # noqa
 
     def get_command_mention(self, command_name) -> str:
         cmd = None

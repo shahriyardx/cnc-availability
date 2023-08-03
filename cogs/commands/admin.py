@@ -13,6 +13,7 @@ from utils.gspread import DataSheet
 from essentials.data import team_names
 from .utils import sync_player
 from ..task.utils import report_games_played, get_week
+from .views import DayAndTimeView, StagePlayers
 
 
 class UtilityCommands(commands.Cog):
@@ -25,9 +26,9 @@ class UtilityCommands(commands.Cog):
 
     @slash_command(description="Sync your roles and nickname with Roster sheet")
     async def sync(
-            self,
-            interaction: Interaction,
-            player: nextcord.Member = SlashOption(description="The member to sync", required=False),
+        self,
+        interaction: Interaction,
+        player: nextcord.Member = SlashOption(description="The member to sync", required=False),
     ):
         await interaction.response.defer(ephemeral=True)
 
@@ -42,24 +43,18 @@ class UtilityCommands(commands.Cog):
             traceback.print_exc()
             return interaction.edit_original_message(content=f"Error occured during sync: {e}")
 
-        return await interaction.edit_original_message(
-            content="Sync finished"
-        )
+        return await interaction.edit_original_message(content="Sync finished")
 
     @slash_command(description="Enable or disable tasks")
     async def toggle_tasks(
         self,
         interaction: Interaction,
-        status: bool = SlashOption(
-            name="status", description="True = Enabled, False = Disabled", required=True
-        ),
+        status: bool = SlashOption(name="status", description="True = Enabled, False = Disabled", required=True),
     ):
         await interaction.response.defer(ephemeral=True)
 
         if interaction.user.id not in [696939596667158579, 810256917497905192]:
-            return await interaction.followup.send(
-                content="You don't have permission to run this command"
-            )
+            return await interaction.followup.send(content="You don't have permission to run this command")
 
         settings = await self.prisma.settings.find_first()
         await self.prisma.settings.update(
@@ -70,24 +65,18 @@ class UtilityCommands(commands.Cog):
         )
 
         self.bot.tasks_enabled = status
-        await interaction.edit_original_message(
-            content=f"Tasks has been {'Enabled' if status else 'Disabled'}"
-        )
+        await interaction.edit_original_message(content=f"Tasks has been {'Enabled' if status else 'Disabled'}")
 
     @slash_command(description="Enable of disable playoffs")
     async def toggle_playoffs(
         self,
         interaction: Interaction,
-        status: bool = SlashOption(
-            name="status", description="True = Enabled, False = Disabled", required=True
-        ),
+        status: bool = SlashOption(name="status", description="True = Enabled, False = Disabled", required=True),
     ):
         await interaction.response.defer(ephemeral=True)
 
         if interaction.user.id not in [696939596667158579, 810256917497905192]:
-            return await interaction.followup.send(
-                content="You don't have permission to run this command"
-            )
+            return await interaction.followup.send(content="You don't have permission to run this command")
 
         settings = await self.prisma.settings.find_first()
         await self.prisma.settings.update(
@@ -98,17 +87,13 @@ class UtilityCommands(commands.Cog):
         )
 
         self.bot.playoffs = status
-        await interaction.edit_original_message(
-            content=f"Playoffs has been {'Enabled' if status else 'Disabled'}"
-        )
+        await interaction.edit_original_message(content=f"Playoffs has been {'Enabled' if status else 'Disabled'}")
 
     @slash_command(description="Reset ir of a player")
     async def resetir(
         self,
         interaction: Interaction,
-        player: nextcord.Member = SlashOption(
-            description="The player to reset ir", required=True
-        ),
+        player: nextcord.Member = SlashOption(description="The player to reset ir", required=True),
     ):
         await interaction.response.defer()
 
@@ -133,9 +118,7 @@ class UtilityCommands(commands.Cog):
                         break
 
         if not member:
-            return await interaction.followup.send(
-                content="Unable to find the team of this player."
-            )
+            return await interaction.followup.send(content="Unable to find the team of this player.")
 
         sub_role = get(team_guild.roles, name="Availability Submitted")
         ir_role = get(team_guild.roles, name="IR")
@@ -154,15 +137,10 @@ class UtilityCommands(commands.Cog):
         chat = get(team_guild.text_channels, name="chat")
         if chat:
             await chat.send(
-                content=(
-                    f"{member.mention} Your Availability has been reset "
-                    "please Submit availability again."
-                )
+                content=(f"{member.mention} Your Availability has been reset " "please Submit availability again.")
             )
 
-        await interaction.edit_original_message(
-            content=f"{player.mention}'s IR has been reset succesfully"
-        )
+        await interaction.edit_original_message(content=f"{player.mention}'s IR has been reset succesfully")
 
     @slash_command(description="Sync nicknames from sheet")
     async def syncall(
@@ -198,7 +176,7 @@ class UtilityCommands(commands.Cog):
                     print(f"Syncing {member.display_name}")
                     await sync_player(self.bot, member)
                     await asyncio.sleep(5)
-                except: # noqa
+                except:  # noqa
                     exc = traceback.format_exc()
                     print(exc)
                     unable_to_sync.append([member, exc])
@@ -222,14 +200,12 @@ class UtilityCommands(commands.Cog):
     async def syncnick(
         self,
         interaction: Interaction,
-        target: nextcord.Member = SlashOption(description="member to sync nick", required=False)
+        target: nextcord.Member = SlashOption(description="member to sync nick", required=False),
     ):
         await interaction.response.defer()
 
         if interaction.user.id not in [696939596667158579, 810256917497905192]:
-            return await interaction.followup.send(
-                content="You don't have permission to run this command"
-            )
+            return await interaction.followup.send(content="You don't have permission to run this command")
 
         await interaction.edit_original_message(content="Nickname sync started")
 
@@ -262,7 +238,7 @@ class UtilityCommands(commands.Cog):
     async def report_stats(
         self,
         interaction: Interaction,
-        team: nextcord.Role = SlashOption(description="The team role", required=True)
+        team: nextcord.Role = SlashOption(description="The team role", required=True),
     ):
         await interaction.response.defer()
 
@@ -290,7 +266,7 @@ class UtilityCommands(commands.Cog):
     async def player_stats(
         self,
         interaction: Interaction,
-        player: nextcord.Member = SlashOption(description='The player', required=False)
+        player: nextcord.Member = SlashOption(description="The player", required=False),
     ):
         await interaction.response.defer()
 
@@ -322,6 +298,56 @@ class UtilityCommands(commands.Cog):
 
         await interaction.followup.send(content=message)
 
+    @slash_command(description="Testing new avail")
+    async def new_setlineups(self, interaction: Interaction):
+        await interaction.response.defer()
+
+        # ============ Day and Time ============== #
+        day_time_view = DayAndTimeView()
+        await interaction.edit_original_message(
+            content="Select days and times",
+            view=day_time_view,
+        )
+
+        await day_time_view.wait()
+        if day_time_view.cancelled:
+            return await interaction.edit_original_message(content="Cancelled")
+
+        lw_members = [
+            member.nick for member in interaction.guild.members if "Left Wing" in [role.name for role in member.roles]
+        ]
+        rw_members = [
+            member.nick for member in interaction.guild.members if "Right Wing" in [role.name for role in member.roles]
+        ]
+        g_members = [
+            member.nick for member in interaction.guild.members if "Goalie" in [role.name for role in member.roles]
+        ]
+
+        ld_members = [
+            member.nick for member in interaction.guild.members if "Left Defense" in [role.name for role in member.roles]
+        ]
+        rd_members = [
+            member.nick for member in interaction.guild.members if "Right Defense" in [role.name for role in member.roles]
+        ]
+        c_members = [
+            member.nick for member in interaction.guild.members if "Center" in [role.name for role in member.roles]
+        ]
+
+        first_stage = StagePlayers(lw_members, rw_members, g_members)
+        await interaction.edit_original_message(content="Select players", view=first_stage)
+
+        await first_stage.wait()
+        if first_stage.cancelled:
+            return await interaction.edit_original_message(content="Cancelled")
+
+        second_stage = StagePlayers(ld_members, rd_members, c_members)
+        await interaction.edit_original_message(content="Select players", view=second_stage)
+
+        await second_stage.wait()
+        if second_stage.cancelled:
+            return await interaction.edit_original_message(content="Cancelled")
+
+        await interaction.edit_original_message(content="New setlineups is still in beta. Please wait for production release")
 
 def setup(bot: IBot):
     bot.add_cog(UtilityCommands(bot))

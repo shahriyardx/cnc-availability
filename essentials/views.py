@@ -27,33 +27,21 @@ class TimeView(ui.View):
 
         await interaction.response.edit_message(view=self)
 
-    @ui.button(
-        label="8:30pm EST", style=ButtonStyle.primary, custom_id="8:30pm EST", row=1
-    )
+    @ui.button(label="8:30pm EST", style=ButtonStyle.primary, custom_id="8:30pm EST", row=1)
     async def e3p(self, button: ui.Button, interaction: Interaction):
-        self.slots.remove(
-            button.custom_id
-        ) if button.custom_id in self.slots else self.slots.append(button.custom_id)
+        self.slots.remove(button.custom_id) if button.custom_id in self.slots else self.slots.append(button.custom_id)
 
         await self._update(interaction)
 
-    @ui.button(
-        label="9:10pm EST", style=ButtonStyle.primary, custom_id="9:10pm EST", row=1
-    )
+    @ui.button(label="9:10pm EST", style=ButtonStyle.primary, custom_id="9:10pm EST", row=1)
     async def nfp(self, button: ui.Button, interaction: Interaction):
-        self.slots.remove(
-            button.custom_id
-        ) if button.custom_id in self.slots else self.slots.append(button.custom_id)
+        self.slots.remove(button.custom_id) if button.custom_id in self.slots else self.slots.append(button.custom_id)
 
         await self._update(interaction)
 
-    @ui.button(
-        label="9:50pm EST", style=ButtonStyle.primary, custom_id="9:50pm EST", row=1
-    )
+    @ui.button(label="9:50pm EST", style=ButtonStyle.primary, custom_id="9:50pm EST", row=1)
     async def tp(self, button: ui.Button, interaction: Interaction):
-        self.slots.remove(
-            button.custom_id
-        ) if button.custom_id in self.slots else self.slots.append(button.custom_id)
+        self.slots.remove(button.custom_id) if button.custom_id in self.slots else self.slots.append(button.custom_id)
 
         await self._update(interaction)
 

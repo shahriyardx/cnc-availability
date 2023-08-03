@@ -33,12 +33,12 @@ class UilityCommands(commands.Cog):
         }
 
         selected_positions = []
-        for position in position_view._selects: # noqa
+        for position in position_view._selects:  # noqa
             selected_positions.append(position_roles[position])
 
         await interaction.user.add_roles(*selected_positions)
         await interaction.edit_original_message(
-            content=f"You have assigned to positions {', '.join(position_view._selects)}", # noqa
+            content=f"You have assigned to positions {', '.join(position_view._selects)}",  # noqa
             view=None,
         )
 
@@ -60,9 +60,7 @@ class UilityCommands(commands.Cog):
         if interaction.user.id == interaction.guild.owner_id:
             print("As Guid owner")
             await player.add_roles(role)
-            return await interaction.followup.send(
-                content=f"{role} has been added to {player}"
-            )
+            return await interaction.followup.send(content=f"{role} has been added to {player}")
 
         highest_role = None
 
@@ -83,9 +81,7 @@ class UilityCommands(commands.Cog):
         if highest_role:
             print(f"Adding role {role} to {player}")
             await player.add_roles(role)
-            return await interaction.followup.send(
-                content=f"{role} has been added to {player}"
-            )
+            return await interaction.followup.send(content=f"{role} has been added to {player}")
 
         await interaction.edit_original_message(content="You can't add roles")
 
@@ -107,9 +103,7 @@ class UilityCommands(commands.Cog):
         if interaction.user.id == interaction.guild.owner_id:
             print("As Guid owner")
             await player.remove_roles(role)
-            return await interaction.followup.send(
-                content=f"{role} has been removed from {player}"
-            )
+            return await interaction.followup.send(content=f"{role} has been removed from {player}")
 
         highest_role = None
 
@@ -130,9 +124,7 @@ class UilityCommands(commands.Cog):
         if highest_role:
             print(f"Removing {role} from {player}")
             await player.remove_roles(role)
-            return await interaction.followup.send(
-                content=f"{role} has been removed from {player}"
-            )
+            return await interaction.followup.send(content=f"{role} has been removed from {player}")
 
     @slash_command(description="Change psn")
     async def psn(
@@ -150,12 +142,8 @@ class UilityCommands(commands.Cog):
     async def changecolor(
         self,
         interaction: Interaction,
-        role: Role = SlashOption(
-            name="role", description="The role to change color", required=True
-        ),
-        color: str = SlashOption(
-            name="color", description="The new color code. e.g. #ffffff"
-        ),
+        role: Role = SlashOption(name="role", description="The role to change color", required=True),
+        color: str = SlashOption(name="color", description="The new color code. e.g. #ffffff"),
     ):
         await interaction.response.defer()
 
@@ -163,16 +151,12 @@ class UilityCommands(commands.Cog):
             code = color.replace("#", "")
             code = int(code, 16)
         except ValueError:
-            return await interaction.edit_original_message(
-                content=f"Invalid color code {color}"
-            )
+            return await interaction.edit_original_message(content=f"Invalid color code {color}")
 
         try:
             await role.edit(color=code)
-        except: # noqa
-            return await interaction.edit_original_message(
-                content="Unable to change color."
-            )
+        except:  # noqa
+            return await interaction.edit_original_message(content="Unable to change color.")
 
         await interaction.edit_original_message(content="Role color changed")
 

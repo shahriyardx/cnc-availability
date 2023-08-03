@@ -59,9 +59,7 @@ class TaskerCommands(commands.Cog):
             )
 
         if interaction.channel.name != Data.AVIAL_SUBMIT_CHANNEL:
-            return await interaction.edit_original_message(
-                content="You can't submit availability in this channel"
-            )
+            return await interaction.edit_original_message(content="You can't submit availability in this channel")
 
         tu_times = TimeView()
         wd_times = TimeView()
@@ -102,9 +100,7 @@ class TaskerCommands(commands.Cog):
                 content="❌ Cancelled!",
                 view=None,
             )
-        await interaction.edit_original_message(
-            content="Processing please wait...", view=None
-        )
+        await interaction.edit_original_message(content="Processing please wait...", view=None)
 
         total_games = len(tu_times.slots) + len(wd_times.slots) + len(th_times.slots)
 
@@ -195,14 +191,10 @@ class TaskerCommands(commands.Cog):
         settings = await self.bot.prisma.settings.find_first()
 
         if not settings.can_submit_lineups:
-            return await interaction.followup.send(
-                content="Lineups can't be submitted right now"
-            )
+            return await interaction.followup.send(content="Lineups can't be submitted right now")
 
         if interaction.channel.name != Data.LINEUP_SUBMIT_CHANNEL:
-            return await interaction.edit_original_message(
-                content="You can't submit lineups in this channel"
-            )
+            return await interaction.edit_original_message(content="You can't submit lineups in this channel")
 
         players = [left_wing, left_defense, right_wing, right_defense, goalie, center]
         team_role = get(interaction.guild.roles, name=Data.PLAYERS_ROLE)
@@ -259,15 +251,11 @@ class TaskerCommands(commands.Cog):
         embed.set_thumbnail(url=interaction.guild.icon.url)
 
         SUPPORT_GUILD = self.bot.get_guild(Data.SUPPORT_GUILD)
-        LINEUP_LOG_CHANNEL = get(
-            interaction.guild.text_channels, name=Data.LINEUP_LOG_CHANNEL
-        )
+        LINEUP_LOG_CHANNEL = get(interaction.guild.text_channels, name=Data.LINEUP_LOG_CHANNEL)
 
         if LINEUP_LOG_CHANNEL:
             log_message = await LINEUP_LOG_CHANNEL.send(content=content, embed=embed)
-            await self.prisma.lineup.update(
-                where={"id": l_data.id}, data={"message_id_team": log_message.id}
-            )
+            await self.prisma.lineup.update(where={"id": l_data.id}, data={"message_id_team": log_message.id})
 
         if SUPPORT_GUILD:
             TEAM_LOG_CHANNEL = get(
@@ -276,9 +264,7 @@ class TaskerCommands(commands.Cog):
             )
 
             if TEAM_LOG_CHANNEL:
-                cmc_log_message = await TEAM_LOG_CHANNEL.send(
-                    content=content, embed=embed
-                )
+                cmc_log_message = await TEAM_LOG_CHANNEL.send(content=content, embed=embed)
                 await self.prisma.lineup.update(
                     where={"id": l_data.id},
                     data={"message_id_team": cmc_log_message.id},
@@ -314,9 +300,7 @@ class TaskerCommands(commands.Cog):
     async def editlineup(
         self,
         interaction: Interaction,
-        lineup_id: str = SlashOption(
-            name="lineup_id", description="The id of the lineup you want to edit"
-        ),
+        lineup_id: str = SlashOption(name="lineup_id", description="The id of the lineup you want to edit"),
         day: str = SlashOption(
             name="day",
             description="Select the day of the game",
@@ -337,32 +321,18 @@ class TaskerCommands(commands.Cog):
             },
             required=False,
         ),
-        left_wing: Member = SlashOption(
-            description="Select left wing player", required=False
-        ),
-        center: Member = SlashOption(
-            description="Select center player", required=False
-        ),
-        right_wing: Member = SlashOption(
-            description="Select right wing player", required=False
-        ),
-        left_defense: Member = SlashOption(
-            description="Select left defense player", required=False
-        ),
-        right_defense: Member = SlashOption(
-            description="Select right defense player", required=False
-        ),
-        goalie: Member = SlashOption(
-            description="Select goalie player", required=False
-        ),
+        left_wing: Member = SlashOption(description="Select left wing player", required=False),
+        center: Member = SlashOption(description="Select center player", required=False),
+        right_wing: Member = SlashOption(description="Select right wing player", required=False),
+        left_defense: Member = SlashOption(description="Select left defense player", required=False),
+        right_defense: Member = SlashOption(description="Select right defense player", required=False),
+        goalie: Member = SlashOption(description="Select goalie player", required=False),
     ):
         await interaction.response.defer()
         settings = await self.bot.prisma.settings.find_first()
 
         if not settings.can_edit_lineups:
-            return await interaction.followup.send(
-                content="Lineups can't be editted right now"
-            )
+            return await interaction.followup.send(content="Lineups can't be editted right now")
 
         old_lineup = await self.prisma.lineup.find_unique(
             where={
@@ -372,9 +342,7 @@ class TaskerCommands(commands.Cog):
         team_name = get_team_name(interaction.guild.name)
 
         if interaction.channel.name != Data.LINEUP_SUBMIT_CHANNEL:
-            return await interaction.edit_original_message(
-                content="You can't edit lineups in this channel"
-            )
+            return await interaction.edit_original_message(content="You can't edit lineups in this channel")
 
         players = [
             p
@@ -440,12 +408,8 @@ class TaskerCommands(commands.Cog):
             interaction.guild.get_member(right_defense.id)
             if right_defense
             else interaction.guild.get_member(old_lineup.right_defense),
-            interaction.guild.get_member(center.id)
-            if center
-            else interaction.guild.get_member(old_lineup.center),
-            interaction.guild.get_member(goalie.id)
-            if goalie
-            else interaction.guild.get_member(old_lineup.goalie),
+            interaction.guild.get_member(center.id) if center else interaction.guild.get_member(old_lineup.center),
+            interaction.guild.get_member(goalie.id) if goalie else interaction.guild.get_member(old_lineup.goalie),
         ]
 
         new_lineup_data = {
@@ -454,22 +418,14 @@ class TaskerCommands(commands.Cog):
             "left_wing": left_wing.id if left_wing else old_lineup.left_wing,
             "center": center.id if center else old_lineup.center,
             "right_wing": right_wing.id if right_wing else old_lineup.right_wing,
-            "left_defense": left_defense.id
-            if left_defense
-            else old_lineup.left_defense,
-            "right_defense": right_defense.id
-            if right_defense
-            else old_lineup.right_defense,
+            "left_defense": left_defense.id if left_defense else old_lineup.left_defense,
+            "right_defense": right_defense.id if right_defense else old_lineup.right_defense,
             "goalie": goalie.id if goalie else old_lineup.goalie,
         }
 
-        await self.prisma.lineup.update(
-            where={"id": old_lineup.id}, data=new_lineup_data
-        )
+        await self.prisma.lineup.update(where={"id": old_lineup.id}, data=new_lineup_data)
 
-        embed = Embed(
-            title=f"Lineups for `{day or old_lineup.day}` at `{time or old_lineup.time}` \n"
-        )
+        embed = Embed(title=f"Lineups for `{day or old_lineup.day}` at `{time or old_lineup.time}` \n")
 
         embed.description = (
             f"Left Wing: {new_players[0].mention} \n"
@@ -497,15 +453,11 @@ class TaskerCommands(commands.Cog):
             )
 
         SUPPORT_GUILD = self.bot.get_guild(Data.SUPPORT_GUILD)
-        LINEUP_LOG_CHANNEL = get(
-            interaction.guild.text_channels, name=Data.LINEUP_LOG_CHANNEL
-        )
+        LINEUP_LOG_CHANNEL = get(interaction.guild.text_channels, name=Data.LINEUP_LOG_CHANNEL)
 
         if LINEUP_LOG_CHANNEL and old_lineup.message_id_team:
             try:
-                old_message = await LINEUP_LOG_CHANNEL.fetch_message(
-                    int(old_lineup.message_id_team)
-                )
+                old_message = await LINEUP_LOG_CHANNEL.fetch_message(int(old_lineup.message_id_team))
                 if old_message:
                     await old_message.delete()
             except Exception as e:
@@ -513,9 +465,7 @@ class TaskerCommands(commands.Cog):
                 pass
 
             message = await LINEUP_LOG_CHANNEL.send(content=content, embed=embed)
-            await self.prisma.lineup.update(
-                where={"id": lineup_id.strip()}, data={"message_id_team": message.id}
-            )
+            await self.prisma.lineup.update(where={"id": lineup_id.strip()}, data={"message_id_team": message.id})
 
         print(SUPPORT_GUILD, old_lineup.message_id_cnc)
 
@@ -532,9 +482,7 @@ class TaskerCommands(commands.Cog):
                 print(f"CNC Message id: {int(old_lineup.message_id_cnc)}")
 
                 try:
-                    old_message = await TEAM_LOG_CHANNEL.fetch_message(
-                        int(old_lineup.message_id_cnc)
-                    )
+                    old_message = await TEAM_LOG_CHANNEL.fetch_message(int(old_lineup.message_id_cnc))
                     if old_message:
                         await old_message.delete()
                 except Exception as e:
@@ -542,22 +490,16 @@ class TaskerCommands(commands.Cog):
                     pass
 
                 message = await TEAM_LOG_CHANNEL.send(content=content, embed=embed)
-                await self.prisma.lineup.update(
-                    where={"id": lineup_id.strip()}, data={"message_id_cnc": message.id}
-                )
+                await self.prisma.lineup.update(where={"id": lineup_id.strip()}, data={"message_id_cnc": message.id})
 
-        await interaction.followup.send(
-            content=f"Lineup ID: `{lineup_id.strip()}` has been updated."
-        )
+        await interaction.followup.send(content=f"Lineup ID: `{lineup_id.strip()}` has been updated.")
 
     @slash_command(name="create-category", description="Create category")
     @commands.has_any_role("Owner", "General Manager")
     async def create_category(
         self,
         interaction: Interaction,
-        category_name: str = SlashOption(
-            name="category_name", description="The category name"
-        ),
+        category_name: str = SlashOption(name="category_name", description="The category name"),
     ):
         await interaction.response.defer(ephemeral=True)
 
@@ -581,21 +523,15 @@ class TaskerCommands(commands.Cog):
     async def create_channel(
         self,
         interaction: Interaction,
-        channel_name: str = SlashOption(
-            name="channel_name", description="The channel name"
-        ),
-        category: CategoryChannel = SlashOption(
-            name="category", description="Mention the category"
-        ),
+        channel_name: str = SlashOption(name="channel_name", description="The channel name"),
+        category: CategoryChannel = SlashOption(name="category", description="Mention the category"),
     ):
         await interaction.response.defer(ephemeral=True)
 
         exists = get(interaction.guild.text_channels, name=channel_name)
 
         if exists:
-            return await interaction.edit_original_message(
-                content="Can't create channel with this name"
-            )
+            return await interaction.edit_original_message(content="Can't create channel with this name")
 
         everyone = get(interaction.guild.roles, name="@everyone")
         owner = get(interaction.guild.roles, name="Owner")
@@ -625,9 +561,7 @@ class TaskerCommands(commands.Cog):
         exists = get(interaction.guild.roles, name=name)
 
         if exists:
-            return await interaction.edit_original_message(
-                content="Can't create role with this name"
-            )
+            return await interaction.edit_original_message(content="Can't create role with this name")
 
         await interaction.guild.create_role(name=name)
         await interaction.edit_original_message(content="Role created")
@@ -640,9 +574,7 @@ class TaskerCommands(commands.Cog):
 
             return permission_overwrites
 
-        await channel.set_permissions(
-            target=role, overwrite=get_permissions(_state=state)
-        )
+        await channel.set_permissions(target=role, overwrite=get_permissions(_state=state))
 
     @slash_command(
         name="toggle-availability",
@@ -661,17 +593,13 @@ class TaskerCommands(commands.Cog):
         await interaction.response.defer(ephemeral=True)
 
         if interaction.user.id != interaction.guild.owner.id:
-            return await interaction.followup.send(
-                content="You are not allowed to run this command"
-            )
+            return await interaction.followup.send(content="You are not allowed to run this command")
 
         for guild in self.bot.guilds:
             if guild.id in Data.IGNORED_GUILDS:
                 continue
 
-            SUBMIT_CHANNEL = get(
-                guild.text_channels, name=Data.AVIAL_SUBMIT_CHANNEL
-            )  # `#submmit-availability`
+            SUBMIT_CHANNEL = get(guild.text_channels, name=Data.AVIAL_SUBMIT_CHANNEL)  # `#submmit-availability`
             TEAM_ROLE = get(
                 guild.roles,
                 name=Data.PLAYERS_ROLE,
@@ -679,9 +607,7 @@ class TaskerCommands(commands.Cog):
             if SUBMIT_CHANNEL:
                 await self.toggle_state(SUBMIT_CHANNEL, TEAM_ROLE, state)
 
-        await interaction.followup.send(
-            content=f"Availavility has been {'Unlocked' if state else 'Locked'}"
-        )
+        await interaction.followup.send(content=f"Availavility has been {'Unlocked' if state else 'Locked'}")
 
 
 def setup(bot: IBot):

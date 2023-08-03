@@ -10,9 +10,7 @@ def get_rows(soup: BeautifulSoup, div_id: str):
 
     for tr in trs:
         datas = tr.find_all("td")
-        players_data.append(
-            {"psn": datas[1].text.split(",")[0].strip(), "gp": int(datas[2].text)}
-        )
+        players_data.append({"psn": datas[1].text.split(",")[0].strip(), "gp": int(datas[2].text)})
 
     return players_data
 
