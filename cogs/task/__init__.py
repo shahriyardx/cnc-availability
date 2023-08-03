@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import json
 import os
@@ -93,6 +94,9 @@ class Tasker(commands.Cog):
             },
         )
 
+        play_days = ["Tuesday", "Wednesday", "Thursday"]
+        play_times = ["8:30pm", "9:10pm", "9:50pm"]
+
         for guild in self.bot.guilds:
             if guild.id in Data.IGNORED_GUILDS:
                 continue
@@ -104,36 +108,46 @@ class Tasker(commands.Cog):
 
             AVIAL_SUBMIT_CHANNEL = get(guild.text_channels, name=Data.AVIAL_SUBMIT_CHANNEL)
 
-            if PLAYERS_ROLE and AVIAL_SUBMIT_CHANNEL and SUBMITTED_ROLE:
-                message = (
-                    f"{PLAYERS_ROLE.mention} please click {self.bot.get_command_mention('submitavailability')} "
-                    "to submit your availability. Remember you must provide your owner a "
-                    "minimum of four days each week to be considered active."
+            if not PLAYERS_ROLE or not AVIAL_SUBMIT_CHANNEL or not SUBMITTED_ROLE:
+                continue
+
+            NEW_AVIAL_SUBMIT_CHANNEL = await AVIAL_SUBMIT_CHANNEL.clone()
+            await AVIAL_SUBMIT_CHANNEL.delete()
+
+            await unlockdown(channel=NEW_AVIAL_SUBMIT_CHANNEL, roles=PLAYERS_ROLE)
+
+            todays_date = datetime.datetime.now()
+            # Send messages
+            for day in play_days:
+                await NEW_AVIAL_SUBMIT_CHANNEL.send(
+                    content=f"🚨🚨 **{day.upper()}** ({todays_date.month}/{todays_date.day}/{todays_date.year}) 🚨🚨"
                 )
+                for time in play_times:
+                    msg = await NEW_AVIAL_SUBMIT_CHANNEL.send(content=f"__**{day.upper()}**__ {time}")
+                    await msg.add_reaction("✅")
+                    await msg.add_reaction("❌")
+                    await asyncio.sleep(2)
 
-                await unlockdown(channel=AVIAL_SUBMIT_CHANNEL, roles=PLAYERS_ROLE)
-                await AVIAL_SUBMIT_CHANNEL.send(content=message)
+            for member in SUBMITTED_ROLE.members:
+                try:
+                    await member.remove_roles(SUBMITTED_ROLE, IR_ROLE, reason="Open Availability")
+                except Exception as e:
+                    print(e)
 
-                for member in SUBMITTED_ROLE.members:
+            for member in IR_ROLE.members:
+                try:
+                    await member.remove_roles(IR_ROLE, reason="Open Availability")
+                except Exception as e:
+                    print(e)
+
+            for member in ECU_ROLE.members:
+                try:
+                    await member.kick()
+                except:  # noqa
                     try:
-                        await member.remove_roles(SUBMITTED_ROLE, IR_ROLE, reason="Open Availability")
-                    except Exception as e:
-                        print(e)
-
-                for member in IR_ROLE.members:
-                    try:
-                        await member.remove_roles(IR_ROLE, reason="Open Availability")
-                    except Exception as e:
-                        print(e)
-
-                for member in ECU_ROLE.members:
-                    try:
-                        await member.kick()
+                        await member.remove_roles(ECU_ROLE)
                     except:  # noqa
-                        try:
-                            await member.remove_roles(ECU_ROLE)
-                        except:  # noqa
-                            pass
+                        pass
 
         print("[+] END open_availability_task")
         if not simulate:

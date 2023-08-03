@@ -50,6 +50,14 @@ model Availability {
   games     Int
 }
 
+model AvailabilitySubmitted {
+  id        String @id @default(cuid())
+  member_id BigInt
+  day       String
+  time      String
+  week      Int
+}
+
 model Game {
   id   String @id @default(cuid())
   week Int

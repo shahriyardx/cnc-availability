@@ -324,10 +324,14 @@ class UtilityCommands(commands.Cog):
         ]
 
         ld_members = [
-            member.nick for member in interaction.guild.members if "Left Defense" in [role.name for role in member.roles]
+            member.nick
+            for member in interaction.guild.members
+            if "Left Defense" in [role.name for role in member.roles]
         ]
         rd_members = [
-            member.nick for member in interaction.guild.members if "Right Defense" in [role.name for role in member.roles]
+            member.nick
+            for member in interaction.guild.members
+            if "Right Defense" in [role.name for role in member.roles]
         ]
         c_members = [
             member.nick for member in interaction.guild.members if "Center" in [role.name for role in member.roles]
@@ -347,7 +351,10 @@ class UtilityCommands(commands.Cog):
         if second_stage.cancelled:
             return await interaction.edit_original_message(content="Cancelled")
 
-        await interaction.edit_original_message(content="New setlineups is still in beta. Please wait for production release")
+        await interaction.edit_original_message(
+            content="New setlineups is still in beta. Please wait for production release"
+        )
+
 
 def setup(bot: IBot):
     bot.add_cog(UtilityCommands(bot))
