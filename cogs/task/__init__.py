@@ -84,7 +84,7 @@ class Tasker(commands.Cog):
         if not simulate:
             await self.bot.prisma.playerlineup.delete_many()
             await self.bot.prisma.lineup.delete_many()
-            await self.bot.prisma.availability.delete_many()
+            await self.bot.prisma.availabilitysubmitted.delete_many()
 
         settings = await self.bot.prisma.settings.find_first()
 
