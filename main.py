@@ -1,3 +1,4 @@
+import datetime
 import os
 from typing import Optional
 
@@ -81,6 +82,63 @@ class Availability(commands.AutoShardedBot):
             return
 
         await sync_player(self, member)  # noqa
+
+    async def handle_avail_react(self, reaction: nextcord.RawReactionActionEvent):
+        guild = self.get_guild(reaction.guild_id)
+        channel = guild.get_channel(reaction.channel_id)
+        member_id = reaction.user_id
+
+        if channel.name != "submit-availability":
+            return
+
+        message = await channel.fetch_message(reaction.message_id)
+        message_parts = message.content.split(" ")
+
+        if len(message_parts) < 2:
+            return
+
+        days_avail = ["Tuesday", "Wednesday", "Thursday"]
+        times_avail = ["8:30pm", "9:10pm", "9:50pm"]
+
+        day = message_parts[0].strip("__").strip("**").title()
+        time = message_parts[1]
+
+        if day not in days_avail or time not in times_avail:
+            return
+
+        week = datetime.datetime.now().isocalendar()[1]
+
+        if reaction.emoji.name == "✅" and reaction.event_type == "REACTION_ADD":
+            await message.remove_reaction("❌", member=reaction.member)
+            await self.prisma.availabilitysubmitted.create(
+                {
+                    "member_id": member_id,
+                    "day": day,
+                    "time": time,
+                    "week": week,
+                }
+            )
+
+        if (reaction.emoji.name == "✅" and reaction.event_type == "REACTION_REMOVE") or (
+            reaction.emoji.name == "❌" and reaction.event_type == "REACTION_ADD"
+        ):
+            await self.prisma.availabilitysubmitted.delete_many(
+                where={
+                    "member_id": member_id,
+                    "week": week,
+                    "day": day,
+                    "time": time,
+                }
+            )
+
+        if reaction.emoji.name == "❌" and reaction.event_type == "REACTION_ADD":
+            await message.remove_reaction("✅", member=reaction.member)
+
+    async def on_raw_reaction_add(self, reaction: nextcord.RawReactionActionEvent):
+        await self.handle_avail_react(reaction)
+
+    async def on_raw_reaction_remove(self, reaction: nextcord.RawReactionActionEvent):
+        await self.handle_avail_react(reaction)
 
     def get_command_mention(self, command_name) -> str:
         cmd = None

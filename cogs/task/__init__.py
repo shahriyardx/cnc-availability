@@ -210,11 +210,10 @@ class Tasker(commands.Cog):
                 if has_ir:
                     continue
 
-                avail = await self.bot.prisma.availability.find_first(where={"member_id": member.id})
+                avail = await self.bot.prisma.availabilitysubmitted.find_many(where={"member_id": member.id})
 
-                if not avail and not self.bot.playoffs:  # noqa
+                if len(avail) < 3 and not self.bot.playoffs: # noqa
                     await append_into_ir(self.bot, guild, member, self.roster_sheet, 0)
-                # Else already got into ir
 
             TEAM_ROLE = get(guild.roles, name="Team")
             for member in TEAM_ROLE.members:
@@ -234,7 +233,7 @@ class Tasker(commands.Cog):
             OWNERS = get(SUPPORT_GUILD.roles, name="Owners")
             COMISSIONERS = get(SUPPORT_GUILD.roles, name="Commissioners")
 
-            if len(playable_members) < 13 and not self.bot.playoffs:  # noqa
+            if len(playable_members) < 11 and not self.bot.playoffs:  # noqa
                 await cnc_team_channel.send(
                     content=(
                         f"The {get_team_name(guild.name)} need {11 - len(playable_members)} ECU "
