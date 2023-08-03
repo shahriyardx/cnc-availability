@@ -2,6 +2,7 @@ import asyncio
 import datetime
 import json
 import os
+import traceback
 from typing import List, Optional
 
 import nextcord
@@ -62,6 +63,7 @@ class Tasker(commands.Cog):
         try:
             await task_func(True)
         except Exception as e:
+            traceback.print_exc()
             return await interaction.edit_original_message(content=f"**Error**: {e}")
 
         await interaction.edit_original_message(content="Simulation succeded.")
@@ -116,11 +118,11 @@ class Tasker(commands.Cog):
 
             await unlockdown(channel=NEW_AVIAL_SUBMIT_CHANNEL, roles=PLAYERS_ROLE)
 
-            todays_date = datetime.datetime.now()
             # Send messages
             for day in play_days:
+                date = get_next_date(day)
                 await NEW_AVIAL_SUBMIT_CHANNEL.send(
-                    content=f"🚨🚨 **{day.upper()}** ({todays_date.month}/{todays_date.day}/{todays_date.year}) 🚨🚨"
+                    content=f"🚨🚨 **{day.upper()}** ({date.month}/{date.day}/{date.year}) 🚨🚨"
                 )
                 for time in play_times:
                     msg = await NEW_AVIAL_SUBMIT_CHANNEL.send(content=f"__**{day.upper()}**__ {time}")
@@ -205,15 +207,17 @@ class Tasker(commands.Cog):
             # Report back in CNC Discord
             playable_members: List[Member] = list()
 
-            for member in TEAM_ROLE.members:
-                has_ir = get(member.roles, name="IR")
-                if has_ir:
-                    continue
+            if not self.bot.playoffs:
+                for member in TEAM_ROLE.members:
+                    submitted = get(member.roles, name="Availability Submitted")
 
-                avail = await self.bot.prisma.availabilitysubmitted.find_many(where={"member_id": member.id})
+                    if not submitted:
+                        await append_into_ir(self.bot, guild, member, self.roster_sheet, 0)
+                        continue
 
-                if len(avail) < 3 and not self.bot.playoffs: # noqa
-                    await append_into_ir(self.bot, guild, member, self.roster_sheet, 0)
+                    avail = await self.bot.prisma.availabilitysubmitted.find_many(where={"member_id": member.id})
+                    if len(avail) < 3:
+                        await append_into_ir(self.bot, guild, member, self.roster_sheet, 0)
 
             TEAM_ROLE = get(guild.roles, name="Team")
             for member in TEAM_ROLE.members:

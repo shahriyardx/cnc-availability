@@ -16,6 +16,7 @@ class IBot(AutoShardedBot):
     get_command_mention: Callable[[str], str]
     prisma: Prisma
     SUPPORT_GUILD: Guild
+    playoffs: bool
 
 
 @dataclass
@@ -36,7 +37,7 @@ Data = Itask(
     AVIAL_LOG_CHANNEL="availability",
     AVIAL_SUBMIT_CHANNEL="submit-availability",
     SUBMITTED_ROLE="Availability Submitted",
-    SUPPORT_GUILD=int(os.getenv("SUPPORT_GUILD", 831166408888942623)),
+    SUPPORT_GUILD=int(os.getenv("SUPPORT_GUILD", 1055597639028183080)),
     LINEUP_LOG_CHANNEL="lineups",
     LINEUP_SUBMIT_CHANNEL="submit-lineups",
 )

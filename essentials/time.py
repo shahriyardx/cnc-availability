@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta
 
+from typing import Union
 from typing_extensions import Literal
 
-Days = Literal["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+Days = Union[Literal["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], str]
 
 
 def get_next_date(day: Days, hour=0, minute=0, second=0):

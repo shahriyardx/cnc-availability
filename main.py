@@ -88,6 +88,9 @@ class Availability(commands.AutoShardedBot):
         channel = guild.get_channel(reaction.channel_id)
         member_id = reaction.user_id
 
+        if member_id == self.user.id:
+            return
+
         if channel.name != "submit-availability":
             return
 
@@ -110,6 +113,7 @@ class Availability(commands.AutoShardedBot):
 
         if reaction.emoji.name == "✅" and reaction.event_type == "REACTION_ADD":
             await message.remove_reaction("❌", member=reaction.member)
+            await reaction.member.add_roles(get(guild.roles, name="Availability Submitted"))
             await self.prisma.availabilitysubmitted.create(
                 {
                     "member_id": member_id,
