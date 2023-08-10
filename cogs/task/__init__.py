@@ -181,10 +181,10 @@ class Tasker(commands.Cog):
             if guild.id in Data.IGNORED_GUILDS:
                 continue
 
+            everyone_role = get(guild.roles, name="everyone") or get(guild.roles, name="@everyone")
             team_role = get(guild.roles, name=Data.PLAYERS_ROLE)
-            lineups_channel = get(guild.text_channels, name="submit-lineups")
 
-            if not team_role or not lineups_channel:
+            if not team_role:
                 continue
 
             # Lockdown submit channel - No more availability submission
@@ -193,7 +193,7 @@ class Tasker(commands.Cog):
             team_avail_log_channel = get(support_guild.text_channels, name=get_team_name(guild.name, prefix='╟・'))
 
             await submit_availability_channel.send(content="This concludes this weeks availability")
-            await lockdown(submit_availability_channel, roles=team_role)
+            await lockdown(submit_availability_channel, roles=everyone_role)
 
             if self.bot.playoffs:
                 continue
@@ -206,7 +206,6 @@ class Tasker(commands.Cog):
                     continue
 
                 avails = await self.bot.prisma.availabilitysubmitted.find_many(where={"member_id": member.id})
-
                 times = {
                     "Tuesday": [],
                     "Wednesday": [],
