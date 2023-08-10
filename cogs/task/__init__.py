@@ -16,7 +16,7 @@ from essentials.utils import get_team_name
 from utils.gspread import DataSheet
 
 from .stats import get_all_team_data
-from .utils import get_week, lockdown, unlockdown, report_games_played
+from .utils import get_week, lockdown, unlockdown, report_games_played, send_message
 
 
 class Tasker(commands.Cog):
@@ -222,8 +222,8 @@ class Tasker(commands.Cog):
 
                     message += f"{key}: {'/'.join(value)}\n"
 
-                await availability_log_channel.send(content=message)
-                await team_avail_log_channel.send(content=message)
+                await send_message(availability_log_channel, message)
+                await send_message(team_avail_log_channel, message)
 
                 if len(avails) < 3:
                     await append_into_ir(self.bot, guild, member, self.roster_sheet, 0)

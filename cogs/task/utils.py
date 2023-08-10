@@ -111,3 +111,12 @@ async def report_games_played(
             f"{get(bot.SUPPORT_GUILD.roles, name='Owners')}, "
             f"{get(bot.SUPPORT_GUILD.roles, name='Commissioners')}"
 
+
+async def send_message(channel: nextcord.TextChannel, content: str):
+    if not channel:
+        return
+
+    try:
+        await channel.send(content=content)
+    except Exception as e:
+        print(e)
