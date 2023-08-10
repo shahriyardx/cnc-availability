@@ -181,7 +181,6 @@ class Tasker(commands.Cog):
             if guild.id in Data.IGNORED_GUILDS:
                 continue
 
-            everyone_role = get(guild.roles, name="everyone") or get(guild.roles, name="@everyone")
             team_role = get(guild.roles, name=Data.PLAYERS_ROLE)
 
             if not team_role:
@@ -193,7 +192,7 @@ class Tasker(commands.Cog):
             team_avail_log_channel = get(support_guild.text_channels, name=get_team_name(guild.name, prefix='╟・'))
 
             await submit_availability_channel.send(content="This concludes this weeks availability")
-            await lockdown(submit_availability_channel, roles=everyone_role)
+            await lockdown(submit_availability_channel, roles=team_role)
 
             if self.bot.playoffs:
                 continue
