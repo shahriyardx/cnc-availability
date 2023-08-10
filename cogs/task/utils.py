@@ -10,7 +10,7 @@ from essentials.models import IBot, Data
 def get_permissions(state: bool):
     permission_overwrites = PermissionOverwrite()
     permission_overwrites.send_messages = state  # noqa
-    permission_overwrites.view_channel = True  # noqa
+    permission_overwrites.view_channel = false  # noqa
 
     return permission_overwrites
 

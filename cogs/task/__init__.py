@@ -3,11 +3,9 @@ import datetime
 import json
 import os
 import traceback
-from typing import List, Optional
 
-import nextcord
 from aioscheduler import TimedScheduler
-from nextcord import Interaction, Member, SlashOption, slash_command
+from nextcord import Interaction, SlashOption, slash_command
 from nextcord.ext import commands, tasks
 from nextcord.utils import get
 
@@ -103,51 +101,51 @@ class Tasker(commands.Cog):
             if guild.id in Data.IGNORED_GUILDS:
                 continue
 
-            PLAYERS_ROLE = get(guild.roles, name=Data.PLAYERS_ROLE)
-            SUBMITTED_ROLE = get(guild.roles, name=Data.SUBMITTED_ROLE)
-            IR_ROLE = get(guild.roles, name="IR")
-            ECU_ROLE = get(guild.roles, name="ECU")
+            players_role = get(guild.roles, name=Data.PLAYERS_ROLE)
+            submitted_role = get(guild.roles, name=Data.SUBMITTED_ROLE)
+            ir_role = get(guild.roles, name="IR")
+            ecu_role = get(guild.roles, name="ECU")
 
-            AVIAL_SUBMIT_CHANNEL = get(guild.text_channels, name=Data.AVIAL_SUBMIT_CHANNEL)
+            avail_submit_channel = get(guild.text_channels, name=Data.AVIAL_SUBMIT_CHANNEL)
 
-            if not PLAYERS_ROLE or not AVIAL_SUBMIT_CHANNEL or not SUBMITTED_ROLE:
+            if not players_role or not avail_submit_channel or not submitted_role:
                 continue
 
-            NEW_AVIAL_SUBMIT_CHANNEL = await AVIAL_SUBMIT_CHANNEL.clone()
-            await AVIAL_SUBMIT_CHANNEL.delete()
+            new_avail_submit_channel = await avail_submit_channel.clone()
+            await avail_submit_channel.delete()
 
-            await unlockdown(channel=NEW_AVIAL_SUBMIT_CHANNEL, roles=PLAYERS_ROLE)
+            await unlockdown(channel=new_avail_submit_channel, roles=players_role)
 
             # Send messages
             for day in play_days:
                 date = get_next_date(day)
-                await NEW_AVIAL_SUBMIT_CHANNEL.send(
+                await new_avail_submit_channel.send(
                     content=f"🚨🚨 **{day.upper()}** ({date.month}/{date.day}/{date.year}) 🚨🚨"
                 )
                 for time in play_times:
-                    msg = await NEW_AVIAL_SUBMIT_CHANNEL.send(content=f"__**{day.upper()}**__ {time}")
+                    msg = await new_avail_submit_channel.send(content=f"__**{day.upper()}**__ {time}")
                     await msg.add_reaction("✅")
                     await msg.add_reaction("❌")
                     await asyncio.sleep(2)
 
-            for member in SUBMITTED_ROLE.members:
+            for member in submitted_role.members:
                 try:
-                    await member.remove_roles(SUBMITTED_ROLE, IR_ROLE, reason="Open Availability")
+                    await member.remove_roles(submitted_role, ir_role, reason="Open Availability")
                 except Exception as e:
                     print(e)
 
-            for member in IR_ROLE.members:
+            for member in ir_role.members:
                 try:
-                    await member.remove_roles(IR_ROLE, reason="Open Availability")
+                    await member.remove_roles(ir_role, reason="Open Availability")
                 except Exception as e:
                     print(e)
 
-            for member in ECU_ROLE.members:
+            for member in ecu_role.members:
                 try:
                     await member.kick()
                 except:  # noqa
                     try:
-                        await member.remove_roles(ECU_ROLE)
+                        await member.remove_roles(ecu_role)
                     except:  # noqa
                         pass
 
@@ -160,7 +158,7 @@ class Tasker(commands.Cog):
         # Closes availability submission
         # Open Lineups submit
 
-        SUPPORT_GUILD = self.bot.SUPPORT_GUILD
+        support_guild = self.bot.SUPPORT_GUILD
         print("[+] START close_availability_task")
         if not self.bot.tasks_enabled:  # noqa
             if not simulate:
@@ -178,80 +176,99 @@ class Tasker(commands.Cog):
             },
         )
 
+        # IR Process
         for guild in self.bot.guilds:
             if guild.id in Data.IGNORED_GUILDS:
                 continue
 
-            ECU_ROLE = get(guild.roles, name="ECU")
-            for member in ECU_ROLE.members:
-                try:
-                    await member.kick()
-                except:  # noqa
-                    try:
-                        await member.remove_roles(ECU_ROLE)
-                    except:  # noqa
-                        pass
+            team_role = get(guild.roles, name=Data.PLAYERS_ROLE)
+            lineups_channel = get(guild.text_channels, name="submit-lineups")
 
-            TEAM_ROLE = get(guild.roles, name=Data.PLAYERS_ROLE)
-            LINEUPS_CHANNEL = get(guild.text_channels, name=Data.LINEUP_SUBMIT_CHANNEL)
-
-            if not TEAM_ROLE or not LINEUPS_CHANNEL:
+            if not team_role or not lineups_channel:
                 continue
 
             # Lockdown submit channel - No more availability submission
             submit_availability_channel = get(guild.text_channels, name=Data.AVIAL_SUBMIT_CHANNEL)
+            availability_log_channel = get(guild.text_channels, name=Data.AVIAL_LOG_CHANNEL)
+            team_avail_log_channel = get(support_guild.text_channels, name=get_team_name(guild.name, prefix='╟・'))
+
             await submit_availability_channel.send(content="This concludes this weeks availability")
-            await lockdown(submit_availability_channel, roles=TEAM_ROLE)
+            await lockdown(submit_availability_channel, roles=team_role)
 
-            # Check who did not submit availability
-            # Report back in CNC Discord
-            playable_members: List[Member] = list()
+            if self.bot.playoffs:
+                continue
 
-            if not self.bot.playoffs:
-                for member in TEAM_ROLE.members:
-                    submitted = get(member.roles, name="Availability Submitted")
+            for member in team_role.members:
+                submitted = get(member.roles, name="Availability Submitted")
 
-                    if not submitted:
-                        await append_into_ir(self.bot, guild, member, self.roster_sheet, 0)
-                        continue
+                if not submitted:
+                    await append_into_ir(self.bot, guild, member, self.roster_sheet, 0)
+                    continue
 
-                    avail = await self.bot.prisma.availabilitysubmitted.find_many(where={"member_id": member.id})
-                    if len(avail) < 3:
-                        await append_into_ir(self.bot, guild, member, self.roster_sheet, 0)
+                avails = await self.bot.prisma.availabilitysubmitted.find_many(where={"member_id": member.id})
 
-            TEAM_ROLE = get(guild.roles, name="Team")
-            for member in TEAM_ROLE.members:
+                times = {
+                    "Tuesday": [],
+                    "Wednesday": [],
+                    "Thursday": [],
+                }
+                for avail in avails:
+                    times[avail.day].append(avail.time)
+
+                message = f"{member.mention} is available\n"
+                for key, value in times.items():
+                    if not value:
+                        message += f"{key}: None\n"
+
+                    message += f"{key}: {'/'.join(value)}\n"
+
+                await availability_log_channel.send(content=message)
+                await team_avail_log_channel.send(content=message)
+
+                if len(avails) < 3:
+                    await append_into_ir(self.bot, guild, member, self.roster_sheet, 0)
+
+        # Member count check
+        for guild in self.bot.guilds:
+            if guild.id in Data.IGNORED_GUILDS:
+                continue
+
+            team_role = get(guild.roles, name="Team")
+            lineups_channel = get(guild.text_channels, name="submit-lineups")
+            playable_members = []
+
+            for member in team_role.members:
                 has_ir = get(member.roles, name="IR")
                 if not has_ir:
                     playable_members.append(member)
 
             cnc_team_channel = get(
-                SUPPORT_GUILD.text_channels,
-                name=f"╟・{get_team_name(guild.name)}",
+                support_guild.text_channels,
+                name=get_team_name(guild.name, prefix='╟・'),
             )
 
             # Ask Owner and General Manager to submit for lineups
-            OWNER_ROLE = get(guild.roles, name="Owner")
-            GM_ROLE = get(guild.roles, name="General Manager")
+            owner_role = get(guild.roles, name="Owner")
+            gm_role = get(guild.roles, name="General Manager")
 
-            OWNERS = get(SUPPORT_GUILD.roles, name="Owners")
-            COMISSIONERS = get(SUPPORT_GUILD.roles, name="Commissioners")
+            owners_role = get(support_guild.roles, name="Owners")
+            commissioners_role = get(support_guild.roles, name="Commissioners")
 
             if len(playable_members) < 11 and not self.bot.playoffs:  # noqa
                 await cnc_team_channel.send(
                     content=(
                         f"The {get_team_name(guild.name)} need {11 - len(playable_members)} ECU "
-                        f"players this week {OWNERS.mention} {COMISSIONERS.mention}"
+                        f"players this week {owners_role.mention} {commissioners_role.mention}"
                     )
                 )
 
-            if not OWNER_ROLE or not GM_ROLE:
+            if not owner_role or not gm_role:
                 continue
 
-            await unlockdown(LINEUPS_CHANNEL, roles=[OWNER_ROLE, GM_ROLE])
-            await LINEUPS_CHANNEL.send(
+            await unlockdown(lineups_channel, roles=[owner_role, gm_role])
+            await lineups_channel.send(
                 content=(
-                    f"{OWNER_ROLE.mention} or {GM_ROLE.mention} please click on "
+                    f"{owner_role.mention} or {gm_role.mention} please click on "
                     f"{self.bot.get_command_mention('setlineups')} to enter your preliminary lineups"
                 )
             )
@@ -310,14 +327,14 @@ class Tasker(commands.Cog):
             if guild.id in Data.IGNORED_GUILDS:
                 continue
 
-            LINEUPS_CHANNEL = get(guild.text_channels, name=Data.LINEUP_SUBMIT_CHANNEL)
-            OWNER_ROLE = get(guild.roles, name="Owner")
-            GM_ROLE = get(guild.roles, name="General Manager")
+            lineups_channel = get(guild.text_channels, name=Data.LINEUP_SUBMIT_CHANNEL)
+            owner_role = get(guild.roles, name="Owner")
+            gm_role = get(guild.roles, name="General Manager")
 
-            if LINEUPS_CHANNEL and OWNER_ROLE and GM_ROLE:
-                await LINEUPS_CHANNEL.send(":information_source: Lineup editing has been closed for this week.")
+            if lineups_channel and owner_role and gm_role:
+                await lineups_channel.send(":information_source: Lineup editing has been closed for this week.")
 
-                await lockdown(LINEUPS_CHANNEL, roles=[OWNER_ROLE, GM_ROLE])
+                await lockdown(lineups_channel, roles=[owner_role, gm_role])
 
         print("[+] STOP close_lineup_channel")
 
@@ -373,12 +390,13 @@ class Tasker(commands.Cog):
 
         if mode in ["dev", "devstart"]:
             # Fake times
-            now = datetime.datetime.utcnow()
-            f16 = now + datetime.timedelta(seconds=3)
-            f17 = now + datetime.timedelta(seconds=10)
-            s16 = f17 + datetime.timedelta(seconds=30)
-            t4 = s16 + datetime.timedelta(seconds=30)
-            f2 = t4 + datetime.timedelta(seconds=30)
+            # now = datetime.datetime.utcnow()
+            # f16 = now + datetime.timedelta(seconds=3)
+            # f17 = now + datetime.timedelta(seconds=10)
+            # s16 = f17 + datetime.timedelta(seconds=30)
+            # t4 = s16 + datetime.timedelta(seconds=30)
+            # f2 = t4 + datetime.timedelta(seconds=30)
+            pass
 
             if mode == "devstart":
                 print("[+] Devstart mode")
