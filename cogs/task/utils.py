@@ -107,7 +107,7 @@ async def report_games_played(
             return mentions
 
         if cnc_team_channel:
-            pass
-            # await cnc_team_channel.send(content=mentions)
-            # f"{get(bot.SUPPORT_GUILD.roles, name='Owners')}, "
-            # f"{get(bot.SUPPORT_GUILD.roles, name='Commissioners')}"
+            await cnc_team_channel.send(content=mentions)
+            f"{get(bot.SUPPORT_GUILD.roles, name='Owners')}, "
+            f"{get(bot.SUPPORT_GUILD.roles, name='Commissioners')}"
+
