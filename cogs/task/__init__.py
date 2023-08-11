@@ -101,62 +101,69 @@ class Tasker(commands.Cog):
             if guild.id in Data.IGNORED_GUILDS:
                 continue
 
-            players_role = get(guild.roles, name=Data.PLAYERS_ROLE)
-            submitted_role = get(guild.roles, name=Data.SUBMITTED_ROLE)
-            ir_role = get(guild.roles, name="IR")
-            ecu_role = get(guild.roles, name="ECU")
+            print(f"=== Opening {guild.name}===")
 
-            avail_submit_channel = get(guild.text_channels, name=Data.AVIAL_SUBMIT_CHANNEL)
+            try:
+                players_role = get(guild.roles, name=Data.PLAYERS_ROLE)
+                submitted_role = get(guild.roles, name=Data.SUBMITTED_ROLE)
+                ir_role = get(guild.roles, name="IR")
+                ecu_role = get(guild.roles, name="ECU")
 
-            if not players_role or not avail_submit_channel or not submitted_role:
-                continue
+                avail_submit_channel = get(guild.text_channels, name=Data.AVIAL_SUBMIT_CHANNEL)
 
-            new_avail_submit_channel = await avail_submit_channel.clone()
-            await avail_submit_channel.delete()
+                if not players_role or not avail_submit_channel or not submitted_role:
+                    continue
 
-            await unlockdown(channel=new_avail_submit_channel, roles=players_role)
+                new_avail_submit_channel = await avail_submit_channel.clone()
+                await avail_submit_channel.delete()
 
-            # Send messages
-            for day in play_days:
-                date = get_next_date(day)
+                await unlockdown(channel=new_avail_submit_channel, roles=players_role)
+
+                # Send messages
+                for day in play_days:
+                    date = get_next_date(day)
+                    await new_avail_submit_channel.send(
+                        content=f"╔══ **{day.upper()}** ({date.month}/{date.day}/{date.year}) ══╗"
+                    )
+                    for time in play_times:
+                        msg = await new_avail_submit_channel.send(content=f"__**{day.upper()}**__ {time}")
+                        await msg.add_reaction("✅")
+                        await msg.add_reaction("❌")
+                        await asyncio.sleep(2)
+
+                    await new_avail_submit_channel.send(content="╚════════════════════╝")
+
                 await new_avail_submit_channel.send(
-                    content=f"╔══ **{day.upper()}** ({date.month}/{date.day}/{date.year}) ══╗"
+                    content=(
+                        f"{players_role.mention} choose which games you can play. "
+                        "You must select a minimum of 4 games or more"
+                    )
                 )
-                for time in play_times:
-                    msg = await new_avail_submit_channel.send(content=f"__**{day.upper()}**__ {time}")
-                    await msg.add_reaction("✅")
-                    await msg.add_reaction("❌")
-                    await asyncio.sleep(2)
 
-                await new_avail_submit_channel.send(content="╚════════════════════╝")
-
-            await new_avail_submit_channel.send(
-                content=(
-                    f"{players_role.mention} choose which games you can play. "
-                    "You must select a minimum of 4 games or more"
-                )
-            )
-
-            for member in submitted_role.members:
-                try:
-                    await member.remove_roles(submitted_role, ir_role, reason="Open Availability")
-                except Exception as e:
-                    print(e)
-
-            for member in ir_role.members:
-                try:
-                    await member.remove_roles(ir_role, reason="Open Availability")
-                except Exception as e:
-                    print(e)
-
-            for member in ecu_role.members:
-                try:
-                    await member.kick()
-                except:  # noqa
+                for member in submitted_role.members:
                     try:
-                        await member.remove_roles(ecu_role)
+                        await member.remove_roles(submitted_role, ir_role, reason="Open Availability")
+                    except Exception as e:
+                        print(e)
+
+                for member in ir_role.members:
+                    try:
+                        await member.remove_roles(ir_role, reason="Open Availability")
+                    except Exception as e:
+                        print(e)
+
+                for member in ecu_role.members:
+                    try:
+                        await member.kick()
                     except:  # noqa
-                        pass
+                        try:
+                            await member.remove_roles(ecu_role)
+                        except:  # noqa
+                            pass
+            except Exception as e:
+                traceback.print_exc()
+                print(e)
+
 
         print("[+] END open_availability_task")
         if not simulate:
