@@ -128,6 +128,8 @@ class Tasker(commands.Cog):
                     await msg.add_reaction("❌")
                     await asyncio.sleep(2)
 
+            await avail_submit_channel.send(content=f"{players_role.mention} choose which games you can play.")
+
             for member in submitted_role.members:
                 try:
                     await member.remove_roles(submitted_role, ir_role, reason="Open Availability")
