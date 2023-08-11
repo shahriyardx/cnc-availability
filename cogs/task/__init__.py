@@ -120,7 +120,7 @@ class Tasker(commands.Cog):
             for day in play_days:
                 date = get_next_date(day)
                 await new_avail_submit_channel.send(
-                    content=f"🚨🚨 **{day.upper()}** ({date.month}/{date.day}/{date.year}) 🚨🚨"
+                    content=f"╔══ **{day.upper()}** ({date.month}/{date.day}/{date.year}) ══╗"
                 )
                 for time in play_times:
                     msg = await new_avail_submit_channel.send(content=f"__**{day.upper()}**__ {time}")
@@ -128,7 +128,14 @@ class Tasker(commands.Cog):
                     await msg.add_reaction("❌")
                     await asyncio.sleep(2)
 
-            await avail_submit_channel.send(content=f"{players_role.mention} choose which games you can play.")
+                await new_avail_submit_channel.send(content="╚════════════════════╝")
+
+            await avail_submit_channel.send(
+                content=(
+                    f"{players_role.mention} choose which games you can play. "
+                    "You must select a minimum of 4 games or more"
+                )
+            )
 
             for member in submitted_role.members:
                 try:
