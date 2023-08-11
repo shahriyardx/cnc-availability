@@ -130,7 +130,7 @@ class Tasker(commands.Cog):
 
                 await new_avail_submit_channel.send(content="╚════════════════════╝")
 
-            await avail_submit_channel.send(
+            await new_avail_submit_channel.send(
                 content=(
                     f"{players_role.mention} choose which games you can play. "
                     "You must select a minimum of 4 games or more"
