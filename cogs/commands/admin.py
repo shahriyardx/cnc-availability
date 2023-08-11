@@ -209,6 +209,13 @@ class UtilityCommands(commands.Cog):
 
         await interaction.edit_original_message(content="Nickname sync started")
 
+        all_members = [member for member in interaction.guild.members if not member.bot]
+        synced = 0
+
+        msg = await interaction.guild.get_channel(interaction.channel_id).send(
+            content=f"Synced {synced}/{len(all_members)}"
+        )
+
         nick_data = self.nick_sheet.get_values("data")
         nicks = {}
 
@@ -222,13 +229,17 @@ class UtilityCommands(commands.Cog):
             if is_member:
                 nicks[uid] = row[1].strip()
 
-        all_members = [member for member in interaction.guild.members if not member.bot]
         if target:
             all_members = [target]
 
         for m in all_members:
             if m.id in nicks:
                 await m.edit(nick=nicks[m.id])
+                synced += 1
+
+                if synced % 10 == 0:
+                    await msg.edit(content=f"Synced {synced}/{len(all_members)}")
+
                 if len(all_members) > 1:
                     await asyncio.sleep(5)
 
