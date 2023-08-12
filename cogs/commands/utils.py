@@ -126,7 +126,7 @@ async def append_into_ir(
 ):
     current_time = datetime.now(pytz.timezone("US/Eastern"))
     all_values = [IR.create(data) for data in sheet.get_values("IR")]
-    items = list(filter(lambda x: x.player == user.display_name, all_values))
+    items = list(filter(lambda x: x.discord_id == str(user.id), all_values))
     status = "Approved" if len(items) < 2 else "Denied"
     team_name = guild.name.replace("CNC", "").strip()
 
