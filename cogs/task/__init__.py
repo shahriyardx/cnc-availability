@@ -268,7 +268,7 @@ class Tasker(commands.Cog):
                 for key, value in times.items():
                     if not value:
                         message += f"{key}: None\n"
-                    if len(value) == 3:
+                    elif len(value) == 3:
                         message += f"{key}: All\n"
                     else:
                         message += f"{key}: {'/'.join(value)}\n"
