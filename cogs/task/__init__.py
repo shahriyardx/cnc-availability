@@ -268,8 +268,8 @@ class Tasker(commands.Cog):
                 for key, value in times.items():
                     if not value:
                         message += f"{key}: None\n"
-
-                    message += f"{key}: {'/'.join(value)}\n"
+                    else:
+                        message += f"{key}: {'/'.join(value)}\n"
 
                 await send_message(availability_log_channel, message)
                 await send_message(team_avail_log_channel, message)
