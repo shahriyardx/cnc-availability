@@ -199,7 +199,6 @@ class Tasker(commands.Cog):
                 traceback.print_exc()
                 print(e)
 
-
         print("[+] END open_availability_task")
         if not simulate:
             self.start_task(self.open_availability_task, get_next_date("Friday", hour=17))
@@ -262,7 +261,8 @@ class Tasker(commands.Cog):
                     "Thursday": [],
                 }
                 for avail in avails:
-                    times[avail.day].append(avail.time)
+                    if avail.time not in times[avail.day]:
+                        times[avail.day].append(avail.time)
 
                 message = f"{member.mention} is available\n"
                 for key, value in times.items():
@@ -274,7 +274,11 @@ class Tasker(commands.Cog):
                 await send_message(availability_log_channel, message)
                 await send_message(team_avail_log_channel, message)
 
-                if len(avails) < 3:
+                total_avails = 0
+                for val in times.values():
+                    total_avails += len(val)
+
+                if total_avails < 3:
                     await append_into_ir(self.bot, guild, member, self.roster_sheet, 0)
 
         # Member count check
