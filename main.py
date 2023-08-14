@@ -114,14 +114,23 @@ class Availability(commands.AutoShardedBot):
         if reaction.emoji.name == "✅" and reaction.event_type == "REACTION_ADD":
             await message.remove_reaction("❌", member=reaction.member)
             await reaction.member.add_roles(get(guild.roles, name="Availability Submitted"))
-            await self.prisma.availabilitysubmitted.create(
-                {
+            submits = await self.prisma.availabilitysubmitted.find_many(
+                where={
                     "member_id": member_id,
                     "day": day,
                     "time": time,
-                    "week": week,
                 }
             )
+
+            if not submits:
+                await self.prisma.availabilitysubmitted.create(
+                    {
+                        "member_id": member_id,
+                        "day": day,
+                        "time": time,
+                        "week": week,
+                    }
+                )
 
         if (reaction.emoji.name == "✅" and reaction.event_type == "REACTION_REMOVE") or (
             reaction.emoji.name == "❌" and reaction.event_type == "REACTION_ADD"
