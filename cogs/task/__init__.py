@@ -66,6 +66,41 @@ class Tasker(commands.Cog):
 
         await interaction.edit_original_message(content="Simulation succeded.")
 
+    @slash_command(description="Simulate specific tasks")
+    async def repost_avail(self, interaction: Interaction):
+        if interaction.user.id not in [696939596667158579, 810256917497905192]:
+            return
+
+        await interaction.response.defer(ephemeral=True)
+
+        play_days = ["Tuesday", "Wednesday", "Thursday"]
+        play_times = ["8:30pm", "9:10pm", "9:50pm"]
+
+        new_avail_submit_channel = get(interaction.guild.channels, name="submit-availability")
+        players_role = get(interaction.guild.roles, name="Team")
+
+        for day in play_days:
+            date = get_next_date(day)
+            await new_avail_submit_channel.send(
+                content=f"╔══ **{day.upper()}** ({date.month}/{date.day}/{date.year}) ══╗"
+            )
+            for time in play_times:
+                msg = await new_avail_submit_channel.send(content=f"__**{day.upper()}**__ {time}")
+                await msg.add_reaction("✅")
+                await msg.add_reaction("❌")
+                await asyncio.sleep(2)
+
+            await new_avail_submit_channel.send(content="╚════════════════════╝")
+
+        await new_avail_submit_channel.send(
+            content=(
+                f"{players_role.mention} choose which games you can play. "
+                "You must select a minimum of 4 games or more"
+            )
+        )
+
+        await interaction.followup.send(content="Done ✅")
+
     async def open_availability_task(self, simulate: bool = False):
         # Runs Friday 5 PM UTC
         # Opens availability
