@@ -251,7 +251,7 @@ class Tasker(commands.Cog):
                 submitted = get(member.roles, name="Availability Submitted")
 
                 if not submitted:
-                    await append_into_ir(self.bot, guild, member, self.roster_sheet, 0)
+                    # await append_into_ir(self.bot, guild, member, self.roster_sheet, 0)
                     continue
 
                 avails = await self.bot.prisma.availabilitysubmitted.find_many(where={"member_id": member.id})
@@ -279,7 +279,8 @@ class Tasker(commands.Cog):
                     total_avails += len(val)
 
                 if total_avails < 3:
-                    await append_into_ir(self.bot, guild, member, self.roster_sheet, 0)
+                    # await append_into_ir(self.bot, guild, member, self.roster_sheet, 0)
+                    pass
 
         # Member count check
         for guild in self.bot.guilds:
