@@ -311,8 +311,9 @@ class UtilityCommands(commands.Cog):
 
     @slash_command(description="Testing new avail")
     async def new_setlineups(self, interaction: Interaction):
-        await interaction.response.defer()
-
+        await interaction.response.defer(ephemeral=True)
+        team_role = get(interaction.guild.roles, )
+        members = [member for member in interaction.guild.members if not member.bot and not member.nick]
         # ============ Day and Time ============== #
         day_time_view = DayAndTimeView()
         await interaction.edit_original_message(
@@ -324,29 +325,41 @@ class UtilityCommands(commands.Cog):
         if day_time_view.cancelled:
             return await interaction.edit_original_message(content="Cancelled")
 
+
+
         lw_members = [
-            member.nick for member in interaction.guild.members if "Left Wing" in [role.name for role in member.roles]
+            member.nick
+            for member in interaction.guild.members
+            if "Left Wing" in [role.name for role in member.roles] and member.nick
         ]
         rw_members = [
-            member.nick for member in interaction.guild.members if "Right Wing" in [role.name for role in member.roles]
+            member.nick
+            for member in interaction.guild.members
+            if "Right Wing" in [role.name for role in member.roles] and member.nick
         ]
         g_members = [
-            member.nick for member in interaction.guild.members if "Goalie" in [role.name for role in member.roles]
+            member.nick
+            for member in interaction.guild.members
+            if "Goalie" in [role.name for role in member.roles] and member.nick
         ]
 
         ld_members = [
             member.nick
             for member in interaction.guild.members
-            if "Left Defense" in [role.name for role in member.roles]
+            if "Left Defense" in [role.name for role in member.roles] and member.nick
         ]
         rd_members = [
             member.nick
             for member in interaction.guild.members
-            if "Right Defense" in [role.name for role in member.roles]
+            if "Right Defense" in [role.name for role in member.roles] and member.nick
         ]
         c_members = [
-            member.nick for member in interaction.guild.members if "Center" in [role.name for role in member.roles]
+            member.nick
+            for member in interaction.guild.members
+            if "Center" in [role.name for role in member.roles] and member.nick
         ]
+
+        print(lw_members, rw_members, g_members)
 
         first_stage = StagePlayers(lw_members, rw_members, g_members)
         await interaction.edit_original_message(content="Select players", view=first_stage)

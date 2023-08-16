@@ -45,8 +45,6 @@ class Availability(commands.AutoShardedBot):
         self.SUPPORT_GUILD = self.get_guild(Data.SUPPORT_GUILD)
 
         settings = await self.prisma.settings.find_first()
-        self.tasks_enabled = settings.tasks_enabled
-        self.playoffs = settings.playofss
 
         if not settings:
             await self.prisma.settings.create(
@@ -55,6 +53,12 @@ class Availability(commands.AutoShardedBot):
                     "can_submit_lineups": False,
                 }
             )
+
+            self.tasks_enabled = True
+            self.playoffs = False
+        else:
+            self.tasks_enabled = settings.tasks_enabled
+            self.playoffs = settings.playofss
 
         print(f"{self.user} is ready..")
 
