@@ -1,7 +1,7 @@
 import traceback
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 import pytz
 import nextcord
@@ -222,3 +222,48 @@ async def append_into_ir(
                     await member.remove_roles(*[Object(role_id) for role_id in inactive_roles])
                 except Exception as e:
                     print(e)
+
+
+@dataclass
+class CustomMember:
+    id: int
+    nick: str
+    roles: List[nextcord.Role]
+    position: str = ""
+
+    def __post_init__(self):
+        position_roles = [
+            role.name
+            for role in self.roles
+            if role.name in ["Left Wing", "Right Wing", "Left Defense", "Right Defense", "Center", "Goalie", "ECU"]
+        ]
+
+        positions = []
+        for role in position_roles:
+            if role == "ECU":
+                positions.append("ECU")
+            else:
+                parts = role.split(" ")
+                name = ""
+                for part in parts:
+                    name += part[0]
+
+                positions.append(name)
+
+        position = ", ".join(positions)
+        self.position = f"({position})"
+
+    def __eq__(self, other) -> bool:
+        return self.id == other.id
+
+    def __hash__(self) -> int:
+        return self.id
+
+
+@dataclass
+class CustomRole:
+    name: str
+
+
+def get_custom_member(member: nextcord.Member) -> CustomMember:
+    return CustomMember(member.id, nick=member.nick, roles=member.roles)

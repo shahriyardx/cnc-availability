@@ -11,8 +11,8 @@ from nextcord.utils import get
 from essentials.models import Data, IBot
 from utils.gspread import DataSheet
 from essentials.data import team_names
-from .utils import sync_player
-from ..task.utils import report_games_played, get_week
+from .utils import sync_player, get_custom_member, CustomMember, CustomRole
+from ..task.utils import report_games_played, get_week, get_team_name
 from .views import DayAndTimeView, StagePlayers
 
 
@@ -309,71 +309,93 @@ class UtilityCommands(commands.Cog):
 
         await interaction.followup.send(content=message)
 
-    @slash_command(description="Testing new avail")
-    async def new_setlineups(self, interaction: Interaction):
-        await interaction.response.defer(ephemeral=True)
-        team_role = get(interaction.guild.roles, )
-        members = [member for member in interaction.guild.members if not member.bot and not member.nick]
-        # ============ Day and Time ============== #
-        day_time_view = DayAndTimeView()
-        await interaction.edit_original_message(
-            content="Select days and times",
-            view=day_time_view,
+    async def submitted(self, member_id: int, day: str, time: str):
+        data = await self.bot.prisma.availabilitysubmitted.find_first(
+            where={"member_id": member_id, "day": day, "time": time}
         )
 
-        await day_time_view.wait()
-        if day_time_view.cancelled:
-            return await interaction.edit_original_message(content="Cancelled")
+        if data:
+            return True
 
+        return False
 
+    @slash_command(description="Testing new avail")
+    async def new_setlineups(
+        self,
+        interaction: Interaction,
+        day: str = SlashOption(
+            description="day",
+            required=True,
+            choices={"Tuesday": "Tuesday", "Wednesday": "Wednesday", "Thirsday": "Thursday"},
+        ),
+        time: str = SlashOption(
+            description="day",
+            required=True,
+            choices={"8:50pm": "8:50pm", "9:10pm": "9:10pm", "9:30pm": "9:30pm"},
+        ),
+    ):
+        await interaction.response.defer(ephemeral=True)
 
-        lw_members = [
-            member.nick
-            for member in interaction.guild.members
-            if "Left Wing" in [role.name for role in member.roles] and member.nick
-        ]
-        rw_members = [
-            member.nick
-            for member in interaction.guild.members
-            if "Right Wing" in [role.name for role in member.roles] and member.nick
-        ]
-        g_members = [
-            member.nick
-            for member in interaction.guild.members
-            if "Goalie" in [role.name for role in member.roles] and member.nick
+        team_name = get_team_name(interaction.guild.name)
+        prev = await self.bot.prisma.lineup.find_first(where={"team": team_name, "day": day, "time": time})
+
+        if prev:
+            return await interaction.followup.send(content=f"Lineup already exists. ID: {prev.id}")
+
+        team_role = get(interaction.guild.roles, name="Team")
+        ecu_role = get(interaction.guild.roles, name="ECU")
+        ir_role = get(interaction.guild.roles, name="IR")
+
+        members = [member for member in [*team_role.members, *ecu_role.members] if not member.bot and member.nick]
+        members = [
+            get_custom_member(member)
+            for member in members
+            if ir_role not in member.roles and await self.submitted(member.id, day, time)
         ]
 
-        ld_members = [
-            member.nick
-            for member in interaction.guild.members
-            if "Left Defense" in [role.name for role in member.roles] and member.nick
-        ]
-        rd_members = [
-            member.nick
-            for member in interaction.guild.members
-            if "Right Defense" in [role.name for role in member.roles] and member.nick
-        ]
-        c_members = [
-            member.nick
-            for member in interaction.guild.members
-            if "Center" in [role.name for role in member.roles] and member.nick
-        ]
+        # position roles
+        lw_role = get(interaction.guild.roles, name="Left Wing")
+        rw_role = get(interaction.guild.roles, name="Right Wing")
+        ld_role = get(interaction.guild.roles, name="Left Defense")
+        rd_role = get(interaction.guild.roles, name="Right Defense")
+        c_role = get(interaction.guild.roles, name="Center")
+        g_role = get(interaction.guild.roles, name="Goalie")
 
-        print(lw_members, rw_members, g_members)
+        lw_members = [member for member in members if lw_role in member.roles]
+        rw_members = [member for member in members if rw_role in member.roles]
+        g_members = [member for member in members if g_role in member.roles]
+        ld_members = [member for member in members if ld_role in member.roles]
+        rd_members = [member for member in members if rd_role in member.roles]
+        c_members = [member for member in members if c_role in member.roles]
 
-        first_stage = StagePlayers(lw_members, rw_members, g_members)
+        lw_rw_c = [
+            CustomMember(id=0, nick="ECU", roles=[CustomRole("ECU")]),
+            *set([*lw_members, *rw_members, *c_members]),
+        ]
+        ld_rd = [CustomMember(id=0, nick="ECU", roles=[CustomRole("ECU")]), *set([*ld_members, *rd_members])]
+        g = [CustomMember(id=0, nick="ECU", roles=[CustomRole("ECU")]), *set([*g_members])]
+
+        data = {}
+
+        first_stage = StagePlayers(lw_rw_c, lw_rw_c, lw_rw_c, ["LW", "RW", "C"])
         await interaction.edit_original_message(content="Select players", view=first_stage)
 
         await first_stage.wait()
         if first_stage.cancelled:
             return await interaction.edit_original_message(content="Cancelled")
 
-        second_stage = StagePlayers(ld_members, rd_members, c_members)
+        data.update(first_stage.data)
+
+        second_stage = StagePlayers(ld_rd, ld_rd, g, ["LD", "RD", "G"])
         await interaction.edit_original_message(content="Select players", view=second_stage)
 
         await second_stage.wait()
         if second_stage.cancelled:
             return await interaction.edit_original_message(content="Cancelled")
+
+        data.update(second_stage.data)
+
+        await self.bot.prisma.lineup.create({"data": json.dumps(data), "day": day, "time": time, "team": team_name})
 
         await interaction.edit_original_message(
             content="New setlineups is still in beta. Please wait for production release"

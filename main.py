@@ -1,11 +1,12 @@
 import datetime
 import os
-from typing import Optional
+from typing import Dict, List, Optional
 
 import nextcord
 from dotenv import load_dotenv
 from nextcord import Intents
 from nextcord.ext import commands
+from nextcord.types.interactions import ApplicationCommand as ApplicationCommandPayload
 from nextcord.utils import get
 
 from essentials.models import Data
@@ -29,8 +30,8 @@ def get_number(value):
 
 
 class Availability(commands.AutoShardedBot):
-    def __init__(self, command_prefix: str, **kwargs):
-        super().__init__(command_prefix, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.prisma = Prisma()
         self.SUPPORT_GUILD: Optional[nextcord.Guild] = None
         self.roster_sheet = DataSheet("NHL Live Draft Sheet")
@@ -40,6 +41,15 @@ class Availability(commands.AutoShardedBot):
         self.playoffs = False
         self.rollout_application_commands = False
 
+    async def rollout_application_commands(self) -> None:
+        print("rolling out")
+        pass
+
+    async def sync_all_application_commands(self, **kwargs) -> None:
+        print("sync")
+        pass
+    
+
     async def on_ready(self):
         await self.prisma.connect()
         self.SUPPORT_GUILD = self.get_guild(Data.SUPPORT_GUILD)
@@ -47,18 +57,16 @@ class Availability(commands.AutoShardedBot):
         settings = await self.prisma.settings.find_first()
 
         if not settings:
-            await self.prisma.settings.create(
+            settings = await self.prisma.settings.create(
                 data={
                     "can_edit_lineups": False,
                     "can_submit_lineups": False,
                 }
             )
 
-            self.tasks_enabled = True
-            self.playoffs = False
-        else:
-            self.tasks_enabled = settings.tasks_enabled
-            self.playoffs = settings.playofss
+
+        self.tasks_enabled = settings.tasks_enabled
+        self.playoffs = settings.playofss
 
         print(f"{self.user} is ready..")
 
@@ -171,7 +179,7 @@ class Availability(commands.AutoShardedBot):
             return f"/{command_name}"
 
 
-bot = Availability(command_prefix="a.", intents=intents)
+bot = Availability(intents=intents)
 
 bot.load_extension("cogs.commands")
 bot.load_extension("cogs.commands.admin")
