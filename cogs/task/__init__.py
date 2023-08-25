@@ -8,7 +8,6 @@ from aioscheduler import TimedScheduler
 from nextcord import Interaction, SlashOption, slash_command
 from nextcord.ext import commands, tasks
 from nextcord.utils import get
-
 from cogs.commands.utils import append_into_ir
 from essentials.models import Data, IBot
 from essentials.time import get_next_date
@@ -239,7 +238,7 @@ class Tasker(commands.Cog):
             # Lockdown submit channel - No more availability submission
             submit_availability_channel = get(guild.text_channels, name=Data.AVIAL_SUBMIT_CHANNEL)
             availability_log_channel = get(guild.text_channels, name=Data.AVIAL_LOG_CHANNEL)
-            team_avail_log_channel = get(support_guild.text_channels, name=get_team_name(guild.name, prefix='╟・'))
+            team_avail_log_channel = get(support_guild.text_channels, name=get_team_name(guild.name, prefix="╟・"))
 
             await submit_availability_channel.send(content="This concludes this weeks availability")
             await lockdown(submit_availability_channel, roles=team_role)
@@ -251,8 +250,7 @@ class Tasker(commands.Cog):
                 submitted = get(member.roles, name="Availability Submitted")
 
                 if not submitted:
-                    # await append_into_ir(self.bot, guild, member, self.roster_sheet, 0)
-                    continue
+                    await append_into_ir(self.bot, guild, member, self.roster_sheet, 0)
 
                 avails = await self.bot.prisma.availabilitysubmitted.find_many(where={"member_id": member.id})
                 times = {
@@ -281,8 +279,7 @@ class Tasker(commands.Cog):
                     total_avails += len(val)
 
                 if total_avails < 3:
-                    # await append_into_ir(self.bot, guild, member, self.roster_sheet, 0)
-                    pass
+                    await append_into_ir(self.bot, guild, member, self.roster_sheet, 0)
 
         # Member count check
         for guild in self.bot.guilds:
@@ -300,7 +297,7 @@ class Tasker(commands.Cog):
 
             cnc_team_channel = get(
                 support_guild.text_channels,
-                name=get_team_name(guild.name, prefix='╟・'),
+                name=get_team_name(guild.name, prefix="╟・"),
             )
 
             # Ask Owner and General Manager to submit for lineups
@@ -331,7 +328,7 @@ class Tasker(commands.Cog):
 
         print("[+] STOP close_availability_task")
         if not simulate:
-            self.start_task(self.close_availability_task, get_next_date("Monday", hour=17))
+            self.start_task(self.close_availability_task, get_next_date("Monday", hour=16))
 
     async def close_lineup_submit(self, simulate: bool = False):
         # Runs Tuesday 4 AM
