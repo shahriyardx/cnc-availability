@@ -346,30 +346,32 @@ class UtilityCommands(commands.Cog):
 
     async def send_lineup_message(self, lineup, interaction: Interaction, data: dict, day: str, time: str):
         msg = ""
-        for key, value in data:
+        mentions = ""
+        for key, value in data.items():
             if value == 1:
                 mention = "Generic ECU"
             else:
                 member = interaction.guild.get_member(value)
                 if member:
                     mention = member.mention
+                    mentions += f"{member.mention} "
                 else:
                     mention = f"Unknown Member, ID: `{value}`"
 
             msg += f"{key}: {mention}\n"
 
-        embed = nextcord.Embed(title=f"# {day} - {time}")
+        embed = nextcord.Embed(title=f"{day} - {time}")
         embed.description = msg
         embed.set_thumbnail(interaction.guild.icon.url)
 
-        await interaction.channel.send(content=lineup.id, embed=embed)
+        await interaction.channel.send(content=f"Lineup ID: {lineup.id}\n{mentions}", embed=embed)
         support_guild = self.bot.get_guild(Data.SUPPORT_GUILD)
         team_log_channel = get(
                 support_guild.text_channels,
                 name=f"╟・{get_team_name(interaction.guild.name)}",
             )
         if team_log_channel:
-            await team_log_channel.send(content=lineup.id, embed=embed)
+            await team_log_channel.send(content=f"Lineup ID: {lineup.id}\n{mentions}", embed=embed)
 
     @slash_command(description="Testing new avail")
     async def new_setlineups(

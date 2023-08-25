@@ -1,6 +1,6 @@
 import nextcord
 from nextcord import ui
-from typing import Optional, List, Callable
+from typing import List, Callable
 from nextcord import SelectOption
 from .utils import CustomMember
 
@@ -68,7 +68,7 @@ class CustomMemberSelect(ui.StringSelect):
         for member in members:
             self.add_option(
                 label=f"{member.nick} {member.position}",
-                value=member.id,
+                value=str(member.id),
                 default=member.id == default,
             )
 
@@ -96,11 +96,7 @@ class StagePlayers(ui.View):
                 p[2]: 0,
             }
 
-        self.data = {
-            p[0]: 0,
-            p[1]: 0,
-            p[2]: 0,
-        }
+        self.data = {**defaults}
 
         self.cancelled: bool = False
         self.p = p
