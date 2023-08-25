@@ -11,9 +11,9 @@ from nextcord.utils import get
 from essentials.models import Data, IBot
 from utils.gspread import DataSheet
 from essentials.data import team_names
-from .utils import sync_player, get_custom_member, CustomMember, CustomRole
+from .utils import sync_player, get_custom_member, CustomMember, CustomRole, valid_member
 from ..task.utils import report_games_played, get_week, get_team_name
-from .views import DayAndTimeView, StagePlayers
+from .views import StagePlayers
 
 
 class UtilityCommands(commands.Cog):
@@ -26,9 +26,9 @@ class UtilityCommands(commands.Cog):
 
     @slash_command(description="Sync your roles and nickname with Roster sheet")
     async def sync(
-        self,
-        interaction: Interaction,
-        player: nextcord.Member = SlashOption(description="The member to sync", required=False),
+            self,
+            interaction: Interaction,
+            player: nextcord.Member = SlashOption(description="The member to sync", required=False),
     ):
         await interaction.response.defer(ephemeral=True)
 
@@ -47,9 +47,9 @@ class UtilityCommands(commands.Cog):
 
     @slash_command(description="Enable or disable tasks")
     async def toggle_tasks(
-        self,
-        interaction: Interaction,
-        status: bool = SlashOption(name="status", description="True = Enabled, False = Disabled", required=True),
+            self,
+            interaction: Interaction,
+            status: bool = SlashOption(name="status", description="True = Enabled, False = Disabled", required=True),
     ):
         await interaction.response.defer(ephemeral=True)
 
@@ -69,9 +69,9 @@ class UtilityCommands(commands.Cog):
 
     @slash_command(description="Enable of disable playoffs")
     async def toggle_playoffs(
-        self,
-        interaction: Interaction,
-        status: bool = SlashOption(name="status", description="True = Enabled, False = Disabled", required=True),
+            self,
+            interaction: Interaction,
+            status: bool = SlashOption(name="status", description="True = Enabled, False = Disabled", required=True),
     ):
         await interaction.response.defer(ephemeral=True)
 
@@ -91,9 +91,9 @@ class UtilityCommands(commands.Cog):
 
     @slash_command(description="Reset ir of a player")
     async def resetir(
-        self,
-        interaction: Interaction,
-        player: nextcord.Member = SlashOption(description="The player to reset ir", required=True),
+            self,
+            interaction: Interaction,
+            player: nextcord.Member = SlashOption(description="The player to reset ir", required=True),
     ):
         await interaction.response.defer()
 
@@ -144,9 +144,9 @@ class UtilityCommands(commands.Cog):
 
     @slash_command(description="Sync nicknames from sheet")
     async def syncall(
-        self,
-        interaction: Interaction,
-        team: nextcord.Role = SlashOption(description="Team role", required=False),
+            self,
+            interaction: Interaction,
+            team: nextcord.Role = SlashOption(description="Team role", required=False),
     ):
         if interaction.user.id not in [696939596667158579, 810256917497905192]:
             return
@@ -198,9 +198,9 @@ class UtilityCommands(commands.Cog):
 
     @slash_command(description="sync nickname in official cnc discord")
     async def syncnick(
-        self,
-        interaction: Interaction,
-        target: nextcord.Member = SlashOption(description="member to sync nick", required=False),
+            self,
+            interaction: Interaction,
+            target: nextcord.Member = SlashOption(description="member to sync nick", required=False),
     ):
         await interaction.response.defer()
 
@@ -247,9 +247,9 @@ class UtilityCommands(commands.Cog):
 
     @slash_command(description="Report stats of a specific server")
     async def report_stats(
-        self,
-        interaction: Interaction,
-        team: nextcord.Role = SlashOption(description="The team role", required=True),
+            self,
+            interaction: Interaction,
+            team: nextcord.Role = SlashOption(description="The team role", required=True),
     ):
         await interaction.response.defer()
 
@@ -275,9 +275,9 @@ class UtilityCommands(commands.Cog):
 
     @slash_command(description="See a player's stats")
     async def player_stats(
-        self,
-        interaction: Interaction,
-        player: nextcord.Member = SlashOption(description="The player", required=False),
+            self,
+            interaction: Interaction,
+            player: nextcord.Member = SlashOption(description="The player", required=False),
     ):
         await interaction.response.defer()
 
@@ -321,18 +321,18 @@ class UtilityCommands(commands.Cog):
 
     @slash_command(description="Testing new avail")
     async def new_setlineups(
-        self,
-        interaction: Interaction,
-        day: str = SlashOption(
-            description="day",
-            required=True,
-            choices={"Tuesday": "Tuesday", "Wednesday": "Wednesday", "Thirsday": "Thursday"},
-        ),
-        time: str = SlashOption(
-            description="day",
-            required=True,
-            choices={"8:50pm": "8:50pm", "9:10pm": "9:10pm", "9:30pm": "9:30pm"},
-        ),
+            self,
+            interaction: Interaction,
+            day: str = SlashOption(
+                description="day",
+                required=True,
+                choices={"Tuesday": "Tuesday", "Wednesday": "Wednesday", "Thirsday": "Thursday"},
+            ),
+            time: str = SlashOption(
+                description="day",
+                required=True,
+                choices={"8:50pm": "8:50pm", "9:10pm": "9:10pm", "9:30pm": "9:30pm"},
+            ),
     ):
         await interaction.response.defer(ephemeral=True)
 
@@ -342,17 +342,6 @@ class UtilityCommands(commands.Cog):
         if prev:
             return await interaction.followup.send(content=f"Lineup already exists. ID: {prev.id}")
 
-        team_role = get(interaction.guild.roles, name="Team")
-        ecu_role = get(interaction.guild.roles, name="ECU")
-        ir_role = get(interaction.guild.roles, name="IR")
-
-        members = [member for member in [*team_role.members, *ecu_role.members] if not member.bot and member.nick]
-        members = [
-            get_custom_member(member)
-            for member in members
-            if ir_role not in member.roles and await self.submitted(member.id, day, time)
-        ]
-
         # position roles
         lw_role = get(interaction.guild.roles, name="Left Wing")
         rw_role = get(interaction.guild.roles, name="Right Wing")
@@ -361,19 +350,20 @@ class UtilityCommands(commands.Cog):
         c_role = get(interaction.guild.roles, name="Center")
         g_role = get(interaction.guild.roles, name="Goalie")
 
-        lw_members = [member for member in members if lw_role in member.roles]
-        rw_members = [member for member in members if rw_role in member.roles]
-        g_members = [member for member in members if g_role in member.roles]
-        ld_members = [member for member in members if ld_role in member.roles]
-        rd_members = [member for member in members if rd_role in member.roles]
-        c_members = [member for member in members if c_role in member.roles]
+        lw_members = [get_custom_member(member) for member in lw_role.members if valid_member(member)]
+        rw_members = [get_custom_member(member) for member in rw_role.members if valid_member(member)]
+        g_members = [get_custom_member(member) for member in g_role.members if valid_member(member)]
+        ld_members = [get_custom_member(member) for member in ld_role.members if valid_member(member)]
+        rd_members = [get_custom_member(member) for member in rd_role.members if valid_member(member)]
+        c_members = [get_custom_member(member) for member in c_role.members if valid_member(member)]
 
         lw_rw_c = [
             CustomMember(id=0, nick="ECU", roles=[CustomRole("ECU")]),
-            *set([*lw_members, *rw_members, *c_members]),
+            *{*lw_members, *rw_members, *c_members},
         ]
-        ld_rd = [CustomMember(id=0, nick="ECU", roles=[CustomRole("ECU")]), *set([*ld_members, *rd_members])]
-        g = [CustomMember(id=0, nick="ECU", roles=[CustomRole("ECU")]), *set([*g_members])]
+
+        ld_rd = [CustomMember(id=0, nick="ECU", roles=[CustomRole("ECU")]), *{*ld_members, *rd_members}]
+        g = [CustomMember(id=0, nick="ECU", roles=[CustomRole("ECU")]), *{*g_members}]
 
         data = {}
 

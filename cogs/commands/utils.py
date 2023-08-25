@@ -1,7 +1,7 @@
 import traceback
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Union
 
 import pytz
 import nextcord
@@ -225,10 +225,15 @@ async def append_into_ir(
 
 
 @dataclass
+class CustomRole:
+    name: str
+
+
+@dataclass
 class CustomMember:
     id: int
     nick: str
-    roles: List[nextcord.Role]
+    roles: List[Union[nextcord.Role, CustomRole]]
     position: str = ""
 
     def __post_init__(self):
@@ -257,13 +262,30 @@ class CustomMember:
         return self.id == other.id
 
     def __hash__(self) -> int:
-        return self.id
-
-
-@dataclass
-class CustomRole:
-    name: str
+        return hash((self.id,))
 
 
 def get_custom_member(member: nextcord.Member) -> CustomMember:
     return CustomMember(member.id, nick=member.nick, roles=member.roles)
+
+
+def combine_list(lists: list):
+    all_items = []
+
+    for lst in lists:
+        all_items.extend(lst)
+
+    return all_items
+
+
+def valid_member(member: nextcord.Member):
+    ir = get(member.roles, name="IR")
+
+    if ir or not member.nick:
+        return None
+
+    team = get(member.roles, name="Team")
+    ecu = get(member.roles, name="ECU")
+
+    if team or ecu:
+        return True
