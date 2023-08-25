@@ -26,9 +26,9 @@ class UtilityCommands(commands.Cog):
 
     @slash_command(description="Sync your roles and nickname with Roster sheet")
     async def sync(
-            self,
-            interaction: Interaction,
-            player: nextcord.Member = SlashOption(description="The member to sync", required=False),
+        self,
+        interaction: Interaction,
+        player: nextcord.Member = SlashOption(description="The member to sync", required=False),
     ):
         await interaction.response.defer(ephemeral=True)
 
@@ -47,9 +47,9 @@ class UtilityCommands(commands.Cog):
 
     @slash_command(description="Enable or disable tasks")
     async def toggle_tasks(
-            self,
-            interaction: Interaction,
-            status: bool = SlashOption(name="status", description="True = Enabled, False = Disabled", required=True),
+        self,
+        interaction: Interaction,
+        status: bool = SlashOption(name="status", description="True = Enabled, False = Disabled", required=True),
     ):
         await interaction.response.defer(ephemeral=True)
 
@@ -69,9 +69,9 @@ class UtilityCommands(commands.Cog):
 
     @slash_command(description="Enable of disable playoffs")
     async def toggle_playoffs(
-            self,
-            interaction: Interaction,
-            status: bool = SlashOption(name="status", description="True = Enabled, False = Disabled", required=True),
+        self,
+        interaction: Interaction,
+        status: bool = SlashOption(name="status", description="True = Enabled, False = Disabled", required=True),
     ):
         await interaction.response.defer(ephemeral=True)
 
@@ -91,9 +91,9 @@ class UtilityCommands(commands.Cog):
 
     @slash_command(description="Reset ir of a player")
     async def resetir(
-            self,
-            interaction: Interaction,
-            player: nextcord.Member = SlashOption(description="The player to reset ir", required=True),
+        self,
+        interaction: Interaction,
+        player: nextcord.Member = SlashOption(description="The player to reset ir", required=True),
     ):
         await interaction.response.defer()
 
@@ -144,9 +144,9 @@ class UtilityCommands(commands.Cog):
 
     @slash_command(description="Sync nicknames from sheet")
     async def syncall(
-            self,
-            interaction: Interaction,
-            team: nextcord.Role = SlashOption(description="Team role", required=False),
+        self,
+        interaction: Interaction,
+        team: nextcord.Role = SlashOption(description="Team role", required=False),
     ):
         if interaction.user.id not in [696939596667158579, 810256917497905192]:
             return
@@ -198,9 +198,9 @@ class UtilityCommands(commands.Cog):
 
     @slash_command(description="sync nickname in official cnc discord")
     async def syncnick(
-            self,
-            interaction: Interaction,
-            target: nextcord.Member = SlashOption(description="member to sync nick", required=False),
+        self,
+        interaction: Interaction,
+        target: nextcord.Member = SlashOption(description="member to sync nick", required=False),
     ):
         await interaction.response.defer()
 
@@ -247,9 +247,9 @@ class UtilityCommands(commands.Cog):
 
     @slash_command(description="Report stats of a specific server")
     async def report_stats(
-            self,
-            interaction: Interaction,
-            team: nextcord.Role = SlashOption(description="The team role", required=True),
+        self,
+        interaction: Interaction,
+        team: nextcord.Role = SlashOption(description="The team role", required=True),
     ):
         await interaction.response.defer()
 
@@ -275,9 +275,9 @@ class UtilityCommands(commands.Cog):
 
     @slash_command(description="See a player's stats")
     async def player_stats(
-            self,
-            interaction: Interaction,
-            player: nextcord.Member = SlashOption(description="The player", required=False),
+        self,
+        interaction: Interaction,
+        player: nextcord.Member = SlashOption(description="The player", required=False),
     ):
         await interaction.response.defer()
 
@@ -319,30 +319,7 @@ class UtilityCommands(commands.Cog):
 
         return False
 
-    @slash_command(description="Testing new avail")
-    async def new_setlineups(
-            self,
-            interaction: Interaction,
-            day: str = SlashOption(
-                description="day",
-                required=True,
-                choices={"Tuesday": "Tuesday", "Wednesday": "Wednesday", "Thirsday": "Thursday"},
-            ),
-            time: str = SlashOption(
-                description="day",
-                required=True,
-                choices={"8:50pm": "8:50pm", "9:10pm": "9:10pm", "9:30pm": "9:30pm"},
-            ),
-    ):
-        await interaction.response.defer(ephemeral=True)
-
-        team_name = get_team_name(interaction.guild.name)
-        prev = await self.bot.prisma.lineup.find_first(where={"team": team_name, "day": day, "time": time})
-
-        if prev:
-            return await interaction.followup.send(content=f"Lineup already exists. ID: {prev.id}")
-
-        # position roles
+    def get_players(self, interaction: Interaction): # noqa
         lw_role = get(interaction.guild.roles, name="Left Wing")
         rw_role = get(interaction.guild.roles, name="Right Wing")
         ld_role = get(interaction.guild.roles, name="Left Defense")
@@ -358,12 +335,66 @@ class UtilityCommands(commands.Cog):
         c_members = [get_custom_member(member) for member in c_role.members if valid_member(member)]
 
         lw_rw_c = [
-            CustomMember(id=0, nick="ECU", roles=[CustomRole("ECU")]),
+            CustomMember(id=1, nick="ECU", roles=[CustomRole("ECU")]),
             *{*lw_members, *rw_members, *c_members},
         ]
 
-        ld_rd = [CustomMember(id=0, nick="ECU", roles=[CustomRole("ECU")]), *{*ld_members, *rd_members}]
-        g = [CustomMember(id=0, nick="ECU", roles=[CustomRole("ECU")]), *{*g_members}]
+        ld_rd = [CustomMember(id=1, nick="ECU", roles=[CustomRole("ECU")]), *{*ld_members, *rd_members}]
+        g = [CustomMember(id=1, nick="ECU", roles=[CustomRole("ECU")]), *{*g_members}]
+
+        return [lw_rw_c, ld_rd, g]
+
+    async def send_lineup_message(self, lineup, interaction: Interaction, data: dict, day: str, time: str):
+        msg = ""
+        for key, value in data:
+            if value == 1:
+                mention = "Generic ECU"
+            else:
+                member = interaction.guild.get_member(value)
+                if member:
+                    mention = member.mention
+                else:
+                    mention = f"Unknown Member, ID: `{value}`"
+
+            msg += f"{key}: {mention}\n"
+
+        embed = nextcord.Embed(title=f"# {day} - {time}")
+        embed.description = msg
+        embed.set_thumbnail(interaction.guild.icon.url)
+
+        await interaction.channel.send(content=lineup.id, embed=embed)
+        support_guild = self.bot.get_guild(Data.SUPPORT_GUILD)
+        team_log_channel = get(
+                support_guild.text_channels,
+                name=f"╟・{get_team_name(interaction.guild.name)}",
+            )
+        if team_log_channel:
+            await team_log_channel.send(content=lineup.id, embed=embed)
+
+    @slash_command(description="Testing new avail")
+    async def new_setlineups(
+        self,
+        interaction: Interaction,
+        day: str = SlashOption(
+            description="day",
+            required=True,
+            choices={"Tuesday": "Tuesday", "Wednesday": "Wednesday", "Thirsday": "Thursday"},
+        ),
+        time: str = SlashOption(
+            description="day",
+            required=True,
+            choices={"8:50pm": "8:50pm", "9:10pm": "9:10pm", "9:30pm": "9:30pm"},
+        ),
+    ):
+        await interaction.response.defer(ephemeral=True)
+
+        team_name = get_team_name(interaction.guild.name)
+        prev = await self.bot.prisma.lineup.find_first(where={"team": team_name, "day": day, "time": time})
+
+        if prev:
+            return await interaction.followup.send(content=f"Lineup already exists. ID: {prev.id}")
+
+        lw_rw_c, ld_rd, g = self.get_players(interaction)
 
         data = {}
 
@@ -385,11 +416,49 @@ class UtilityCommands(commands.Cog):
 
         data.update(second_stage.data)
 
-        await self.bot.prisma.lineup.create({"data": json.dumps(data), "day": day, "time": time, "team": team_name})
-
-        await interaction.edit_original_message(
-            content="New setlineups is still in beta. Please wait for production release"
+        lineup = await self.bot.prisma.lineup.create(
+            {"data": json.dumps(data), "day": day, "time": time, "team": team_name}
         )
+
+        await self.send_lineup_message(lineup, interaction, data, day, time)
+        await interaction.edit_original_message(content=f"Lineup submitted, ID: `{lineup.id}`")
+
+    @slash_command(description="Testing new avail")
+    async def new_editlineups(
+        self, interaction: Interaction, lineup_id: str = SlashOption(description="The id of the lineup to edit")
+    ):
+        await interaction.response.defer(ephemeral=True)
+
+        old_lineup = await self.bot.prisma.lineup.find_first(
+            where={"id": lineup_id, "team": get_team_name(interaction.guild.name)}
+        )
+        if not old_lineup:
+            return await interaction.followup.send(content="Lineup not found")
+
+        data = json.loads(old_lineup.data)
+        lw_rw_c, ld_rd, g = self.get_players(interaction)
+
+        first_stage = StagePlayers(lw_rw_c, lw_rw_c, lw_rw_c, ["LW", "RW", "C"], defaults=data)
+        await interaction.edit_original_message(content="Select players", view=first_stage)
+
+        await first_stage.wait()
+        if first_stage.cancelled:
+            return await interaction.edit_original_message(content="Cancelled")
+
+        data.update(first_stage.data)
+
+        second_stage = StagePlayers(ld_rd, ld_rd, g, ["LD", "RD", "G"], defaults=data)
+        await interaction.edit_original_message(content="Select players", view=second_stage)
+
+        await second_stage.wait()
+        if second_stage.cancelled:
+            return await interaction.edit_original_message(content="Cancelled", view=None)
+
+        data.update(second_stage.data)
+        await self.bot.prisma.lineup.update(where={"id": old_lineup.id}, data={"data": json.dumps(data)})
+
+        await self.send_lineup_message(old_lineup, interaction, data, old_lineup.day, old_lineup.time)
+        await interaction.edit_original_message(content=f"Lineup Edited, ID: `{old_lineup.id}`")
 
 
 def setup(bot: IBot):
