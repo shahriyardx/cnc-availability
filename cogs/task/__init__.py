@@ -329,7 +329,7 @@ class Tasker(commands.Cog):
 
         print("[+] STOP close_availability_task")
         if not simulate:
-            self.start_task(self.close_availability_task, get_next_date("Monday", hour=17))
+            self.start_task(self.close_availability_task, get_next_date("Monday", hour=16))
 
     async def close_lineup_submit(self, simulate: bool = False):
         # Runs Tuesday 4 AM
