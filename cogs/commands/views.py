@@ -63,7 +63,7 @@ class DayAndTimeView(ui.View):
 
 
 class CustomMemberSelect(ui.StringSelect):
-    def __init__(self, placeholder: str, members: list[CustomMember], callback: Callable, default: int = None):
+    def __init__(self, placeholder: str, members: List[CustomMember], callback: Callable, default: int = None):
         super().__init__(placeholder=placeholder, min_values=1, max_values=1)
         for member in members:
             self.add_option(
