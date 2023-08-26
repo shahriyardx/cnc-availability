@@ -427,7 +427,7 @@ class UtilityCommands(commands.Cog):
         time: str = SlashOption(
             description="day",
             required=True,
-            choices={"8:50pm": "8:50pm", "9:10pm": "9:10pm", "9:30pm": "9:30pm"},
+            choices={"8:30pm": "8:30pm", "9:10pm": "9:10pm", "9:50pm": "9:50pm"},
         ),
     ):
         await interaction.response.defer(ephemeral=True)
