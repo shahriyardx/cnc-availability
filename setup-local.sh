@@ -1,0 +1,1 @@
+docker compose -f dl.yml up -d

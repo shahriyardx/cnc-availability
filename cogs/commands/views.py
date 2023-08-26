@@ -76,14 +76,13 @@ class CustomMemberSelect(ui.StringSelect):
 
     async def callback(self, interaction: nextcord.Interaction) -> None:
         member = self.values[0] if len(self.values) > 0 else "0"
-        member_id = int(member)
 
         for opt in self.options:
             opt.default = False
-            if opt.value == member_id:
+            if opt.value == member:
                 opt.default = True
 
-        await self.on_change(member_id, interaction)
+        await self.on_change(int(member), interaction)
 
 
 class StagePlayers(ui.View):

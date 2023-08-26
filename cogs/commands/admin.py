@@ -319,7 +319,17 @@ class UtilityCommands(commands.Cog):
 
         return False
 
-    def get_players(self, interaction: Interaction): # noqa
+    async def is_available(self, member: nextcord.Member, day: str, time: str):
+        result = await self.bot.prisma.availabilitysubmitted.find_first(
+            where={"member_id": member.id, "day": day, "time": time}
+        )
+
+        if result:
+            return True
+
+        return False
+
+    async def get_players(self, interaction: Interaction, day: str, time: str): # noqa
         lw_role = get(interaction.guild.roles, name="Left Wing")
         rw_role = get(interaction.guild.roles, name="Right Wing")
         ld_role = get(interaction.guild.roles, name="Left Defense")
@@ -327,12 +337,12 @@ class UtilityCommands(commands.Cog):
         c_role = get(interaction.guild.roles, name="Center")
         g_role = get(interaction.guild.roles, name="Goalie")
 
-        lw_members = [get_custom_member(member) for member in lw_role.members if valid_member(member)]
-        rw_members = [get_custom_member(member) for member in rw_role.members if valid_member(member)]
-        g_members = [get_custom_member(member) for member in g_role.members if valid_member(member)]
-        ld_members = [get_custom_member(member) for member in ld_role.members if valid_member(member)]
-        rd_members = [get_custom_member(member) for member in rd_role.members if valid_member(member)]
-        c_members = [get_custom_member(member) for member in c_role.members if valid_member(member)]
+        lw_members = [get_custom_member(member) for member in lw_role.members if valid_member(member) and await self.is_available(member, day, time)]
+        rw_members = [get_custom_member(member) for member in rw_role.members if valid_member(member) and await self.is_available(member, day, time)]
+        g_members = [get_custom_member(member) for member in g_role.members if valid_member(member) and await self.is_available(member, day, time)]
+        ld_members = [get_custom_member(member) for member in ld_role.members if valid_member(member) and await self.is_available(member, day, time)]
+        rd_members = [get_custom_member(member) for member in rd_role.members if valid_member(member) and await self.is_available(member, day, time)]
+        c_members = [get_custom_member(member) for member in c_role.members if valid_member(member) and await self.is_available(member, day, time)]
 
         lw_rw_c = [
             CustomMember(id=1, nick="ECU", roles=[CustomRole("ECU")]),
@@ -380,7 +390,7 @@ class UtilityCommands(commands.Cog):
         day: str = SlashOption(
             description="day",
             required=True,
-            choices={"Tuesday": "Tuesday", "Wednesday": "Wednesday", "Thirsday": "Thursday"},
+            choices={"Tuesday": "Tuesday", "Wednesday": "Wednesday", "Thursday": "Thursday"},
         ),
         time: str = SlashOption(
             description="day",
@@ -396,7 +406,7 @@ class UtilityCommands(commands.Cog):
         if prev:
             return await interaction.followup.send(content=f"Lineup already exists. ID: {prev.id}")
 
-        lw_rw_c, ld_rd, g = self.get_players(interaction)
+        lw_rw_c, ld_rd, g = await self.get_players(interaction, day, time)
 
         data = {}
 
@@ -405,7 +415,7 @@ class UtilityCommands(commands.Cog):
 
         await first_stage.wait()
         if first_stage.cancelled:
-            return await interaction.edit_original_message(content="Cancelled")
+            return await interaction.edit_original_message(content="Cancelled", view=None)
 
         data.update(first_stage.data)
 
@@ -414,7 +424,7 @@ class UtilityCommands(commands.Cog):
 
         await second_stage.wait()
         if second_stage.cancelled:
-            return await interaction.edit_original_message(content="Cancelled")
+            return await interaction.edit_original_message(content="Cancelled", view=None)
 
         data.update(second_stage.data)
 
@@ -423,7 +433,7 @@ class UtilityCommands(commands.Cog):
         )
 
         await self.send_lineup_message(lineup, interaction, data, day, time)
-        await interaction.edit_original_message(content=f"Lineup submitted, ID: `{lineup.id}`")
+        await interaction.edit_original_message(content=f"Lineup submitted, ID: `{lineup.id}`", view=None)
 
     @slash_command(description="Testing new avail")
     async def new_editlineups(
@@ -438,14 +448,14 @@ class UtilityCommands(commands.Cog):
             return await interaction.followup.send(content="Lineup not found")
 
         data = json.loads(old_lineup.data)
-        lw_rw_c, ld_rd, g = self.get_players(interaction)
+        lw_rw_c, ld_rd, g = await self.get_players(interaction, old_lineup.day, old_lineup.time)
 
         first_stage = StagePlayers(lw_rw_c, lw_rw_c, lw_rw_c, ["LW", "RW", "C"], defaults=data)
         await interaction.edit_original_message(content="Select players", view=first_stage)
 
         await first_stage.wait()
         if first_stage.cancelled:
-            return await interaction.edit_original_message(content="Cancelled")
+            return await interaction.edit_original_message(content="Cancelled", view=None)
 
         data.update(first_stage.data)
 
@@ -460,7 +470,7 @@ class UtilityCommands(commands.Cog):
         await self.bot.prisma.lineup.update(where={"id": old_lineup.id}, data={"data": json.dumps(data)})
 
         await self.send_lineup_message(old_lineup, interaction, data, old_lineup.day, old_lineup.time)
-        await interaction.edit_original_message(content=f"Lineup Edited, ID: `{old_lineup.id}`")
+        await interaction.edit_original_message(content=f"Lineup Edited, ID: `{old_lineup.id}`", view=None)
 
 
 def setup(bot: IBot):
