@@ -137,7 +137,7 @@ class UtilityCommands(commands.Cog):
         chat = get(team_guild.text_channels, name="chat")
         if chat:
             await chat.send(
-                content=(f"{member.mention} Your Availability has been reset " "please Submit availability again.")
+                content=f"{member.mention} Your Availability has been reset " "please Submit availability again."
             )
 
         await interaction.edit_original_message(content=f"{player.mention}'s IR has been reset succesfully")
@@ -408,7 +408,7 @@ class UtilityCommands(commands.Cog):
             await team_log_channel.send(content=f"Lineup ID: {lineup.id}\n{mentions}", embed=embed)
 
     @slash_command(description="Testing new avail")
-    async def new_setlineups(
+    async def setlineups(
         self,
         interaction: Interaction,
         day: str = SlashOption(
@@ -423,6 +423,12 @@ class UtilityCommands(commands.Cog):
         ),
     ):
         await interaction.response.defer(ephemeral=True)
+
+        owner = get(interaction.user.roles, name="Owner")
+        gm = get(interaction.user.roles, name="General Manager")
+
+        if not owner and not gm:
+            return await interaction.followup.send(content="You don't have permission to set or edit lineups")
 
         team_name = get_team_name(interaction.guild.name)
         prev = await self.bot.prisma.lineup.find_first(where={"team": team_name, "day": day, "time": time})
@@ -460,10 +466,16 @@ class UtilityCommands(commands.Cog):
         await interaction.edit_original_message(content=f"Lineup submitted, ID: `{lineup.id}`", view=None)
 
     @slash_command(description="Testing new avail")
-    async def new_editlineups(
+    async def editlineups(
         self, interaction: Interaction, lineup_id: str = SlashOption(description="The id of the lineup to edit")
     ):
         await interaction.response.defer(ephemeral=True)
+
+        owner = get(interaction.user.roles, name="Owner")
+        gm = get(interaction.user.roles, name="General Manager")
+
+        if not owner and not gm:
+            return await interaction.followup.send(content="You don't have permission to set or edit lineups")
 
         old_lineup = await self.bot.prisma.lineup.find_first(
             where={"id": lineup_id, "team": get_team_name(interaction.guild.name)}
