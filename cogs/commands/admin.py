@@ -11,7 +11,7 @@ from nextcord.utils import get
 from essentials.models import Data, IBot
 from utils.gspread import DataSheet
 from essentials.data import team_names
-from .utils import sync_player, get_custom_member, CustomMember, CustomRole, valid_member
+from .utils import sync_player, get_custom_member, CustomMember, CustomRole, valid_member, get_duplicate
 from ..task.utils import report_games_played, get_week, get_team_name
 from .views import StagePlayers
 
@@ -471,6 +471,11 @@ class UtilityCommands(commands.Cog):
             return await interaction.edit_original_message(content="Cancelled", view=None)
 
         data.update(second_stage.data)
+        dup = get_duplicate(data)
+
+        if dup:
+            return await interaction.edit_original_message(
+                content=f"Can't have same player for multiple position, {dup}")
 
         lineup = await self.bot.prisma.lineup.create(
             {"data": json.dumps(data), "day": day, "time": time, "team": team_name}
@@ -523,6 +528,11 @@ class UtilityCommands(commands.Cog):
             return await interaction.edit_original_message(content="Cancelled", view=None)
 
         data.update(second_stage.data)
+        dup = get_duplicate(data)
+
+        if dup:
+            return await interaction.edit_original_message(content=f"Can't have same player for multiple position, {dup}")
+
         await self.bot.prisma.lineup.update(where={"id": old_lineup.id}, data={"data": json.dumps(data)})
 
         await self.send_lineup_message(old_lineup, interaction, data, old_lineup.day, old_lineup.time)

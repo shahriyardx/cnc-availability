@@ -291,3 +291,38 @@ def valid_member(member: nextcord.Member):
 
     if team or ecu or owner or gm:
         return True
+
+
+@dataclass
+class Player:
+    position: str
+    player_id: int
+
+    def __eq__(self, other):
+        return self.player_id == other.player_id
+
+    def __hash__(self):
+        return hash(self.player_id)
+
+
+def get_duplicate(data: dict):
+    values = []
+    duplicate_values = []
+
+    all_items = [Player(pos, pid) for pos, pid in data.items()]
+
+    for item in all_items:
+        if item.player_id == 1:
+            continue
+
+        if item in values:
+            duplicate_values.append(item)
+            duplicate_item = values[values.index(item)]
+            duplicate_values.append(duplicate_item)
+
+        values.append(item)
+
+    if not duplicate_values:
+        return None
+
+    return ", ".join(set([val.position for val in duplicate_values]))
