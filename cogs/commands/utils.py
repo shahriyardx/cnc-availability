@@ -286,6 +286,8 @@ def valid_member(member: nextcord.Member):
 
     team = get(member.roles, name="Team")
     ecu = get(member.roles, name="ECU")
+    owner = get(member.roles, name="Owner")
+    gm = get(member.roles, name="General Manager")
 
-    if team or ecu:
+    if team or ecu or owner or gm:
         return True

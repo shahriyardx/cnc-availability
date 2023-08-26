@@ -336,6 +336,11 @@ class UtilityCommands(commands.Cog):
         rd_role = get(interaction.guild.roles, name="Right Defense")
         c_role = get(interaction.guild.roles, name="Center")
         g_role = get(interaction.guild.roles, name="Goalie")
+        owner_role = get(interaction.guild.roles, name="Owner")
+        gm_role = get(interaction.guild.roles, name="General Manager")
+
+        owner_membners = [get_custom_member(member) for member in owner_role.members if valid_member(member)]
+        gm_membners = [get_custom_member(member) for member in gm_role.members if valid_member(member)]
 
         lw_members = [
             get_custom_member(member)
@@ -370,11 +375,14 @@ class UtilityCommands(commands.Cog):
 
         lw_rw_c = [
             CustomMember(id=1, nick="ECU", roles=[CustomRole("ECU")]),
-            *{*lw_members, *rw_members, *c_members},
+            *{*lw_members, *rw_members, *c_members, *owner_membners, *gm_membners},
         ]
 
-        ld_rd = [CustomMember(id=1, nick="ECU", roles=[CustomRole("ECU")]), *{*ld_members, *rd_members}]
-        g = [CustomMember(id=1, nick="ECU", roles=[CustomRole("ECU")]), *{*g_members}]
+        ld_rd = [
+            CustomMember(id=1, nick="ECU", roles=[CustomRole("ECU")]),
+            *{*ld_members, *rd_members, *owner_membners, *gm_membners},
+        ]
+        g = [CustomMember(id=1, nick="ECU", roles=[CustomRole("ECU")]), *{*g_members, *owner_membners, *gm_membners}]
 
         return [lw_rw_c, ld_rd, g]
 
