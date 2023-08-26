@@ -329,7 +329,7 @@ class UtilityCommands(commands.Cog):
 
         return False
 
-    async def get_players(self, interaction: Interaction, day: str, time: str): # noqa
+    async def get_players(self, interaction: Interaction, day: str, time: str):  # noqa
         lw_role = get(interaction.guild.roles, name="Left Wing")
         rw_role = get(interaction.guild.roles, name="Right Wing")
         ld_role = get(interaction.guild.roles, name="Left Defense")
@@ -337,12 +337,36 @@ class UtilityCommands(commands.Cog):
         c_role = get(interaction.guild.roles, name="Center")
         g_role = get(interaction.guild.roles, name="Goalie")
 
-        lw_members = [get_custom_member(member) for member in lw_role.members if valid_member(member) and await self.is_available(member, day, time)]
-        rw_members = [get_custom_member(member) for member in rw_role.members if valid_member(member) and await self.is_available(member, day, time)]
-        g_members = [get_custom_member(member) for member in g_role.members if valid_member(member) and await self.is_available(member, day, time)]
-        ld_members = [get_custom_member(member) for member in ld_role.members if valid_member(member) and await self.is_available(member, day, time)]
-        rd_members = [get_custom_member(member) for member in rd_role.members if valid_member(member) and await self.is_available(member, day, time)]
-        c_members = [get_custom_member(member) for member in c_role.members if valid_member(member) and await self.is_available(member, day, time)]
+        lw_members = [
+            get_custom_member(member)
+            for member in lw_role.members
+            if valid_member(member) and await self.is_available(member, day, time)
+        ]
+        rw_members = [
+            get_custom_member(member)
+            for member in rw_role.members
+            if valid_member(member) and await self.is_available(member, day, time)
+        ]
+        g_members = [
+            get_custom_member(member)
+            for member in g_role.members
+            if valid_member(member) and await self.is_available(member, day, time)
+        ]
+        ld_members = [
+            get_custom_member(member)
+            for member in ld_role.members
+            if valid_member(member) and await self.is_available(member, day, time)
+        ]
+        rd_members = [
+            get_custom_member(member)
+            for member in rd_role.members
+            if valid_member(member) and await self.is_available(member, day, time)
+        ]
+        c_members = [
+            get_custom_member(member)
+            for member in c_role.members
+            if valid_member(member) and await self.is_available(member, day, time)
+        ]
 
         lw_rw_c = [
             CustomMember(id=1, nick="ECU", roles=[CustomRole("ECU")]),
@@ -377,9 +401,9 @@ class UtilityCommands(commands.Cog):
         await interaction.channel.send(content=f"Lineup ID: {lineup.id}\n{mentions}", embed=embed)
         support_guild = self.bot.get_guild(Data.SUPPORT_GUILD)
         team_log_channel = get(
-                support_guild.text_channels,
-                name=f"╟・{get_team_name(interaction.guild.name)}",
-            )
+            support_guild.text_channels,
+            name=f"╟・{get_team_name(interaction.guild.name)}",
+        )
         if team_log_channel:
             await team_log_channel.send(content=f"Lineup ID: {lineup.id}\n{mentions}", embed=embed)
 
@@ -413,8 +437,8 @@ class UtilityCommands(commands.Cog):
         first_stage = StagePlayers(lw_rw_c, lw_rw_c, lw_rw_c, ["LW", "RW", "C"])
         await interaction.edit_original_message(content="Select players", view=first_stage)
 
-        await first_stage.wait()
-        if first_stage.cancelled:
+        cancelled = await first_stage.wait()
+        if first_stage.cancelled or cancelled:
             return await interaction.edit_original_message(content="Cancelled", view=None)
 
         data.update(first_stage.data)
@@ -422,8 +446,8 @@ class UtilityCommands(commands.Cog):
         second_stage = StagePlayers(ld_rd, ld_rd, g, ["LD", "RD", "G"])
         await interaction.edit_original_message(content="Select players", view=second_stage)
 
-        await second_stage.wait()
-        if second_stage.cancelled:
+        cancelled = await second_stage.wait()
+        if second_stage.cancelled or cancelled:
             return await interaction.edit_original_message(content="Cancelled", view=None)
 
         data.update(second_stage.data)
@@ -453,8 +477,8 @@ class UtilityCommands(commands.Cog):
         first_stage = StagePlayers(lw_rw_c, lw_rw_c, lw_rw_c, ["LW", "RW", "C"], defaults=data)
         await interaction.edit_original_message(content="Select players", view=first_stage)
 
-        await first_stage.wait()
-        if first_stage.cancelled:
+        cancelled = await first_stage.wait()
+        if first_stage.cancelled or cancelled:
             return await interaction.edit_original_message(content="Cancelled", view=None)
 
         data.update(first_stage.data)
@@ -462,8 +486,8 @@ class UtilityCommands(commands.Cog):
         second_stage = StagePlayers(ld_rd, ld_rd, g, ["LD", "RD", "G"], defaults=data)
         await interaction.edit_original_message(content="Select players", view=second_stage)
 
-        await second_stage.wait()
-        if second_stage.cancelled:
+        cancelled = await second_stage.wait()
+        if second_stage.cancelled or cancelled:
             return await interaction.edit_original_message(content="Cancelled", view=None)
 
         data.update(second_stage.data)
