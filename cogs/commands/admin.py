@@ -427,8 +427,9 @@ class UtilityCommands(commands.Cog):
         owner = get(interaction.user.roles, name="Owner")
         gm = get(interaction.user.roles, name="General Manager")
 
-        if not owner and not gm:
-            return await interaction.followup.send(content="You don't have permission to set or edit lineups")
+        if interaction.user.id not in [810256917497905192, 696939596667158579]:
+            if not owner and not gm:
+                return await interaction.followup.send(content="You don't have permission to set or edit lineups")
 
         team_name = get_team_name(interaction.guild.name)
         prev = await self.bot.prisma.lineup.find_first(where={"team": team_name, "day": day, "time": time})
@@ -466,7 +467,7 @@ class UtilityCommands(commands.Cog):
         await interaction.edit_original_message(content=f"Lineup submitted, ID: `{lineup.id}`", view=None)
 
     @slash_command(description="Testing new avail")
-    async def editlineups(
+    async def editlineup(
         self, interaction: Interaction, lineup_id: str = SlashOption(description="The id of the lineup to edit")
     ):
         await interaction.response.defer(ephemeral=True)
@@ -474,8 +475,9 @@ class UtilityCommands(commands.Cog):
         owner = get(interaction.user.roles, name="Owner")
         gm = get(interaction.user.roles, name="General Manager")
 
-        if not owner and not gm:
-            return await interaction.followup.send(content="You don't have permission to set or edit lineups")
+        if interaction.user.id not in [810256917497905192, 696939596667158579]:
+            if not owner and not gm:
+                return await interaction.followup.send(content="You don't have permission to set or edit lineups")
 
         old_lineup = await self.bot.prisma.lineup.find_first(
             where={"id": lineup_id, "team": get_team_name(interaction.guild.name)}
