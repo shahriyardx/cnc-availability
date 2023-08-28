@@ -588,6 +588,7 @@ class UtilityCommands(commands.Cog):
             embed.set_thumbnail(interaction.guild.icon.url)
 
             await interaction.channel.send(content=msg, embed=embed)
+            await interaction.edit_original_message(content="Completed")
 
 
 def setup(bot: IBot):
