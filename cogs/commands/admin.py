@@ -479,7 +479,8 @@ class UtilityCommands(commands.Cog):
 
         if dup:
             return await interaction.edit_original_message(
-                content=f"Can't have same player for multiple position, {dup}")
+                content=f"Can't have same player for multiple position, {dup}"
+            )
 
         lineup = await self.bot.prisma.lineup.create(
             {"data": json.dumps(data), "day": day, "time": time, "team": team_name}
@@ -538,12 +539,55 @@ class UtilityCommands(commands.Cog):
         dup = get_duplicate(data)
 
         if dup:
-            return await interaction.edit_original_message(content=f"Can't have same player for multiple position, {dup}")
+            return await interaction.edit_original_message(
+                content=f"Can't have same player for multiple position, {dup}"
+            )
 
         await self.bot.prisma.lineup.update(where={"id": old_lineup.id}, data={"data": json.dumps(data)})
 
         await self.send_lineup_message(old_lineup, interaction, data, old_lineup.day, old_lineup.time)
         await interaction.edit_original_message(content=f"Lineup Edited, ID: `{old_lineup.id}`", view=None)
+
+    @slash_command(description="get lineup data")
+    async def gamedaylineups(
+        self,
+        interaction: Interaction,
+        day: str = SlashOption(
+            description="The day to check games",
+            required=True,
+            choices={"Tuesday": "Tuesday", "Wednesday": "Wednesday", "Thursday": "Thursday"},
+        ),
+    ):
+        await interaction.response.defer()
+
+        data = await self.bot.prisma.lineup.find_many(where={"day": day, "team": get_team_name(interaction.guild.name)})
+
+        if not data:
+            return await interaction.followup.send(content="No lineup found")
+
+        for lineup in data:
+            lineup_data = json.loads(lineup.data)
+
+            msg = ""
+            mentions = ""
+            for key, value in lineup_data.items():
+                if value == 1:
+                    mention = "Generic ECU"
+                else:
+                    member = interaction.guild.get_member(value)
+                    if member:
+                        mention = member.mention
+                        mentions += f"{member.mention} "
+                    else:
+                        mention = f"Unknown Member, ID: `{value}`"
+
+                msg += f"{key}: {mention}\n"
+
+            embed = nextcord.Embed(title=f"{day} - {lineup.time}")
+            embed.description = msg
+            embed.set_thumbnail(interaction.guild.icon.url)
+
+            await interaction.channel.send(content=msg, embed=embed)
 
 
 def setup(bot: IBot):

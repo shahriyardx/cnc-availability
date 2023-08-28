@@ -144,12 +144,20 @@ async def append_into_ir(
         ],
     )
 
-    IR_role = get(guild.roles, name="IR")
-    await user.add_roles(IR_role)
+    try:
+        IR_role = get(guild.roles, name="IR")
+        await user.add_roles(IR_role)
+    except:
+        pass
 
-    channel = bot.get_channel(ir_channel)
-    if channel:
-        await channel.send(f"{user.mention} of the **{team_name}** is on IR this week")
+    try:
+        channel = bot.get_channel(ir_channel)
+        if channel:
+            await channel.send(f"{user.mention} of the **{team_name}** is on IR this week")
+    except:
+        print("==================")
+        traceback.print_exc()
+        print("==================")
 
     if status == "Approved":
         if len(items) == 0:
