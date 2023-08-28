@@ -433,6 +433,9 @@ class UtilityCommands(commands.Cog):
     ):
         await interaction.response.defer(ephemeral=True)
 
+        if interaction.channel.name != "submit-lineups":
+            return await interaction.followup.send(content="Lineups can't be submitted in this channel")
+
         owner = get(interaction.user.roles, name="Owner")
         gm = get(interaction.user.roles, name="General Manager")
 
@@ -490,6 +493,9 @@ class UtilityCommands(commands.Cog):
         self, interaction: Interaction, lineup_id: str = SlashOption(description="The id of the lineup to edit")
     ):
         await interaction.response.defer(ephemeral=True)
+
+        if interaction.channel.name != "submit-lineups":
+            return await interaction.followup.send(content="Lineups can't be editted in this channel")
 
         owner = get(interaction.user.roles, name="Owner")
         gm = get(interaction.user.roles, name="General Manager")
