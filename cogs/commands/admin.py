@@ -412,6 +412,12 @@ class UtilityCommands(commands.Cog):
             support_guild.text_channels,
             name=f"╟・{get_team_name(interaction.guild.name)}",
         )
+
+        lineups_channel = get(interaction.guild.text_channels, name="lineups")
+
+        if lineups_channel:
+            await lineups_channel.send(content=f"Lineup ID: {lineup.id}\n{mentions}", embed=embed)
+
         if team_log_channel:
             await team_log_channel.send(content=f"Lineup ID: {lineup.id}\n{mentions}", embed=embed)
 
