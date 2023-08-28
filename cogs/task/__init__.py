@@ -251,7 +251,7 @@ class Tasker(commands.Cog):
                 submitted = get(member.roles, name="Availability Submitted")
 
                 if not submitted:
-                    await append_into_ir(self.bot, guild, member, self.roster_sheet, 0)
+                    return await append_into_ir(self.bot, guild, member, self.roster_sheet, 0)
 
                 avails = await self.bot.prisma.availabilitysubmitted.find_many(where={"member_id": member.id})
                 times = {
