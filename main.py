@@ -90,7 +90,9 @@ class Availability(commands.AutoShardedBot):
                 await guild.create_role(name="Daily ECU")
 
     async def on_member_join(self, member: nextcord.Member):
+        print(member, 'joined')
         if member.guild.id in Data.IGNORED_GUILDS:
+            print('Ignored')
             return
 
         await sync_player(self, member)  # noqa
