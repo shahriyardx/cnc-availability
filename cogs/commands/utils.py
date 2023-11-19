@@ -75,17 +75,20 @@ async def sync_player(bot: IBot, member: nextcord.Member):
 
     try:
         v = roster_sheet.get_value(team_name, "B27")
+        print(v)
         owner_id = get_number(v[0][0])
     except:
         pass
 
     try:
         v = roster_sheet.get_value(team_name, "B28")
+        print(v)
         gm_id = get_number(v[0][0])
     except:
         pass
     try:
         v = roster_sheet.get_value(team_name, "B29")
+        print(v)
         agm_id = get_number(v[0][0])
     except:
         pass
