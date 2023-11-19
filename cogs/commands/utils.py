@@ -94,14 +94,17 @@ async def sync_player(bot: IBot, member: nextcord.Member):
         pass
 
     if owner_id == member.id:
+        print("Making owner")
         await member.add_roles(get(member.guild.roles, name="Owner"))
         await member.remove_roles(get(member.guild.roles, name="Team"))
 
-    elif gm_id == member.id:
+    if gm_id == member.id:
+        print("Making gm")
         await member.add_roles(get(member.guild.roles, name="General Manager"))
         await member.remove_roles(get(member.guild.roles, name="Team"))
 
-    elif agm_id == member.id:
+    if agm_id == member.id:
+        print("Making AGM")
         await member.add_roles(get(member.guild.roles, name="AGM"))
 
     # importing nick
