@@ -43,6 +43,7 @@ async def add_roles(member: nextcord.Member, roles: list):
 
 async def sync_player(bot: IBot, member: nextcord.Member):
     team_name = member.guild.name.split(" ", maxsplit=1)[1].strip()
+    print(team_name)
     cnc_member = bot.SUPPORT_GUILD.get_member(member.id)
     if not bot.SUPPORT_GUILD.get_member(member.id):
         return
@@ -68,6 +69,8 @@ async def sync_player(bot: IBot, member: nextcord.Member):
                     break
 
     # checking owner gm and agm
+    owner_id = roster_sheet.get_value(team_name, "B27")
+    print(owner_id)
     owner_id = get_number(roster_sheet.get_value(team_name, "B27")[0][0])
     gm_id = get_number(roster_sheet.get_value(team_name, "B28")[0][0])
     agm_id = get_number(roster_sheet.get_value(team_name, "B29")[0][0])
