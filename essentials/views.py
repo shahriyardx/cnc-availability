@@ -11,7 +11,7 @@ class TimeView(ui.View):
         self.cancelled = False
 
     async def _update(self, interaction: Interaction):
-        buttons: List[Button] = self.children # noqa
+        buttons: List[Button] = self.children  # noqa
 
         for btn in buttons:
             if btn.custom_id in self.slots and btn.custom_id not in [

@@ -10,11 +10,18 @@ def get_rows(soup: BeautifulSoup, div_id: str):
 
     for tr in trs:
         datas = tr.find_all("td")
-        players_data.append({"discord_id": datas[-1].text, "psn": datas[1].text.split(",")[0].strip(), "gp": int(datas[2].text)})
+        players_data.append(
+            {"discord_id": datas[-1].text, "psn": datas[1].text.split(",")[0].strip(), "gp": int(datas[2].text)}
+        )
 
     return players_data
 
-x = "https://www.mystatsonline.com/hockey/visitor/league/stats/team_hockey.aspx?IDLeague=63342&IDSeason=91439&IDTeam=147894"
+
+x = (
+    "https://www.mystatsonline.com/hockey/visitor/league"
+    "/stats/team_hockey.aspx?IDLeague=63342&IDSeason=91439&IDTeam=147894"
+)
+
 
 def get_team_data(team_id: str, season_id: str = "91439"):
     data = requests.get(
@@ -64,8 +71,8 @@ def get_all_team_data():
         147925,
     ]
 
-    players_data = dict()
-    goalies_data = dict()
+    players_data = {}
+    goalies_data = {}
 
     for team in teams:
         players, goalies = get_team_data(team)
@@ -88,5 +95,6 @@ def get_all_team_data():
             players_data[key] = val
 
     return players_data
+
 
 print(get_team_data("147894"))

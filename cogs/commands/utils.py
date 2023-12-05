@@ -49,7 +49,7 @@ async def sync_player(bot: IBot, member: nextcord.Member):
         return
 
     right_team = get(cnc_member.roles, name=team_name)
-    print('Right team', right_team)
+    print("Right team", right_team)
     if not right_team:
         return
 
@@ -116,7 +116,6 @@ async def sync_player(bot: IBot, member: nextcord.Member):
         print(f"Failed in team discord")
         traceback.print_exc()
         print(e)
-
 
 
 @dataclass

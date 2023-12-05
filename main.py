@@ -48,7 +48,6 @@ class Availability(commands.AutoShardedBot):
     async def sync_all_application_commands(self, **kwargs) -> None:
         print("sync")
         pass
-    
 
     async def on_ready(self):
         await self.prisma.connect()
@@ -63,7 +62,6 @@ class Availability(commands.AutoShardedBot):
                     "can_submit_lineups": False,
                 }
             )
-
 
         self.tasks_enabled = settings.tasks_enabled
         self.playoffs = settings.playofss
@@ -90,9 +88,7 @@ class Availability(commands.AutoShardedBot):
                 await guild.create_role(name="Daily ECU")
 
     async def on_member_join(self, member: nextcord.Member):
-        print(member, 'joined')
         if member.guild.id in Data.IGNORED_GUILDS:
-            print('Ignored')
             return
 
         await sync_player(self, member)  # noqa
