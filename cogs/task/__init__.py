@@ -212,7 +212,7 @@ class Tasker(commands.Cog):
         print("[+] START close_availability_task")
         if not self.bot.tasks_enabled:  # noqa
             if not simulate:
-                return self.start_task(self.open_availability_task, get_next_date("Friday", hour=17))
+                return self.start_task(self.close_availability_task, get_next_date("Monday", hour=16))
 
             return
 
@@ -341,7 +341,7 @@ class Tasker(commands.Cog):
         print("[+] START close_lineup_submit")
         if not self.bot.tasks_enabled:  # noqa
             if not simulate:
-                return self.start_task(self.open_availability_task, get_next_date("Friday", hour=17))
+                return self.start_task(self.close_lineup_submit, get_next_date("Tuesday", hour=4))
 
             return
 
@@ -367,7 +367,7 @@ class Tasker(commands.Cog):
         print("[+] START close_lineup_channel")
         if not self.bot.tasks_enabled:  # noqa
             if not simulate:
-                return self.start_task(self.open_availability_task, get_next_date("Friday", hour=17))
+                return self.start_task(self.close_lineup_channel, get_next_date("Friday", hour=2))
 
             return
 
