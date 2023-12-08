@@ -401,12 +401,12 @@ class Tasker(commands.Cog):
     async def calculate_gp(self, simulate: bool = False):
         if not self.bot.tasks_enabled:  # noqa
             if not simulate:
-                return self.start_task(self.open_availability_task, get_next_date("Friday", hour=17))
+                return self.start_task(self.calculate_gp, get_next_date("Friday", hour=17))
 
             return
 
         if self.bot.playoffs:  # noqa
-            return self.start_task(self.open_availability_task, get_next_date("Friday", hour=17))
+            return self.start_task(self.calculate_gp, get_next_date("Friday", hour=17))
 
         week = get_week()
         last_week = week - 1
@@ -429,7 +429,7 @@ class Tasker(commands.Cog):
             await report_games_played(self.bot, guild, old_data, new_data)
 
         if not simulate:
-            self.start_task(self.close_lineup_channel, get_next_date("Friday", hour=16))
+            self.start_task(self.calculate_gp, get_next_date("Friday", hour=16))
 
     def start_task(self, task_func, time):
         now = datetime.datetime.utcnow()
