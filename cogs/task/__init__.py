@@ -401,12 +401,12 @@ class Tasker(commands.Cog):
     async def calculate_gp(self, simulate: bool = False):
         if not self.bot.tasks_enabled:  # noqa
             if not simulate:
-                return self.start_task(self.calculate_gp, get_next_date("Friday", hour=17))
+                return self.start_task(self.calculate_gp, get_next_date("Friday", hour=16))
 
             return
 
         if self.bot.playoffs:  # noqa
-            return self.start_task(self.calculate_gp, get_next_date("Friday", hour=17))
+            return self.start_task(self.calculate_gp, get_next_date("Friday", hour=16))
 
         week = get_week()
         last_week = week - 1
