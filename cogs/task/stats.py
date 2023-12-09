@@ -10,12 +10,14 @@ def get_rows(soup: BeautifulSoup, div_id: str):
 
     for tr in trs:
         datas = tr.find_all("td")
-        players_data.append({"psn": datas[1].text.split(",")[0].strip(), "gp": int(datas[2].text)})
+        players_data.append(
+            {"discord_id": datas[-1].text, "psn": datas[1].text.split(",")[0].strip(), "gp": int(datas[2].text)}
+        )
 
     return players_data
 
 
-def get_team_data(team_id: str, season_id: str = "95020"):
+def get_team_data(team_id: int, season_id: str = "95020"):
     data = requests.get(
         "https://www.mystatsonline.com/hockey/visitor/league/stats/team_hockey.aspx?"
         f"IDLeague=63342&IDSeason={season_id}&IDTeam={team_id}"
@@ -63,22 +65,16 @@ def get_all_team_data():
         147925,
     ]
 
-    players_data = dict()
-    goalies_data = dict()
+    players_data = {}
+    goalies_data = {}
 
     for team in teams:
         players, goalies = get_team_data(team)
         for p in players:
-            if p["psn"] in players_data:
-                print(p["gp"], players_data[p["psn"]])
-
-            players_data[p["psn"]] = p["gp"]
+            players_data[p["discord_id"]] = p["gp"]
 
         for p in goalies:
-            if p["psn"] in goalies_data:
-                print(p["gp"], players_data[p["psn"]])
-
-            goalies_data[p["psn"]] = p["gp"]
+            goalies_data[p["discord_id"]] = p["gp"]
 
     for key, val in goalies_data.items():
         if key in players_data:
