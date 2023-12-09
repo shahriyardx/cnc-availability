@@ -52,16 +52,16 @@ def get_played_games(
         new_game_data = dict()
 
     # in both
-    if member.display_name in old_game_data and member.display_name in new_game_data:
-        return new_game_data[member.display_name] - old_game_data[member.display_name]
+    if str(member.id) in old_game_data and str(member.id) in new_game_data:
+        return new_game_data[str(member.id)] - old_game_data[str(member.id)]
 
     # not in both
-    if member.display_name not in old_game_data and member.display_name not in new_game_data:
+    if str(member.id) not in old_game_data and str(member.id) not in new_game_data:
         return -1
 
     # in any of them
-    if member.display_name in new_game_data:
-        return new_game_data[member.display_name]
+    if str(member.id) in new_game_data:
+        return new_game_data[str(member.id)]
 
     else:
         return 0
