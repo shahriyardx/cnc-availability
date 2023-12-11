@@ -283,7 +283,7 @@ class Tasker(commands.Cog):
                 if total_avails < 3:
                     await append_into_ir(self.bot, guild, member, self.roster_sheet, 0)
 
-                await asyncio.sleep(60)
+                await asyncio.sleep(5)
 
         # Member count check
         for guild in self.bot.guilds:
