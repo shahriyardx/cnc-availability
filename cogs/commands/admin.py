@@ -622,9 +622,18 @@ class UtilityCommands(commands.Cog):
                     traceback.print_exc()
                     pass
 
+        await i.edit_original_message(
+            content="Removing non-roster members finished, Working on syncing existing members..."
+        )
+
         for pid in players:
             m = i.guild.get_member(pid)
-            await sync_player(self.bot, m)
+            try:
+                await sync_player(self.bot, m)
+                await asyncio.sleep(10)
+            except: # noqa
+                await i.channel.send(content=f"Syncing {m.mention} failed")
+                traceback.print_exc()
 
         await i.edit_original_message(content="Finished")
 
