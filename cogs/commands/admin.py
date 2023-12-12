@@ -591,7 +591,7 @@ class UtilityCommands(commands.Cog):
             await interaction.edit_original_message(content="Completed")
 
     @slash_command(description="get lineup data")
-    async def sync(self, i: Interaction):
+    async def syncteam(self, i: Interaction):
         await i.response.defer()
 
         team_role = get(i.guild.roles, name="Team")
