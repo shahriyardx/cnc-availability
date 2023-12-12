@@ -599,6 +599,9 @@ class UtilityCommands(commands.Cog):
         else:
             return await i.edit_original_message(content="You are not allowed to run this command")
 
+        if i.guild.id in [831166408888942623]:
+            return await i.edit_original_message(content="Can't run on this server")
+
         team_role = get(i.guild.roles, name="Team")
         if not team_role:
             return await i.edit_original_message(content="Team role not found")
