@@ -598,7 +598,7 @@ class UtilityCommands(commands.Cog):
         if not team_role:
             return await i.edit_original_message(content="Team role not found")
 
-        values = self.draft_sheet.get_values(i.guild.name[4:])
+        values = self.roster_sheet.get_values(i.guild.name[4:])
         players = []
         for row in values:
             try:
