@@ -624,8 +624,7 @@ class UtilityCommands(commands.Cog):
 
         for pid in players:
             m = i.guild.get_member(pid)
-            if not get(m.roles, name="Team"):
-                await m.add_roles(team_role)
+            await sync_player(self.bot, m)
 
         await i.edit_original_message(content="Finished")
 
