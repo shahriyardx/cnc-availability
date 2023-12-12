@@ -14,7 +14,7 @@ from essentials.data import team_names
 from .utils import sync_player, get_custom_member, CustomMember, CustomRole, valid_member, get_duplicate
 from ..task.utils import report_games_played, get_week, get_team_name
 from .views import StagePlayers
-
+from betterspread import Sheet
 
 class UtilityCommands(commands.Cog):
     def __init__(self, bot: IBot) -> None:
@@ -589,6 +589,32 @@ class UtilityCommands(commands.Cog):
 
             await interaction.channel.send(content=msg, embed=embed)
             await interaction.edit_original_message(content="Completed")
+
+    @slash_command(description="get lineup data")
+    async def sync(self, i: Interaction):
+        await i.response.defer()
+
+        team_role = get(i.guild.roles, name="Team")
+        if not team_role:
+            return await i.edit_original_message(content="Team role not found")
+
+        values = self.draft_sheet.get_values(i.guild.name[4:])
+        players = []
+        for row in values:
+            try:
+                players.append(int(row[5]))
+            except: # noqa
+                pass
+
+        for member in team_role.members:
+            if member.id not in players:
+                try:
+                    print("Kicking", member)
+                    # await member.kick(reason="Not on roster")
+                except: # noqa
+                    pass
+
+        await i.edit_original_message(content="Finished")
 
 
 def setup(bot: IBot):
