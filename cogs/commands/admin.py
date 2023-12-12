@@ -406,7 +406,8 @@ class UtilityCommands(commands.Cog):
         embed.description = msg
         embed.set_thumbnail(interaction.guild.icon.url)
 
-        await interaction.channel.send(content=f"`{lineup.id}`")
+        await interaction.channel.send(content="Lineup ID: ")
+        await interaction.channel.send(content=f"{lineup.id}")
         await interaction.channel.send(embed=embed)
 
     @slash_command(description="Testing new avail")
