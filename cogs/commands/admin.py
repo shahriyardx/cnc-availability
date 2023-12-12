@@ -588,10 +588,10 @@ class UtilityCommands(commands.Cog):
             embed.set_thumbnail(interaction.guild.icon.url)
 
             if lineupsChannel:
-                await lineupsChannel.send(content=msg, embed=embed)
+                await lineupsChannel.send(content=mentions, embed=embed)
 
             if team_log_channel:
-                await lineupsChannel.send(content=msg, embed=embed)
+                await lineupsChannel.send(content=mentions, embed=embed)
 
         await interaction.edit_original_message(content="Completed")
 
