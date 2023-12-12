@@ -594,6 +594,11 @@ class UtilityCommands(commands.Cog):
     async def syncteam(self, i: Interaction):
         await i.response.defer()
 
+        if get(i.user.roles, name="Owner") or get(i.user.roles, name="General Manager"):
+            pass
+        else:
+            return await i.edit_original_message(content="You are not allowed to run this command")
+
         team_role = get(i.guild.roles, name="Team")
         if not team_role:
             return await i.edit_original_message(content="Team role not found")
