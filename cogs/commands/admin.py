@@ -406,15 +406,8 @@ class UtilityCommands(commands.Cog):
         embed.description = msg
         embed.set_thumbnail(interaction.guild.icon.url)
 
-        support_guild = self.bot.get_guild(Data.SUPPORT_GUILD)
-        team_log_channel = get(
-            support_guild.text_channels,
-            name=f"╟・{get_team_name(interaction.guild.name)}",
-        )
-
-        await interaction.channel.send(content=f"Lineup ID: {lineup.id}\n{mentions}", embed=embed)
-        if team_log_channel:
-            await team_log_channel.send(content=f"Lineup ID: {lineup.id}\n{mentions}", embed=embed)
+        await interaction.channel.send(content=f"`{lineup.id}`")
+        await interaction.channel.send(embed=embed)
 
     @slash_command(description="Testing new avail")
     async def setlineups(
@@ -565,6 +558,13 @@ class UtilityCommands(commands.Cog):
         if not data:
             return await interaction.followup.send(content="No lineup found")
 
+        lineupsChannel = get(interaction.guild.channels, name="lineups")
+        support_guild = self.bot.get_guild(Data.SUPPORT_GUILD)
+        team_log_channel = get(
+            support_guild.text_channels,
+            name=f"╟・{get_team_name(interaction.guild.name)}",
+        )
+
         for lineup in data:
             lineup_data = json.loads(lineup.data)
 
@@ -587,8 +587,13 @@ class UtilityCommands(commands.Cog):
             embed.description = msg
             embed.set_thumbnail(interaction.guild.icon.url)
 
-            await interaction.channel.send(content=msg, embed=embed)
-            await interaction.edit_original_message(content="Completed")
+            if lineupsChannel:
+                await lineupsChannel.send(content=msg, embed=embed)
+
+            if team_log_channel:
+                await lineupsChannel.send(content=msg, embed=embed)
+
+        await interaction.edit_original_message(content="Completed")
 
     @slash_command(description="get lineup data")
     async def syncteam(self, i: Interaction):
