@@ -609,8 +609,7 @@ class UtilityCommands(commands.Cog):
         for member in team_role.members:
             if member.id not in players:
                 try:
-                    print("Kicking", member)
-                    # await member.kick(reason="Not on roster")
+                    await member.kick(reason="Not on roster")
                 except: # noqa
                     pass
 
