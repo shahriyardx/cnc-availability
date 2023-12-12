@@ -619,6 +619,7 @@ class UtilityCommands(commands.Cog):
                 try:
                     await member.kick(reason="Not on roster")
                 except: # noqa
+                    traceback.print_exc()
                     pass
 
         await i.edit_original_message(content="Finished")
