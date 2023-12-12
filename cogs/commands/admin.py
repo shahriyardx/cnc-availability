@@ -622,6 +622,11 @@ class UtilityCommands(commands.Cog):
                     traceback.print_exc()
                     pass
 
+        for pid in players:
+            m = i.guild.get_member(pid)
+            if not get(m.roles, name="Team"):
+                await m.add_roles(team_role)
+
         await i.edit_original_message(content="Finished")
 
 
