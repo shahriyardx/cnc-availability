@@ -14,7 +14,7 @@ from essentials.data import team_names
 from .utils import sync_player, get_custom_member, CustomMember, CustomRole, valid_member, get_duplicate
 from ..task.utils import report_games_played, get_week, get_team_name
 from .views import StagePlayers
-from betterspread import Sheet
+
 
 class UtilityCommands(commands.Cog):
     def __init__(self, bot: IBot) -> None:
