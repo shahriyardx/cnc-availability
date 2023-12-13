@@ -592,7 +592,7 @@ class UtilityCommands(commands.Cog):
                 await lineupsChannel.send(content=mentions, embed=embed)
 
             if team_log_channel:
-                await lineupsChannel.send(content=mentions, embed=embed)
+                await team_log_channel.send(content=mentions, embed=embed)
 
         await interaction.edit_original_message(content="Completed")
 
