@@ -634,6 +634,9 @@ class UtilityCommands(commands.Cog):
 
         for pid in players:
             m = i.guild.get_member(pid)
+            if not m:
+                continue
+
             try:
                 await sync_player(self.bot, m)
                 await asyncio.sleep(10)
