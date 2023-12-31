@@ -62,7 +62,6 @@ class ECUCommand(commands.Cog):
         try:
             channel = await self.bot.fetch_channel(event.channel_id)
         except Exception as e:
-            print(e)
             return
 
         try:
@@ -70,7 +69,6 @@ class ECUCommand(commands.Cog):
             if message.author.id == event.user_id:
                 raise ValueError("Unable")
         except Exception as e:
-            print(e)
             return
 
         content = message.content
@@ -148,11 +146,9 @@ class ECUCommand(commands.Cog):
             if player[1] == search_position:
                 nicks.append(player[0])
 
-        print(nicks)
         for nick in nicks:
             member = get(interaction.guild.members, nick=nick)
             if not member:
-                print(f"Unable to find member with nick {nick}")
                 continue
 
             if member:

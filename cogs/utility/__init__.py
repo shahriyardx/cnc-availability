@@ -58,18 +58,15 @@ class UilityCommands(commands.Cog):
         await interaction.response.defer()
 
         if interaction.user.id == interaction.guild.owner_id:
-            print("As Guid owner")
             await player.add_roles(role)
             return await interaction.followup.send(content=f"{role} has been added to {player}")
 
         highest_role = None
 
         if get(interaction.user.roles, name="Owner"):
-            print("As Owner")
             highest_role = get(interaction.guild.roles, name="Owner")
 
         if get(interaction.user.roles, name="General Manager"):
-            print("As GM")
             highest_role = get(interaction.guild.roles, name="General Manager")
 
         if not highest_role:
@@ -79,7 +76,6 @@ class UilityCommands(commands.Cog):
             return await interaction.followup.send("Can't remove this role")
 
         if highest_role:
-            print(f"Adding role {role} to {player}")
             await player.add_roles(role)
             return await interaction.followup.send(content=f"{role} has been added to {player}")
 
@@ -101,18 +97,15 @@ class UilityCommands(commands.Cog):
         await interaction.response.defer()
 
         if interaction.user.id == interaction.guild.owner_id:
-            print("As Guid owner")
             await player.remove_roles(role)
             return await interaction.followup.send(content=f"{role} has been removed from {player}")
 
         highest_role = None
 
         if get(interaction.user.roles, name="Owner"):
-            print("As Owner")
             highest_role = get(interaction.guild.roles, name="Owner")
 
         if get(interaction.user.roles, name="General Manager"):
-            print("As GM")
             highest_role = get(interaction.guild.roles, name="General Manager")
 
         if not highest_role:
@@ -122,7 +115,6 @@ class UilityCommands(commands.Cog):
             return await interaction.followup.send("Can't remove this role")
 
         if highest_role:
-            print(f"Removing {role} from {player}")
             await player.remove_roles(role)
             return await interaction.followup.send(content=f"{role} has been removed from {player}")
 

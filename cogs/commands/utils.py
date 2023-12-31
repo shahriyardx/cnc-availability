@@ -43,13 +43,11 @@ async def add_roles(member: nextcord.Member, roles: list):
 
 async def sync_player(bot: IBot, member: nextcord.Member):
     team_name = member.guild.name.split(" ", maxsplit=1)[1].strip()
-    print(team_name)
     cnc_member = bot.SUPPORT_GUILD.get_member(member.id)
     if not bot.SUPPORT_GUILD.get_member(member.id):
         return
 
     right_team = get(cnc_member.roles, name=team_name)
-    print("Right team", right_team)
     if not right_team:
         return
 
@@ -57,7 +55,6 @@ async def sync_player(bot: IBot, member: nextcord.Member):
     all_roster = draft_sheet.get_values("Data import")
     for row in all_roster[1:]:
         if get_number(row[3]) == member.id:
-            print(row[3], member.id)
             roles_to_add = [
                 get(member.guild.roles, name="Team"),
                 get(member.guild.roles, name=position_roles.get(row[1])),
@@ -75,47 +72,38 @@ async def sync_player(bot: IBot, member: nextcord.Member):
 
     try:
         v = roster_sheet.get_value(team_name, "B27")
-        print(v)
         owner_id = get_number(v[0][0])
     except:
         pass
 
     try:
         v = roster_sheet.get_value(team_name, "B28")
-        print(v)
         gm_id = get_number(v[0][0])
     except:
         pass
     try:
         v = roster_sheet.get_value(team_name, "B29")
-        print(v)
         agm_id = get_number(v[0][0])
     except:
         pass
 
     if owner_id == member.id:
-        print("Making owner")
         await member.add_roles(get(member.guild.roles, name="Owner"))
         await member.remove_roles(get(member.guild.roles, name="Team"))
 
     if gm_id == member.id:
-        print("Making gm")
         await member.add_roles(get(member.guild.roles, name="General Manager"))
         await member.remove_roles(get(member.guild.roles, name="Team"))
 
     if agm_id == member.id:
-        print("Making AGM")
         await member.add_roles(get(member.guild.roles, name="AGM"))
 
     # importing nick
     cnc_nick = cnc_member.nick
     try:
-        print(member)
         await member.edit(nick=cnc_nick)
-    except Exception as e:
-        print(f"Failed in team discord")
-        traceback.print_exc()
-        print(e)
+    except: # noqa
+        pass
 
 
 @dataclass
@@ -171,10 +159,8 @@ async def append_into_ir(
         channel = bot.get_channel(ir_channel)
         if channel:
             await channel.send(f"{user.mention} of the **{team_name}** is on IR this week")
-    except:
-        print("==================")
-        traceback.print_exc()
-        print("==================")
+    except: # noqa
+        pass
 
     if status == "Approved":
         if len(items) == 0:
@@ -195,11 +181,10 @@ async def append_into_ir(
                     f"{next_status}"
                 )
             )
-        except Exception as e:
-            print(e)
+        except: # noqa
+            pass
     else:
         team_name = guild.name.split(" ", maxsplit=1)[1]
-        print(user.display_name)
 
         sheet.append(
             "Inactive",
@@ -231,13 +216,13 @@ async def append_into_ir(
                     "enough availability for the third time this season"
                 )
             )
-        except Exception as e:
-            print(e)
+        except: # noqa
+            pass
 
         try:
             await user.kick(reason="Kicked because of third time being on IR")
-        except Exception as e:
-            print(e)
+        except: # noqa
+            pass
 
         support_server = bot.get_guild(support_server_id)
         if support_server:
@@ -245,8 +230,8 @@ async def append_into_ir(
             if member:
                 try:
                     await member.remove_roles(*[Object(role_id) for role_id in inactive_roles])
-                except Exception as e:
-                    print(e)
+                except: # noqa
+                    pass
 
 
 @dataclass

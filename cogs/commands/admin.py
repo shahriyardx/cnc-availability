@@ -40,7 +40,6 @@ class UtilityCommands(commands.Cog):
         try:
             await sync_player(self.bot, player)
         except Exception as e:
-            traceback.print_exc()
             return interaction.edit_original_message(content=f"Error occured during sync: {e}")
 
         return await interaction.edit_original_message(content="Sync finished")
@@ -173,12 +172,10 @@ class UtilityCommands(commands.Cog):
                     continue
 
                 try:
-                    print(f"Syncing {member.display_name}")
                     await sync_player(self.bot, member)
                     await asyncio.sleep(5)
                 except:  # noqa
                     exc = traceback.format_exc()
-                    print(exc)
                     unable_to_sync.append([member, exc])
                     continue
 
@@ -625,7 +622,6 @@ class UtilityCommands(commands.Cog):
                 try:
                     await member.kick(reason="Not on roster")
                 except: # noqa
-                    traceback.print_exc()
                     pass
 
         await i.edit_original_message(
@@ -642,7 +638,6 @@ class UtilityCommands(commands.Cog):
                 await asyncio.sleep(10)
             except: # noqa
                 await i.channel.send(content=f"Syncing {m.mention} failed")
-                traceback.print_exc()
 
         await i.edit_original_message(content="Finished")
 
