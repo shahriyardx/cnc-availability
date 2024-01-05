@@ -4,7 +4,7 @@ WORKDIR /app
 RUN apt-get update
 
 # Install deps
-COPY requirements.txt .env ./
+COPY requirements.txt ./
 RUN pip install -r requirements.txt
 
 # Prisma
