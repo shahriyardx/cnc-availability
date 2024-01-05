@@ -150,6 +150,11 @@ class TaskerCommands(commands.Cog):
             )
             if SUBMIT_CHANNEL:
                 await self.toggle_state(SUBMIT_CHANNEL, TEAM_ROLE, state)
+                await SUBMIT_CHANNEL.send(content=(
+                        f"{TEAM_ROLE.mention} choose which games you can play. "
+                        f"You must select a minimum of 4 games or more"
+                    )
+                )
 
         await interaction.followup.send(content=f"Availavility has been {'Unlocked' if state else 'Locked'}")
 
