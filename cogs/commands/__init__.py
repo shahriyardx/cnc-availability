@@ -112,8 +112,9 @@ class TaskerCommands(commands.Cog):
     async def toggle_state(self, channel, role, state):
         def get_permissions(_state: bool):
             permission_overwrites = PermissionOverwrite()
-            permission_overwrites.send_messages = _state  # noqa
+            permission_overwrites.send_messages = False  # noqa
             permission_overwrites.view_channel = _state  # noqa
+            permission_overwrites.add_reactions = False # noqa
 
             return permission_overwrites
 
