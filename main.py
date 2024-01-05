@@ -13,6 +13,8 @@ from essentials.models import Data
 from prisma import Prisma
 from utils.gspread import DataSheet
 from cogs.commands.utils import sync_player
+from cogs.ipc import init_ipc
+
 
 load_dotenv(".env")
 
@@ -40,16 +42,10 @@ class Availability(commands.AutoShardedBot):
         self.playoffs = False
         self.rollout_application_commands = False
 
-    async def rollout_application_commands(self) -> None:
-        print("rolling out")
-        pass
-
-    async def sync_all_application_commands(self, **kwargs) -> None:
-        print("sync")
-        pass
-
     async def on_ready(self):
         await self.prisma.connect()
+        await init_ipc(self)
+
         self.SUPPORT_GUILD = self.get_guild(Data.SUPPORT_GUILD)
 
         settings = await self.prisma.settings.find_first()
@@ -76,15 +72,15 @@ class Availability(commands.AutoShardedBot):
         #     if row[0] in nick_dict:
         #         self.roster_sheet.update("Data import", f"D{index + 1}", str(nick_dict[row[0]]))
 
-        for guild in self.guilds:
-            ecu_role = get(guild.roles, name="ECU")
-            decu_role = get(guild.roles, name="Daily ECU")
-
-            if not ecu_role:
-                await guild.create_role(name="ECU")
-
-            if not decu_role:
-                await guild.create_role(name="Daily ECU")
+        # for guild in self.guilds:
+        #     ecu_role = get(guild.roles, name="ECU")
+        #     decu_role = get(guild.roles, name="Daily ECU")
+        #
+        #     if not ecu_role:
+        #         await guild.create_role(name="ECU")
+        #
+        #     if not decu_role:
+        #         await guild.create_role(name="Daily ECU")
 
     async def on_member_join(self, member: nextcord.Member):
         if member.guild.id in Data.IGNORED_GUILDS:

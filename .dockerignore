@@ -1,0 +1,9 @@
+.gitignore
+lol.txt
+deploy.sh
+.vscode
+poetry.lock
+pyproject.toml
+admindb
+database
+availdb

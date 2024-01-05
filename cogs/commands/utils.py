@@ -1,4 +1,3 @@
-import traceback
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional, List, Union
@@ -49,15 +48,12 @@ async def sync_player(bot: IBot, member: nextcord.Member):
 
     right_team = get(cnc_member.roles, name=team_name)
     if not right_team:
-        print('Not right team')
         return
 
     # Checking if team member
     all_roster = draft_sheet.get_values("Data import")
     for row in all_roster[1:]:
-        print(f"Checking {row}")
         if get_number(row[3]) == member.id:
-            print(f"Found")
             roles_to_add = [
                 get(member.guild.roles, name="Team"),
                 get(member.guild.roles, name=position_roles.get(row[1])),
@@ -250,14 +246,14 @@ class CustomMember:
     position: str = ""
 
     def __post_init__(self):
-        position_roles = [
+        pos_roles = [
             role.name
             for role in self.roles
             if role.name in ["Left Wing", "Right Wing", "Left Defense", "Right Defense", "Center", "Goalie", "ECU"]
         ]
 
         positions = []
-        for role in position_roles:
+        for role in pos_roles:
             if role == "ECU":
                 positions.append("ECU")
             else:

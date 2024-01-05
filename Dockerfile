@@ -16,4 +16,4 @@ COPY utils ./utils
 COPY essentials ./essentials
 COPY main.py requirements.txt credentials.json .env ./
 
-CMD [ "prisma", "db", "push", "&&", "python", "main.py" ]
+CMD prisma db push && python main.py
