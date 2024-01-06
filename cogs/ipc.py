@@ -21,6 +21,9 @@ async def init_ipc(bot: AutoShardedBot):
     @server.route("get_stats")
     async def get_stats(_, week: int):
         data = await prisma.game.find_first(where={"week": week})
-        return json.dumps(data)
+        if (data):
+            return json.dumps(data.data)
+        else:
+            return json.dumps({})
 
     await server.start()
