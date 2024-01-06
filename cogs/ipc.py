@@ -19,11 +19,22 @@ async def init_ipc(bot: AutoShardedBot):
     prisma: Prisma = bot.prisma # noqa
 
     @server.route("get_stats")
-    async def get_stats(_, week: int):
-        data = await prisma.game.find_first(where={"week": week})
-        if (data):
-            return json.dumps(data.data)
+    async def get_stats(_):
+        data = await prisma.game.find_many(order={"week": "desc"})
+        if len(data) > 1:
+            return json.dumps({
+                "current": data[0].data,
+                "prev": data[1].data
+            })
+        elif len(data) == 1:
+            return json.dumps({
+                "current": data[0].data,
+                "prev": {},
+            })
         else:
-            return json.dumps({})
+            return json.dumps({
+                "current": {},
+                "prev": {}
+            })
 
     await server.start()
