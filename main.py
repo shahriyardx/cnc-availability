@@ -44,7 +44,11 @@ class Availability(commands.AutoShardedBot):
 
     async def on_ready(self):
         await self.prisma.connect()
-        await init_ipc(self)
+        try:
+            await init_ipc(self)
+        except: # noqa
+            print("failed to connect ipc server")
+            pass
 
         self.SUPPORT_GUILD = self.get_guild(Data.SUPPORT_GUILD)
 
@@ -62,25 +66,6 @@ class Availability(commands.AutoShardedBot):
         self.playoffs = settings.playofss
 
         print(f"{self.user} is ready..")
-
-        # all_roaster = self.roster_sheet.get_values("Data import")
-        # nick_dict = {member.display_name: member.id for member in self.SUPPORT_GUILD.members}
-        #
-        # for index, row in enumerate(all_roaster):
-        #     await asyncio.sleep(2)
-        #     print(row[0], index)
-        #     if row[0] in nick_dict:
-        #         self.roster_sheet.update("Data import", f"D{index + 1}", str(nick_dict[row[0]]))
-
-        # for guild in self.guilds:
-        #     ecu_role = get(guild.roles, name="ECU")
-        #     decu_role = get(guild.roles, name="Daily ECU")
-        #
-        #     if not ecu_role:
-        #         await guild.create_role(name="ECU")
-        #
-        #     if not decu_role:
-        #         await guild.create_role(name="Daily ECU")
 
     async def on_member_join(self, member: nextcord.Member):
         if member.guild.id in Data.IGNORED_GUILDS:

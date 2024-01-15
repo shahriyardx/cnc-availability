@@ -628,6 +628,8 @@ class UtilityCommands(commands.Cog):
             content="Removing non-roster members finished, Working on syncing existing members..."
         )
 
+        print(players)
+
         for pid in players:
             m = i.guild.get_member(pid)
             if not m:
