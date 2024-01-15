@@ -47,9 +47,10 @@ async def sync_player(bot: IBot, member: nextcord.Member):
         return
 
     right_team = get(cnc_member.roles, name=team_name)
-    print(right_team)
     if not right_team:
         return
+
+    await member.add_roles(get(member.guild.roles, name="Team"))
 
     # Checking if team member
     all_roster = draft_sheet.get_values("Data import")
@@ -57,7 +58,6 @@ async def sync_player(bot: IBot, member: nextcord.Member):
         if get_number(row[3]) == member.id:
             print("Found member")
             roles_to_add = [
-                get(member.guild.roles, name="Team"),
                 get(member.guild.roles, name=position_roles.get(row[1])),
                 get(member.guild.roles, name=position_roles.get(row[2])),
             ]
