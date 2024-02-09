@@ -102,7 +102,6 @@ class Availability(commands.AutoShardedBot):
         week = datetime.datetime.now().isocalendar()[1]
 
         if reaction.emoji.name == "✅" and reaction.event_type == "REACTION_ADD":
-            await message.remove_reaction("❌", member=reaction.member)
             await reaction.member.add_roles(get(guild.roles, name="Availability Submitted"))
             submits = await self.prisma.availabilitysubmitted.find_many(
                 where={
@@ -122,9 +121,7 @@ class Availability(commands.AutoShardedBot):
                     }
                 )
 
-        if (reaction.emoji.name == "✅" and reaction.event_type == "REACTION_REMOVE") or (
-            reaction.emoji.name == "❌" and reaction.event_type == "REACTION_ADD"
-        ):
+        if reaction.emoji.name == "✅" and reaction.event_type == "REACTION_REMOVE":
             await self.prisma.availabilitysubmitted.delete_many(
                 where={
                     "member_id": member_id,
@@ -133,9 +130,6 @@ class Availability(commands.AutoShardedBot):
                     "time": time,
                 }
             )
-
-        if reaction.emoji.name == "❌" and reaction.event_type == "REACTION_ADD":
-            await message.remove_reaction("✅", member=reaction.member)
 
     async def on_raw_reaction_add(self, reaction: nextcord.RawReactionActionEvent):
         await self.handle_avail_react(reaction)

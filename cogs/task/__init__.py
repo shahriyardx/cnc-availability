@@ -163,7 +163,6 @@ class Tasker(commands.Cog):
                     for time in play_times:
                         msg = await new_avail_submit_channel.send(content=f"__**{day.upper()}**__ {time}")
                         await msg.add_reaction("✅")
-                        await msg.add_reaction("❌")
                         await asyncio.sleep(2)
 
                     await new_avail_submit_channel.send(content="╚════════════════════╝")
