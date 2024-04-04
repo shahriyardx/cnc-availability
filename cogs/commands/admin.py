@@ -528,13 +528,6 @@ class UtilityCommands(commands.Cog):
                     content="You don't have permission to set or edit lineups"
                 )
 
-        settings = await self.bot.prisma.settings.find_first()
-        if not settings.can_submit_lineups:
-            if interaction.user.id not in [810256917497905192, 696939596667158579]:
-                return await interaction.followup.send(
-                    content="Lineup submission is not open right now"
-                )
-
         team_name = get_team_name(interaction.guild.name)
         prev = await self.bot.prisma.lineup.find_first(
             where={"team": team_name, "day": day, "time": time}
@@ -610,13 +603,6 @@ class UtilityCommands(commands.Cog):
             if not owner and not gm:
                 return await interaction.followup.send(
                     content="You don't have permission to set or edit lineups"
-                )
-
-        settings = await self.bot.prisma.settings.find_first()
-        if not settings.can_edit_lineups:
-            if interaction.user.id not in [810256917497905192, 696939596667158579]:
-                return await interaction.followup.send(
-                    content="Lineup editing is not open right now"
                 )
 
         old_lineup = await self.bot.prisma.lineup.find_first(
