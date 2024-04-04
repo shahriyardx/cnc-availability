@@ -114,12 +114,16 @@ class ECUCommand(commands.Cog):
                 position_needing_ecu.remove(player[2])
 
         if position not in position_needing_ecu:
-            return await channel.send(content="The position is unavailable. Please try other position")
+            return await channel.send(
+                content="The position is unavailable. Please try other position"
+            )
 
         ecu_data = self.ecu.get_values("ecuData")
         for row in ecu_data:
             if row[3] == str(event.user_id):
-                return await channel.send(content=f"You are already on the **{team}** for ECU this week.")
+                return await channel.send(
+                    content=f"You are already on the **{team}** for ECU this week."
+                )
 
         cnc_channel = self.bot.get_channel(int(channel_id))
         author = cnc_channel.guild.get_member(event.user_id)
@@ -138,7 +142,9 @@ class ECUCommand(commands.Cog):
             ],
         )
 
-    async def send_messages(self, interaction: Interaction, team: nextcord.Role, search_position: str):
+    async def send_messages(
+        self, interaction: Interaction, team: nextcord.Role, search_position: str
+    ):
         nicks = []
 
         players = self.ecu.get_values("players")
@@ -170,8 +176,12 @@ class ECUCommand(commands.Cog):
         self,
         interaction: Interaction,
         team: nextcord.Role = SlashOption(description="The team role", required=True),
-        player: nextcord.Member = SlashOption(description="The player that needs to be replaced", required=False),
-        position: nextcord.Role = SlashOption(description="Select the position", required=False),
+        player: nextcord.Member = SlashOption(
+            description="The player that needs to be replaced", required=False
+        ),
+        position: nextcord.Role = SlashOption(
+            description="Select the position", required=False
+        ),
     ):
         if interaction.guild_id not in [1055597639028183080, 831166408888942623]:
             return
@@ -181,7 +191,9 @@ class ECUCommand(commands.Cog):
         try:
             sheet_data = self.roster.get_values(team.name)
         except:  # noqa
-            return await interaction.edit_original_message(content=f"Data for the {team.name} not found")
+            return await interaction.edit_original_message(
+                content=f"Data for the {team.name} not found"
+            )
 
         search_position: Optional[str] = None
 
@@ -205,13 +217,17 @@ class ECUCommand(commands.Cog):
 
         if search_position:
             await interaction.edit_original_message(
-                content=(f"Starting ECU for the {team.name}, Position: {search_position}")
+                content=(
+                    f"Starting ECU for the {team.name}, Position: {search_position}"
+                )
             )
             return await self.send_messages(interaction, team, search_position)
 
         team_guild = get(self.bot.guilds, name=f"CNC {team.name}")
         if not team_guild:
-            return await interaction.edit_original_message(content=f"Unable to find team discord of {team.name}")
+            return await interaction.edit_original_message(
+                content=f"Unable to find team discord of {team.name}"
+            )
 
         ir = get(team_guild.roles, name="IR")
         position_needing_ecu = []
@@ -234,7 +250,9 @@ class ECUCommand(commands.Cog):
                     position_needing_ecu.append(pos)
 
         await interaction.edit_original_message(
-            content=(f"Starting ECU for the {team.name}, Positions: {', '.join(position_needing_ecu)}")
+            content=(
+                f"Starting ECU for the {team.name}, Positions: {', '.join(position_needing_ecu)}"
+            )
         )
 
         for ir_pos in position_needing_ecu:

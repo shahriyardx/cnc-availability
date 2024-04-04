@@ -1,7 +1,26 @@
-[tool.black]
-line-length = 120
-target-version = ['py38']
-exclude = '''
-    database/
-    venv/
-'''
+[tool.poetry]
+name = "cnc-availability"
+version = "0.1.0"
+description = ""
+authors = ["Md Shahriyar Alam <mdshahriyaralam552@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.11"
+aiohttp = "^3.9.3"
+aioscheduler = "^1.4.2"
+aiosqlite = "^0.20.0"
+beautifulsoup4 = "^4.12.3"
+bs4 = "^0.0.2"
+nextcord = "^2.6.0"
+prisma = "^0.13.1"
+python-dotenv = "^1.0.1"
+requests = "^2.31.0"
+typing-extensions = "^4.10.0"
+gspread = "^6.1.0"
+betterspread = "^0.2.1"
+pytz = "^2024.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

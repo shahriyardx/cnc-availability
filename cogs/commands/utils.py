@@ -103,7 +103,7 @@ async def sync_player(bot: IBot, member: nextcord.Member):
     cnc_nick = cnc_member.nick
     try:
         await member.edit(nick=cnc_nick)
-    except: # noqa
+    except:  # noqa
         pass
 
 
@@ -159,8 +159,10 @@ async def append_into_ir(
     try:
         channel = bot.get_channel(ir_channel)
         if channel:
-            await channel.send(f"{user.mention} of the **{team_name}** is on IR this week")
-    except: # noqa
+            await channel.send(
+                f"{user.mention} of the **{team_name}** is on IR this week"
+            )
+    except:  # noqa
         pass
 
     if status == "Approved":
@@ -182,7 +184,7 @@ async def append_into_ir(
                     f"{next_status}"
                 )
             )
-        except: # noqa
+        except:  # noqa
             pass
     else:
         team_name = guild.name.split(" ", maxsplit=1)[1]
@@ -200,7 +202,9 @@ async def append_into_ir(
 
         channel = bot.get_channel(inactive_channel)
         if channel:
-            await channel.send(f"{user.mention} of the **{team_name}** has been deemed inactive")
+            await channel.send(
+                f"{user.mention} of the **{team_name}** has been deemed inactive"
+            )
 
         all_values = sheet.get_values(team_name)
         for index, value in enumerate(all_values, start=1):
@@ -217,12 +221,12 @@ async def append_into_ir(
                     "enough availability for the third time this season"
                 )
             )
-        except: # noqa
+        except:  # noqa
             pass
 
         try:
             await user.kick(reason="Kicked because of third time being on IR")
-        except: # noqa
+        except:  # noqa
             pass
 
         support_server = bot.get_guild(support_server_id)
@@ -230,8 +234,10 @@ async def append_into_ir(
             member = support_server.get_member(user.id)
             if member:
                 try:
-                    await member.remove_roles(*[Object(role_id) for role_id in inactive_roles])
-                except: # noqa
+                    await member.remove_roles(
+                        *[Object(role_id) for role_id in inactive_roles]
+                    )
+                except:  # noqa
                     pass
 
 
@@ -251,7 +257,16 @@ class CustomMember:
         pos_roles = [
             role.name
             for role in self.roles
-            if role.name in ["Left Wing", "Right Wing", "Left Defense", "Right Defense", "Center", "Goalie", "ECU"]
+            if role.name
+            in [
+                "Left Wing",
+                "Right Wing",
+                "Left Defense",
+                "Right Defense",
+                "Center",
+                "Goalie",
+                "ECU",
+            ]
         ]
 
         positions = []

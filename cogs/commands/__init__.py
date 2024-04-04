@@ -42,7 +42,9 @@ class TaskerCommands(commands.Cog):
     async def create_category(
         self,
         interaction: Interaction,
-        category_name: str = SlashOption(name="category_name", description="The category name"),
+        category_name: str = SlashOption(
+            name="category_name", description="The category name"
+        ),
     ):
         await interaction.response.defer(ephemeral=True)
 
@@ -66,15 +68,21 @@ class TaskerCommands(commands.Cog):
     async def create_channel(
         self,
         interaction: Interaction,
-        channel_name: str = SlashOption(name="channel_name", description="The channel name"),
-        category: CategoryChannel = SlashOption(name="category", description="Mention the category"),
+        channel_name: str = SlashOption(
+            name="channel_name", description="The channel name"
+        ),
+        category: CategoryChannel = SlashOption(
+            name="category", description="Mention the category"
+        ),
     ):
         await interaction.response.defer(ephemeral=True)
 
         exists = get(interaction.guild.text_channels, name=channel_name)
 
         if exists:
-            return await interaction.edit_original_message(content="Can't create channel with this name")
+            return await interaction.edit_original_message(
+                content="Can't create channel with this name"
+            )
 
         everyone = get(interaction.guild.roles, name="@everyone")
         owner = get(interaction.guild.roles, name="Owner")
@@ -104,7 +112,9 @@ class TaskerCommands(commands.Cog):
         exists = get(interaction.guild.roles, name=name)
 
         if exists:
-            return await interaction.edit_original_message(content="Can't create role with this name")
+            return await interaction.edit_original_message(
+                content="Can't create role with this name"
+            )
 
         await interaction.guild.create_role(name=name)
         await interaction.edit_original_message(content="Role created")
@@ -114,11 +124,13 @@ class TaskerCommands(commands.Cog):
             permission_overwrites = PermissionOverwrite()
             permission_overwrites.send_messages = False  # noqa
             permission_overwrites.view_channel = _state  # noqa
-            permission_overwrites.add_reactions = False # noqa
+            permission_overwrites.add_reactions = False  # noqa
 
             return permission_overwrites
 
-        await channel.set_permissions(target=role, overwrite=get_permissions(_state=state))
+        await channel.set_permissions(
+            target=role, overwrite=get_permissions(_state=state)
+        )
 
     @slash_command(
         name="toggle-availability",
@@ -137,26 +149,33 @@ class TaskerCommands(commands.Cog):
         await interaction.response.defer(ephemeral=True)
 
         if interaction.user.id != interaction.guild.owner.id:
-            return await interaction.followup.send(content="You are not allowed to run this command")
+            return await interaction.followup.send(
+                content="You are not allowed to run this command"
+            )
 
         for guild in self.bot.guilds:
             if guild.id in Data.IGNORED_GUILDS:
                 continue
 
-            SUBMIT_CHANNEL = get(guild.text_channels, name=Data.AVIAL_SUBMIT_CHANNEL)  # `#submmit-availability`
+            SUBMIT_CHANNEL = get(
+                guild.text_channels, name=Data.AVIAL_SUBMIT_CHANNEL
+            )  # `#submmit-availability`
             TEAM_ROLE = get(
                 guild.roles,
                 name=Data.PLAYERS_ROLE,
             )
             if SUBMIT_CHANNEL:
                 await self.toggle_state(SUBMIT_CHANNEL, TEAM_ROLE, state)
-                await SUBMIT_CHANNEL.send(content=(
+                await SUBMIT_CHANNEL.send(
+                    content=(
                         f"{TEAM_ROLE.mention} choose which games you can play. "
                         f"You must select a minimum of 4 games or more"
                     )
                 )
 
-        await interaction.followup.send(content=f"Availavility has been {'Unlocked' if state else 'Locked'}")
+        await interaction.followup.send(
+            content=f"Availavility has been {'Unlocked' if state else 'Locked'}"
+        )
 
 
 def setup(bot: IBot):

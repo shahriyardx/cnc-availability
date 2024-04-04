@@ -1,6 +1,8 @@
 import datetime
 from typing import List, Union, Optional
 
+import betterspread
+import discord
 import nextcord
 from nextcord import PermissionOverwrite, Role, TextChannel
 from nextcord.utils import get
@@ -11,7 +13,7 @@ def get_permissions(state: bool):
     permission_overwrites = PermissionOverwrite()
     permission_overwrites.send_messages = False  # noqa
     permission_overwrites.view_channel = state  # noqa
-    permission_overwrites.add_reactions = False # noqa
+    permission_overwrites.add_reactions = False  # noqa
 
     return permission_overwrites
 
@@ -29,12 +31,16 @@ def get_roles_array(roles: Union[Role, List[Role]]):
 
 async def unlockdown(channel: TextChannel, roles: Union[Role, List[Role]]):
     for role in get_roles_array(roles):
-        await channel.set_permissions(target=role, overwrite=get_permissions(state=True))
+        await channel.set_permissions(
+            target=role, overwrite=get_permissions(state=True)
+        )
 
 
 async def lockdown(channel: TextChannel, roles: Union[Role, List[Role]]):
     for role in get_roles_array(roles):
-        await channel.set_permissions(target=role, overwrite=get_permissions(state=False))
+        await channel.set_permissions(
+            target=role, overwrite=get_permissions(state=False)
+        )
 
 
 def get_week():
@@ -68,6 +74,36 @@ def get_played_games(
         return 0
 
 
+async def strike_player(member: discord.Member, strike_count: int, team_name: str):
+    if not member:
+        return
+
+    sheet = betterspread.Sheet(
+        "OFFICIAL NHL ROSTER SHEET",
+        connection=betterspread.Connection("./credentials.json"),
+    )
+    strikes_tab = await sheet.get_tab("Strikes")
+    strikes = await strikes_tab.values()
+
+    for row in strikes:
+        if row[2] == str(member.id):
+            current = int(row[4])
+            cell = row[4]
+            await cell.update(str(current + strike_count))
+            break
+    else:
+        now = datetime.datetime.utcnow()
+        await strikes_tab.append(
+            [
+                member.display_name,
+                team_name,
+                str(member.id),
+                f"{now.month}/{now.day}/{now.year}",
+                str(strike_count),
+            ]
+        )
+
+
 async def report_games_played(
     bot: IBot,
     guild: nextcord.Guild,
@@ -83,6 +119,7 @@ async def report_games_played(
     ecu = get(guild.roles, name="ECU")
 
     checking_members: List[nextcord.Member] = [*team.members, *ecu.members]
+    team_name = get_team_name(guild.name)
 
     for member in checking_members:
         games_played = get_played_games(old_data, new_data, member)
@@ -91,10 +128,11 @@ async def report_games_played(
             continue
 
         if games_played < 3:
+            strike_count = 3 - games_played
+            await strike_player(member, strike_count, guild.name.split("CNC ")[1])
             not_minimum.append([member, games_played, ecu in member.roles])
 
     if not_minimum:
-        team_name = get_team_name(guild.name)
         cnc_team_channel = get(
             bot.SUPPORT_GUILD.text_channels,
             name=f"╟・{team_name}",
@@ -102,7 +140,8 @@ async def report_games_played(
 
         mentions = "### Players who did not play minimum 3 games this week\n"
         for player_data in not_minimum:
-            mentions += f"- {player_data[0].mention} ({player_data[0].id}){' (ECU)' if player_data[2] else ''} played **{player_data[1]}** games\n"
+            strike_count = 3 - int(player_data[1])
+            mentions += f"- {player_data[0].mention} ({player_data[0].id}){' (ECU)' if player_data[2] else ''} played **{player_data[1]}** games. Got {strike_count} strikes\n"
 
         if return_first:
             return mentions

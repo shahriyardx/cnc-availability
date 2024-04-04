@@ -11,9 +11,34 @@ from nextcord.utils import get
 from essentials.models import Data, IBot
 from utils.gspread import DataSheet
 from essentials.data import team_names
-from .utils import sync_player, get_custom_member, CustomMember, CustomRole, valid_member, get_duplicate
+from .utils import (
+    sync_player,
+    get_custom_member,
+    CustomMember,
+    CustomRole,
+    valid_member,
+    get_duplicate,
+)
 from ..task.utils import report_games_played, get_week, get_team_name
 from .views import StagePlayers
+from datetime import datetime
+from pytz import timezone
+
+
+def can_submit():
+    now = datetime.now(tz=timezone("EST"))
+    weekday = now.weekday()
+
+    if weekday == 0:
+        return True
+
+    if weekday > 3:
+        return None
+
+    last_time = datetime(
+        now.year, now.month, now.day, 8, 30, 0, 0, tzinfo=timezone("EST")
+    )
+    return now < last_time
 
 
 class UtilityCommands(commands.Cog):
@@ -28,7 +53,9 @@ class UtilityCommands(commands.Cog):
     async def sync(
         self,
         interaction: Interaction,
-        player: nextcord.Member = SlashOption(description="The member to sync", required=False),
+        player: nextcord.Member = SlashOption(
+            description="The member to sync", required=False
+        ),
     ):
         await interaction.response.defer(ephemeral=True)
 
@@ -40,7 +67,9 @@ class UtilityCommands(commands.Cog):
         try:
             await sync_player(self.bot, player)
         except Exception as e:
-            return interaction.edit_original_message(content=f"Error occured during sync: {e}")
+            return interaction.edit_original_message(
+                content=f"Error occured during sync: {e}"
+            )
 
         return await interaction.edit_original_message(content="Sync finished")
 
@@ -48,12 +77,16 @@ class UtilityCommands(commands.Cog):
     async def toggle_tasks(
         self,
         interaction: Interaction,
-        status: bool = SlashOption(name="status", description="True = Enabled, False = Disabled", required=True),
+        status: bool = SlashOption(
+            name="status", description="True = Enabled, False = Disabled", required=True
+        ),
     ):
         await interaction.response.defer(ephemeral=True)
 
         if interaction.user.id not in [696939596667158579, 810256917497905192]:
-            return await interaction.followup.send(content="You don't have permission to run this command")
+            return await interaction.followup.send(
+                content="You don't have permission to run this command"
+            )
 
         settings = await self.prisma.settings.find_first()
         await self.prisma.settings.update(
@@ -64,18 +97,24 @@ class UtilityCommands(commands.Cog):
         )
 
         self.bot.tasks_enabled = status
-        await interaction.edit_original_message(content=f"Tasks has been {'Enabled' if status else 'Disabled'}")
+        await interaction.edit_original_message(
+            content=f"Tasks has been {'Enabled' if status else 'Disabled'}"
+        )
 
     @slash_command(description="Enable of disable playoffs")
     async def toggle_playoffs(
         self,
         interaction: Interaction,
-        status: bool = SlashOption(name="status", description="True = Enabled, False = Disabled", required=True),
+        status: bool = SlashOption(
+            name="status", description="True = Enabled, False = Disabled", required=True
+        ),
     ):
         await interaction.response.defer(ephemeral=True)
 
         if interaction.user.id not in [696939596667158579, 810256917497905192]:
-            return await interaction.followup.send(content="You don't have permission to run this command")
+            return await interaction.followup.send(
+                content="You don't have permission to run this command"
+            )
 
         settings = await self.prisma.settings.find_first()
         await self.prisma.settings.update(
@@ -86,13 +125,17 @@ class UtilityCommands(commands.Cog):
         )
 
         self.bot.playoffs = status
-        await interaction.edit_original_message(content=f"Playoffs has been {'Enabled' if status else 'Disabled'}")
+        await interaction.edit_original_message(
+            content=f"Playoffs has been {'Enabled' if status else 'Disabled'}"
+        )
 
     @slash_command(description="Reset ir of a player")
     async def resetir(
         self,
         interaction: Interaction,
-        player: nextcord.Member = SlashOption(description="The player to reset ir", required=True),
+        player: nextcord.Member = SlashOption(
+            description="The player to reset ir", required=True
+        ),
     ):
         await interaction.response.defer()
 
@@ -117,7 +160,9 @@ class UtilityCommands(commands.Cog):
                         break
 
         if not member:
-            return await interaction.followup.send(content="Unable to find the team of this player.")
+            return await interaction.followup.send(
+                content="Unable to find the team of this player."
+            )
 
         sub_role = get(team_guild.roles, name="Availability Submitted")
         ir_role = get(team_guild.roles, name="IR")
@@ -136,10 +181,13 @@ class UtilityCommands(commands.Cog):
         chat = get(team_guild.text_channels, name="chat")
         if chat:
             await chat.send(
-                content=f"{member.mention} Your Availability has been reset " "please Submit availability again."
+                content=f"{member.mention} Your Availability has been reset "
+                "please Submit availability again."
             )
 
-        await interaction.edit_original_message(content=f"{player.mention}'s IR has been reset succesfully")
+        await interaction.edit_original_message(
+            content=f"{player.mention}'s IR has been reset succesfully"
+        )
 
     @slash_command(description="Sync nicknames from sheet")
     async def syncall(
@@ -152,7 +200,9 @@ class UtilityCommands(commands.Cog):
 
         await interaction.response.defer()
         await interaction.edit_original_message(content="Sync process has been started")
-        msg = await interaction.guild.get_channel(interaction.channel_id).send(content="Sync all is about to start..")
+        msg = await interaction.guild.get_channel(interaction.channel_id).send(
+            content="Sync all is about to start.."
+        )
 
         guilds = self.bot.guilds
         if team:
@@ -182,13 +232,17 @@ class UtilityCommands(commands.Cog):
             if unable_to_sync:
                 member_list = ""
                 for us in unable_to_sync:
-                    member_list += f"- {us[0].display_name} {us[0].id} \n```sh\n{us[1]}\n```"
+                    member_list += (
+                        f"- {us[0].display_name} {us[0].id} \n```sh\n{us[1]}\n```"
+                    )
 
                 await interaction.guild.get_channel(interaction.channel_id).send(
                     content=f"Unable to sync for **{guild.name}**\n {member_list}"
                 )
 
-            await msg.edit(content=f"Finished syncing {guild.name}. Next server sync in 10 minutes")
+            await msg.edit(
+                content=f"Finished syncing {guild.name}. Next server sync in 10 minutes"
+            )
             await asyncio.sleep(3 * 60)
 
         await msg.edit(content="All servers has been synced")
@@ -197,12 +251,16 @@ class UtilityCommands(commands.Cog):
     async def syncnick(
         self,
         interaction: Interaction,
-        target: nextcord.Member = SlashOption(description="member to sync nick", required=False),
+        target: nextcord.Member = SlashOption(
+            description="member to sync nick", required=False
+        ),
     ):
         await interaction.response.defer()
 
         if interaction.user.id not in [696939596667158579, 810256917497905192]:
-            return await interaction.followup.send(content="You don't have permission to run this command")
+            return await interaction.followup.send(
+                content="You don't have permission to run this command"
+            )
 
         await interaction.edit_original_message(content="Nickname sync started")
 
@@ -240,7 +298,9 @@ class UtilityCommands(commands.Cog):
                 if len(all_members) > 1:
                     await asyncio.sleep(5)
 
-        await interaction.guild.get_channel(interaction.channel_id).send(content="Nick sync has been finished")
+        await interaction.guild.get_channel(interaction.channel_id).send(
+            content="Nick sync has been finished"
+        )
 
     @slash_command(description="Report stats of a specific server")
     async def report_stats(
@@ -266,7 +326,9 @@ class UtilityCommands(commands.Cog):
             new_data = json.loads(new_week_data.data)
 
         guild = get(self.bot.guilds, name=f"CNC {team.name}")
-        data = await report_games_played(self.bot, guild, old_data, new_data, return_first=True)
+        data = await report_games_played(
+            self.bot, guild, old_data, new_data, return_first=True
+        )
 
         await interaction.followup.send(content=data)
 
@@ -336,8 +398,16 @@ class UtilityCommands(commands.Cog):
         owner_role = get(interaction.guild.roles, name="Owner")
         gm_role = get(interaction.guild.roles, name="General Manager")
 
-        owner_membners = [get_custom_member(member) for member in owner_role.members if valid_member(member)]
-        gm_membners = [get_custom_member(member) for member in gm_role.members if valid_member(member)]
+        owner_membners = [
+            get_custom_member(member)
+            for member in owner_role.members
+            if valid_member(member)
+        ]
+        gm_membners = [
+            get_custom_member(member)
+            for member in gm_role.members
+            if valid_member(member)
+        ]
 
         lw_members = [
             get_custom_member(member)
@@ -379,11 +449,16 @@ class UtilityCommands(commands.Cog):
             CustomMember(id=1, nick="ECU", roles=[CustomRole("ECU")]),
             *{*ld_members, *rd_members, *owner_membners, *gm_membners},
         ]
-        g = [CustomMember(id=1, nick="ECU", roles=[CustomRole("ECU")]), *{*g_members, *owner_membners, *gm_membners}]
+        g = [
+            CustomMember(id=1, nick="ECU", roles=[CustomRole("ECU")]),
+            *{*g_members, *owner_membners, *gm_membners},
+        ]
 
         return [lw_rw_c, ld_rd, g]
 
-    async def send_lineup_message(self, lineup, interaction: Interaction, data: dict, day: str, time: str):
+    async def send_lineup_message(
+        self, lineup, interaction: Interaction, data: dict, day: str, time: str
+    ):
         msg = ""
         mentions = ""
         for key, value in data.items():
@@ -407,14 +482,18 @@ class UtilityCommands(commands.Cog):
         await interaction.channel.send(content=f"{lineup.id}")
         await interaction.channel.send(embed=embed)
 
-    @slash_command(description="Testing new avail")
-    async def setlineups(
+    @slash_command(description="Testing new avail", name="set-lineups")
+    async def set_lineups(
         self,
         interaction: Interaction,
         day: str = SlashOption(
             description="day",
             required=True,
-            choices={"Tuesday": "Tuesday", "Wednesday": "Wednesday", "Thursday": "Thursday"},
+            choices={
+                "Tuesday": "Tuesday",
+                "Wednesday": "Wednesday",
+                "Thursday": "Thursday",
+            },
         ),
         time: str = SlashOption(
             description="day",
@@ -424,46 +503,75 @@ class UtilityCommands(commands.Cog):
     ):
         await interaction.response.defer(ephemeral=True)
 
+        can = can_submit()
+
+        if can is None:
+            return await interaction.followup.send(
+                content="You can't submit lineups right now"
+            )
+        elif not can:
+            return await interaction.followup.send(
+                content=f"You can't submit lineups for `{day}` right now"
+            )
+
         if interaction.channel.name != "submit-lineups":
-            return await interaction.followup.send(content="Lineups can't be submitted in this channel")
+            return await interaction.followup.send(
+                content="Lineups can't be submitted in this channel"
+            )
 
         owner = get(interaction.user.roles, name="Owner")
         gm = get(interaction.user.roles, name="General Manager")
 
         if interaction.user.id not in [810256917497905192, 696939596667158579]:
             if not owner and not gm:
-                return await interaction.followup.send(content="You don't have permission to set or edit lineups")
+                return await interaction.followup.send(
+                    content="You don't have permission to set or edit lineups"
+                )
 
         settings = await self.bot.prisma.settings.find_first()
         if not settings.can_submit_lineups:
             if interaction.user.id not in [810256917497905192, 696939596667158579]:
-                return await interaction.followup.send(content="Lineup submission is not open right now")
+                return await interaction.followup.send(
+                    content="Lineup submission is not open right now"
+                )
 
         team_name = get_team_name(interaction.guild.name)
-        prev = await self.bot.prisma.lineup.find_first(where={"team": team_name, "day": day, "time": time})
+        prev = await self.bot.prisma.lineup.find_first(
+            where={"team": team_name, "day": day, "time": time}
+        )
 
         if prev:
-            return await interaction.followup.send(content=f"Lineup already exists. ID: {prev.id}")
+            return await interaction.followup.send(
+                content=f"Lineup already exists. ID: {prev.id}"
+            )
 
         lw_rw_c, ld_rd, g = await self.get_players(interaction, day, time)
 
         data = {}
 
         first_stage = StagePlayers(lw_rw_c, lw_rw_c, lw_rw_c, ["LW", "RW", "C"])
-        await interaction.edit_original_message(content="Select players", view=first_stage)
+        await interaction.edit_original_message(
+            content="Select players", view=first_stage
+        )
 
         cancelled = await first_stage.wait()
         if first_stage.cancelled or cancelled:
-            return await interaction.edit_original_message(content="Cancelled", view=None)
+            return await interaction.edit_original_message(
+                content="Cancelled", view=None
+            )
 
         data.update(first_stage.data)
 
         second_stage = StagePlayers(ld_rd, ld_rd, g, ["LD", "RD", "G"])
-        await interaction.edit_original_message(content="Select players", view=second_stage)
+        await interaction.edit_original_message(
+            content="Select players", view=second_stage
+        )
 
         cancelled = await second_stage.wait()
         if second_stage.cancelled or cancelled:
-            return await interaction.edit_original_message(content="Cancelled", view=None)
+            return await interaction.edit_original_message(
+                content="Cancelled", view=None
+            )
 
         data.update(second_stage.data)
         dup = get_duplicate(data)
@@ -478,28 +586,38 @@ class UtilityCommands(commands.Cog):
         )
 
         await self.send_lineup_message(lineup, interaction, data, day, time)
-        await interaction.edit_original_message(content=f"Lineup submitted, ID: `{lineup.id}`", view=None)
+        await interaction.edit_original_message(
+            content=f"Lineup submitted, ID: `{lineup.id}`", view=None
+        )
 
-    @slash_command(description="Testing new avail")
-    async def editlineup(
-        self, interaction: Interaction, lineup_id: str = SlashOption(description="The id of the lineup to edit")
+    @slash_command(description="Testing new avail", name="edit-lineups")
+    async def edit_lineup(
+        self,
+        interaction: Interaction,
+        lineup_id: str = SlashOption(description="The id of the lineup to edit"),
     ):
         await interaction.response.defer(ephemeral=True)
 
         if interaction.channel.name != "submit-lineups":
-            return await interaction.followup.send(content="Lineups can't be editted in this channel")
+            return await interaction.followup.send(
+                content="Lineups can't be editted in this channel"
+            )
 
         owner = get(interaction.user.roles, name="Owner")
         gm = get(interaction.user.roles, name="General Manager")
 
         if interaction.user.id not in [810256917497905192, 696939596667158579]:
             if not owner and not gm:
-                return await interaction.followup.send(content="You don't have permission to set or edit lineups")
+                return await interaction.followup.send(
+                    content="You don't have permission to set or edit lineups"
+                )
 
         settings = await self.bot.prisma.settings.find_first()
         if not settings.can_edit_lineups:
             if interaction.user.id not in [810256917497905192, 696939596667158579]:
-                return await interaction.followup.send(content="Lineup editing is not open right now")
+                return await interaction.followup.send(
+                    content="Lineup editing is not open right now"
+                )
 
         old_lineup = await self.bot.prisma.lineup.find_first(
             where={"id": lineup_id, "team": get_team_name(interaction.guild.name)}
@@ -508,23 +626,35 @@ class UtilityCommands(commands.Cog):
             return await interaction.followup.send(content="Lineup not found")
 
         data = json.loads(old_lineup.data)
-        lw_rw_c, ld_rd, g = await self.get_players(interaction, old_lineup.day, old_lineup.time)
+        lw_rw_c, ld_rd, g = await self.get_players(
+            interaction, old_lineup.day, old_lineup.time
+        )
 
-        first_stage = StagePlayers(lw_rw_c, lw_rw_c, lw_rw_c, ["LW", "RW", "C"], defaults=data)
-        await interaction.edit_original_message(content="Select players", view=first_stage)
+        first_stage = StagePlayers(
+            lw_rw_c, lw_rw_c, lw_rw_c, ["LW", "RW", "C"], defaults=data
+        )
+        await interaction.edit_original_message(
+            content="Select players", view=first_stage
+        )
 
         cancelled = await first_stage.wait()
         if first_stage.cancelled or cancelled:
-            return await interaction.edit_original_message(content="Cancelled", view=None)
+            return await interaction.edit_original_message(
+                content="Cancelled", view=None
+            )
 
         data.update(first_stage.data)
 
         second_stage = StagePlayers(ld_rd, ld_rd, g, ["LD", "RD", "G"], defaults=data)
-        await interaction.edit_original_message(content="Select players", view=second_stage)
+        await interaction.edit_original_message(
+            content="Select players", view=second_stage
+        )
 
         cancelled = await second_stage.wait()
         if second_stage.cancelled or cancelled:
-            return await interaction.edit_original_message(content="Cancelled", view=None)
+            return await interaction.edit_original_message(
+                content="Cancelled", view=None
+            )
 
         data.update(second_stage.data)
         dup = get_duplicate(data)
@@ -534,10 +664,16 @@ class UtilityCommands(commands.Cog):
                 content=f"Can't have same player for multiple position, {dup}"
             )
 
-        await self.bot.prisma.lineup.update(where={"id": old_lineup.id}, data={"data": json.dumps(data)})
+        await self.bot.prisma.lineup.update(
+            where={"id": old_lineup.id}, data={"data": json.dumps(data)}
+        )
 
-        await self.send_lineup_message(old_lineup, interaction, data, old_lineup.day, old_lineup.time)
-        await interaction.edit_original_message(content=f"Lineup Edited, ID: `{old_lineup.id}`", view=None)
+        await self.send_lineup_message(
+            old_lineup, interaction, data, old_lineup.day, old_lineup.time
+        )
+        await interaction.edit_original_message(
+            content=f"Lineup Edited, ID: `{old_lineup.id}`", view=None
+        )
 
     @slash_command(description="get lineup data")
     async def gamedaylineups(
@@ -546,12 +682,18 @@ class UtilityCommands(commands.Cog):
         day: str = SlashOption(
             description="The day to check games",
             required=True,
-            choices={"Tuesday": "Tuesday", "Wednesday": "Wednesday", "Thursday": "Thursday"},
+            choices={
+                "Tuesday": "Tuesday",
+                "Wednesday": "Wednesday",
+                "Thursday": "Thursday",
+            },
         ),
     ):
         await interaction.response.defer()
 
-        data = await self.bot.prisma.lineup.find_many(where={"day": day, "team": get_team_name(interaction.guild.name)})
+        data = await self.bot.prisma.lineup.find_many(
+            where={"day": day, "team": get_team_name(interaction.guild.name)}
+        )
 
         if not data:
             return await interaction.followup.send(content="No lineup found")
@@ -600,7 +742,9 @@ class UtilityCommands(commands.Cog):
         if get(i.user.roles, name="Owner") or get(i.user.roles, name="General Manager"):
             pass
         else:
-            return await i.edit_original_message(content="You are not allowed to run this command")
+            return await i.edit_original_message(
+                content="You are not allowed to run this command"
+            )
 
         if i.guild.id in [831166408888942623]:
             return await i.edit_original_message(content="Can't run on this server")
@@ -614,14 +758,14 @@ class UtilityCommands(commands.Cog):
         for row in values:
             try:
                 players.append(int(row[5]))
-            except: # noqa
+            except:  # noqa
                 pass
 
         for member in team_role.members:
             if member.id not in players:
                 try:
                     await member.kick(reason="Not on roster")
-                except: # noqa
+                except:  # noqa
                     pass
 
         await i.edit_original_message(
@@ -638,7 +782,7 @@ class UtilityCommands(commands.Cog):
             try:
                 await sync_player(self.bot, m)
                 await asyncio.sleep(10)
-            except: # noqa
+            except:  # noqa
                 await i.channel.send(content=f"Syncing {m.mention} failed")
 
         await i.edit_original_message(content="Finished")

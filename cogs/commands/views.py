@@ -52,18 +52,28 @@ class DayAndTimeView(ui.View):
 
         await interaction.response.edit_message(view=self)
 
-    @ui.button(label="Next", custom_id="next", row=3, style=nextcord.ButtonStyle.primary)
+    @ui.button(
+        label="Next", custom_id="next", row=3, style=nextcord.ButtonStyle.primary
+    )
     async def next(self, _button: ui.Button, _interaction: nextcord.Interaction):
         self.stop()
 
-    @ui.button(label="Cancel", custom_id="cancel", row=3, style=nextcord.ButtonStyle.danger)
+    @ui.button(
+        label="Cancel", custom_id="cancel", row=3, style=nextcord.ButtonStyle.danger
+    )
     async def cancel(self, _button: ui.Button, _interaction: nextcord.Interaction):
         self.stop()
         self.cancelled = True
 
 
 class CustomMemberSelect(ui.StringSelect):
-    def __init__(self, placeholder: str, members: List[CustomMember], callback: Callable, default: int = None):
+    def __init__(
+        self,
+        placeholder: str,
+        members: List[CustomMember],
+        callback: Callable,
+        default: int = None,
+    ):
         super().__init__(placeholder=placeholder, min_values=1, max_values=1)
         for member in members:
             self.add_option(
@@ -86,7 +96,14 @@ class CustomMemberSelect(ui.StringSelect):
 
 
 class StagePlayers(ui.View):
-    def __init__(self, lw_members: list, rw_members: list, g_members: list, p: list, defaults: dict = None):
+    def __init__(
+        self,
+        lw_members: list,
+        rw_members: list,
+        g_members: list,
+        p: list,
+        defaults: dict = None,
+    ):
         super().__init__()
         if not defaults:
             defaults = {
@@ -100,9 +117,21 @@ class StagePlayers(ui.View):
         self.cancelled: bool = False
         self.p = p
 
-        self.add_item(CustomMemberSelect(f"Select {p[0]} player", lw_members, self.on_a_select, defaults[p[0]]))
-        self.add_item(CustomMemberSelect(f"Select {p[1]} player", rw_members, self.on_b_select, defaults[p[1]]))
-        self.add_item(CustomMemberSelect(f"Select {p[2]} player", g_members, self.on_c_select, defaults[p[2]]))
+        self.add_item(
+            CustomMemberSelect(
+                f"Select {p[0]} player", lw_members, self.on_a_select, defaults[p[0]]
+            )
+        )
+        self.add_item(
+            CustomMemberSelect(
+                f"Select {p[1]} player", rw_members, self.on_b_select, defaults[p[1]]
+            )
+        )
+        self.add_item(
+            CustomMemberSelect(
+                f"Select {p[2]} player", g_members, self.on_c_select, defaults[p[2]]
+            )
+        )
 
     async def on_a_select(self, member: int, interaction: nextcord.Interaction):
         if member:
@@ -122,14 +151,22 @@ class StagePlayers(ui.View):
 
         await interaction.response.edit_message(view=self)
 
-    @ui.button(label="Next", custom_id="next", row=3, style=nextcord.ButtonStyle.primary)
+    @ui.button(
+        label="Next", custom_id="next", row=3, style=nextcord.ButtonStyle.primary
+    )
     async def next(self, _button: ui.Button, _interaction: nextcord.Interaction):
-        if not self.data[self.p[0]] or not self.data[self.p[1]] or not self.data[self.p[2]]:
+        if (
+            not self.data[self.p[0]]
+            or not self.data[self.p[1]]
+            or not self.data[self.p[2]]
+        ):
             return
 
         self.stop()
 
-    @ui.button(label="Cancel", custom_id="cancel", row=3, style=nextcord.ButtonStyle.danger)
+    @ui.button(
+        label="Cancel", custom_id="cancel", row=3, style=nextcord.ButtonStyle.danger
+    )
     async def cancel(self, _button: ui.Button, _interaction: nextcord.Interaction):
         self.stop()
         self.cancelled = True

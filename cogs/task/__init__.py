@@ -17,6 +17,9 @@ from utils.gspread import DataSheet
 
 from .stats import get_all_team_data
 from .utils import get_week, lockdown, unlockdown, report_games_played, send_message
+from betterspread import Sheet, Connection
+
+connection = Connection(credentials_path="./credentials.json")
 
 
 class Tasker(commands.Cog):
@@ -24,6 +27,7 @@ class Tasker(commands.Cog):
         self.bot = bot
         self.scheduler = TimedScheduler(prefer_utc=True)
         self.start_tasks.start()
+        self.roster = Sheet("OFFICIAL NHL ROSTER SHEET", connection=connection)
         self.roster_sheet = DataSheet("OFFICIAL NHL ROSTER SHEET")
 
     @slash_command(description="Simulate specific tasks")
@@ -46,7 +50,9 @@ class Tasker(commands.Cog):
         await interaction.response.defer(ephemeral=True)
 
         if interaction.user.id not in [interaction.guild.owner_id, 696939596667158579]:
-            return await interaction.edit_original_message(content="You are allowed to simulate tasks")
+            return await interaction.edit_original_message(
+                content="You are allowed to simulate tasks"
+            )
 
         t = {
             "Open Availability": self.open_availability_task,
@@ -64,7 +70,7 @@ class Tasker(commands.Cog):
             traceback.print_exc()
             return await interaction.edit_original_message(content=f"**Error**: {e}")
 
-        await interaction.edit_original_message(content="Simulation succeded.")
+        await interaction.edit_original_message(content="Simulation succeeded.")
 
     @slash_command(description="Simulate specific tasks")
     async def repost_avail(self, interaction: Interaction):
@@ -76,7 +82,9 @@ class Tasker(commands.Cog):
         play_days = ["Tuesday", "Wednesday", "Thursday"]
         play_times = ["8:30pm", "9:10pm", "9:50pm"]
 
-        new_avail_submit_channel = get(interaction.guild.channels, name="submit-availability")
+        new_avail_submit_channel = get(
+            interaction.guild.channels, name="submit-availability"
+        )
         players_role = get(interaction.guild.roles, name="Team")
 
         for day in play_days:
@@ -85,9 +93,10 @@ class Tasker(commands.Cog):
                 content=f"╔══ **{day.upper()}** ({date.month}/{date.day}/{date.year}) ══╗"
             )
             for time in play_times:
-                msg = await new_avail_submit_channel.send(content=f"__**{day.upper()}**__ {time}")
+                msg = await new_avail_submit_channel.send(
+                    content=f"__**{day.upper()}**__ {time}"
+                )
                 await msg.add_reaction("✅")
-                await msg.add_reaction("❌")
                 await asyncio.sleep(2)
 
             await new_avail_submit_channel.send(content="╚════════════════════╝")
@@ -101,6 +110,46 @@ class Tasker(commands.Cog):
 
         await interaction.followup.send(content="Done ✅")
 
+    @slash_command(description="get avail of specific day", name="get-avail")
+    async def get_avail(
+        self,
+        interaction: Interaction,
+        day: str = SlashOption(
+            description="Select task to simulate",
+            choices={
+                "Tuesday": "Tuesday",
+                "Wednesday": "Wednesday",
+                "Thursday": "Thursday",
+            },
+        ),
+    ):
+        await interaction.response.defer()
+
+        guild = interaction.guild
+        team_role = get(guild.roles, name=Data.PLAYERS_ROLE)
+
+        member_ids = [member.id for member in team_role.members]
+
+        avails = await self.bot.prisma.availabilitysubmitted.find_many(
+            where={"day": day, "member_id": {"in": member_ids}}
+        )
+        data = {
+            "8:30pm": [],
+            "9:10pm": [],
+            "9:50pm": [],
+        }
+
+        for avail in avails:
+            member = guild.get_member(avail.member_id)
+            if member:
+                data[avail.time].append(member.mention)
+
+        msg = f"Avail submissions for : {day}\n"
+        for key, val in data.items():
+            msg += f"**{key}** - {','.join(val)}\n" if val else f"**{key}:** None\n"
+
+        await interaction.followup.send(content=msg)
+
     async def open_availability_task(self, simulate: bool = False):
         # Runs Friday 5 PM UTC
         # Opens availability
@@ -110,7 +159,9 @@ class Tasker(commands.Cog):
         print("[+] START open_availability_task")
         if not self.bot.tasks_enabled:  # noqa
             if not simulate:
-                return self.start_task(self.open_availability_task, get_next_date("Friday", hour=17))
+                return self.start_task(
+                    self.open_availability_task, get_next_date("Friday", hour=17)
+                )
 
             return
 
@@ -144,8 +195,17 @@ class Tasker(commands.Cog):
                 ir_role = get(guild.roles, name="IR")
                 ecu_role = get(guild.roles, name="ECU")
 
-                avail_submit_channel = get(guild.text_channels, name=Data.AVIAL_SUBMIT_CHANNEL)
+                avail_submit_channel = get(
+                    guild.text_channels, name=Data.AVIAL_SUBMIT_CHANNEL
+                )
+                lineups_channel = get(guild.text_channels, name="submit-lineups")
 
+                gm_role = get(guild.roles, name="General Manager")
+                owner_role = get(guild.roles, name="Owner")
+
+                await unlockdown(
+                    lineups_channel, roles=[r for r in [owner_role, gm_role] if r]
+                )
                 if not players_role or not avail_submit_channel or not submitted_role:
                     continue
 
@@ -161,11 +221,15 @@ class Tasker(commands.Cog):
                         content=f"╔══ **{day.upper()}** ({date.month}/{date.day}/{date.year}) ══╗"
                     )
                     for time in play_times:
-                        msg = await new_avail_submit_channel.send(content=f"__**{day.upper()}**__ {time}")
+                        msg = await new_avail_submit_channel.send(
+                            content=f"__**{day.upper()}**__ {time}"
+                        )
                         await msg.add_reaction("✅")
                         await asyncio.sleep(2)
 
-                    await new_avail_submit_channel.send(content="╚════════════════════╝")
+                    await new_avail_submit_channel.send(
+                        content="╚════════════════════╝"
+                    )
 
                 await new_avail_submit_channel.send(
                     content=(
@@ -176,7 +240,9 @@ class Tasker(commands.Cog):
 
                 for member in submitted_role.members:
                     try:
-                        await member.remove_roles(submitted_role, ir_role, reason="Open Availability")
+                        await member.remove_roles(
+                            submitted_role, ir_role, reason="Open Availability"
+                        )
                     except Exception as e:
                         print(e)
 
@@ -200,89 +266,22 @@ class Tasker(commands.Cog):
 
         print("[+] END open_availability_task")
         if not simulate:
-            self.start_task(self.open_availability_task, get_next_date("Friday", hour=17))
+            self.start_task(
+                self.open_availability_task, get_next_date("Friday", hour=17)
+            )
 
     async def close_availability_task(self, simulate: bool = False):
         # Runs Monday 5 PM UTC
-        # Closes availability submission
-        # Open Lineups submit
 
         support_guild = self.bot.SUPPORT_GUILD
         print("[+] START close_availability_task")
-        if not self.bot.tasks_enabled:  # noqa
+        if not self.bot.tasks_enabled or self.bot.playoffs:  # noqa
             if not simulate:
-                return self.start_task(self.close_availability_task, get_next_date("Monday", hour=16))
+                return self.start_task(
+                    self.close_availability_task, get_next_date("Monday", hour=16)
+                )
 
             return
-
-        # Open lineups submit and edit
-        settings = await self.bot.prisma.settings.find_first()
-        await self.bot.prisma.settings.update(
-            where={"id": settings.id},
-            data={
-                "can_edit_lineups": True,
-                "can_submit_lineups": True,
-            },
-        )
-
-        # IR Process
-        for guild in self.bot.guilds:
-            if guild.id in Data.IGNORED_GUILDS:
-                continue
-
-            team_role = get(guild.roles, name=Data.PLAYERS_ROLE)
-
-            if not team_role:
-                continue
-
-            # Lockdown submit channel - No more availability submission
-            submit_availability_channel = get(guild.text_channels, name=Data.AVIAL_SUBMIT_CHANNEL)
-            availability_log_channel = get(guild.text_channels, name=Data.AVIAL_LOG_CHANNEL)
-            team_avail_log_channel = get(support_guild.text_channels, name=get_team_name(guild.name, prefix="╟・"))
-
-            await submit_availability_channel.send(content="This concludes this weeks availability")
-            await lockdown(submit_availability_channel, roles=team_role)
-
-            if self.bot.playoffs:
-                continue
-
-            for member in team_role.members:
-                submitted = get(member.roles, name="Availability Submitted")
-
-                if not submitted:
-                    await append_into_ir(self.bot, guild, member, self.roster_sheet, 0)
-                    continue
-
-                avails = await self.bot.prisma.availabilitysubmitted.find_many(where={"member_id": member.id})
-                times = {
-                    "Tuesday": [],
-                    "Wednesday": [],
-                    "Thursday": [],
-                }
-                for avail in avails:
-                    if avail.time not in times[avail.day]:
-                        times[avail.day].append(avail.time)
-
-                message = f"{member.mention} is available\n"
-                for key, value in times.items():
-                    if not value:
-                        message += f"{key}: None\n"
-                    elif len(value) == 3:
-                        message += f"{key}: All\n"
-                    else:
-                        message += f"{key}: {'/'.join(value)}\n"
-
-                await send_message(availability_log_channel, message)
-                await send_message(team_avail_log_channel, message)
-
-                total_avails = 0
-                for val in times.values():
-                    total_avails += len(val)
-
-                if total_avails < 3:
-                    await append_into_ir(self.bot, guild, member, self.roster_sheet, 0)
-
-                await asyncio.sleep(5)
 
         # Member count check
         for guild in self.bot.guilds:
@@ -307,100 +306,38 @@ class Tasker(commands.Cog):
             owner_role = get(guild.roles, name="Owner")
             gm_role = get(guild.roles, name="General Manager")
 
-            owners_role = get(support_guild.roles, name="Owners")
-            commissioners_role = get(support_guild.roles, name="Commissioners")
-
             if len(playable_members) < 11 and not self.bot.playoffs:  # noqa
                 await cnc_team_channel.send(
                     content=(
-                        f"The {get_team_name(guild.name)} need {11 - len(playable_members)} ECU "
-                        f"players this week {owners_role.mention} {commissioners_role.mention}"
+                        f"The **{get_team_name(guild.name)}** need {11 - len(playable_members)} ECU "
+                        f"players this week"
                     )
                 )
 
             if not owner_role or not gm_role:
                 continue
 
-            await unlockdown(lineups_channel, roles=[owner_role, gm_role])
             await lineups_channel.send(
                 content=(
                     f"{owner_role.mention} or {gm_role.mention} please click on "
-                    f"{self.bot.get_command_mention('setlineups')} to enter your preliminary lineups"
+                    f"{self.bot.get_command_mention('set-lineups')} to enter your preliminary lineups\n"
+                    f"You can use {self.bot.get_command_mention('get-avail')} "
+                    "command to check who is available for lineup"
                 )
             )
 
         print("[+] STOP close_availability_task")
         if not simulate:
-            self.start_task(self.close_availability_task, get_next_date("Monday", hour=16))
-
-    async def close_lineup_submit(self, simulate: bool = False):
-        # Runs Tuesday 4 AM
-        # Keeps the lineup edit open
-
-        print("[+] START close_lineup_submit")
-        if not self.bot.tasks_enabled:  # noqa
-            if not simulate:
-                return self.start_task(self.close_lineup_submit, get_next_date("Tuesday", hour=4))
-
-            return
-
-        settings = await self.bot.prisma.settings.find_first()
-        await self.bot.prisma.settings.update(
-            where={"id": settings.id},
-            data={
-                "can_edit_lineups": True,
-                "can_submit_lineups": False,
-            },
-        )
-
-        print("[+] STOP close_lineup_submit")
-        if not simulate:
-            self.start_task(self.close_lineup_submit, get_next_date("Tuesday", hour=4))
-
-    async def close_lineup_channel(self, simulate: bool = False):
-        # Runs Friday 2 AM UTC
-        # Closes the lineup channel
-        # Checks who did not play 3 matches
-
-        # Close lineup submit and edit both again
-        print("[+] START close_lineup_channel")
-        if not self.bot.tasks_enabled:  # noqa
-            if not simulate:
-                return self.start_task(self.close_lineup_channel, get_next_date("Friday", hour=2))
-
-            return
-
-        settings = await self.bot.prisma.settings.find_first()
-        await self.bot.prisma.settings.update(
-            where={"id": settings.id},
-            data={
-                "can_edit_lineups": False,
-                "can_submit_lineups": False,
-            },
-        )
-
-        for guild in self.bot.guilds:
-            if guild.id in Data.IGNORED_GUILDS:
-                continue
-
-            lineups_channel = get(guild.text_channels, name=Data.LINEUP_SUBMIT_CHANNEL)
-            owner_role = get(guild.roles, name="Owner")
-            gm_role = get(guild.roles, name="General Manager")
-
-            if lineups_channel and owner_role and gm_role:
-                await lineups_channel.send(":information_source: Lineup editing has been closed for this week.")
-
-                await lockdown(lineups_channel, roles=[owner_role, gm_role])
-
-        print("[+] STOP close_lineup_channel")
-
-        if not simulate:
-            self.start_task(self.close_lineup_channel, get_next_date("Friday", hour=2))
+            self.start_task(
+                self.close_availability_task, get_next_date("Monday", hour=16)
+            )
 
     async def calculate_gp(self, simulate: bool = False):
         if not self.bot.tasks_enabled:  # noqa
             if not simulate:
-                return self.start_task(self.calculate_gp, get_next_date("Friday", hour=16))
+                return self.start_task(
+                    self.calculate_gp, get_next_date("Friday", hour=16)
+                )
 
             return
 
@@ -422,7 +359,9 @@ class Tasker(commands.Cog):
             new_data = json.loads(new_week_data.data)
         else:
             new_data = get_all_team_data()
-            await self.bot.prisma.game.create({"week": week, "data": json.dumps(new_data)})
+            await self.bot.prisma.game.create(
+                {"week": week, "data": json.dumps(new_data)}
+            )
 
         for guild in self.bot.guilds:
             await report_games_played(self.bot, guild, old_data, new_data)
@@ -446,7 +385,7 @@ class Tasker(commands.Cog):
 
         if mode in ["dev", "devstart"]:
             # Fake times
-            # now = datetime.datetime.utcnow()
+            now = datetime.datetime.utcnow()
             # f16 = now + datetime.timedelta(seconds=3)
             # f17 = now + datetime.timedelta(seconds=10)
             # s16 = f17 + datetime.timedelta(seconds=30)
@@ -466,14 +405,15 @@ class Tasker(commands.Cog):
             f16 = get_next_date("Friday", hour=16)
             f17 = get_next_date("Friday", hour=17)
             m16 = get_next_date("Monday", hour=16)
-            t4 = get_next_date("Tuesday", hour=4)
-            f2 = get_next_date("Friday", hour=2)
+            # t4 = get_next_date("Tuesday", hour=4)
+            # f2 = get_next_date("Friday", hour=2)
 
             self.start_task(self.calculate_gp, f16)
             self.start_task(self.open_availability_task, f17)
             self.start_task(self.close_availability_task, m16)
-            self.start_task(self.close_lineup_submit, t4)
-            self.start_task(self.close_lineup_channel, f2)
+
+            # self.start_task(self.close_lineup_submit, t4)
+            # self.start_task(self.close_lineup_channel, f2)
 
         self.scheduler.start()
 
