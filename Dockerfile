@@ -1,4 +1,4 @@
-FROM python:3.8.16-slim-buster
+FROM python:3.9
 
 WORKDIR /app
 RUN apt-get update
