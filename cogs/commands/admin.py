@@ -36,7 +36,7 @@ def can_submit():
         return None
 
     last_time = datetime(
-        now.year, now.month, now.day, 8, 30, 0, 0, tzinfo=timezone("EST")
+        now.year, now.month, now.day, 20, 30, 0, 0, tzinfo=timezone("EST")
     )
     return now < last_time
 

@@ -152,12 +152,13 @@ class Availability(commands.AutoShardedBot):
 
 
 bot = Availability(intents=intents)
-
+print("Loading cogs")
 bot.load_extension("cogs.commands")
 bot.load_extension("cogs.commands.admin")
 bot.load_extension("cogs.commands.ecu")
 bot.load_extension("cogs.task")
 bot.load_extension("cogs.utility")
 
+print("Starting")
 TOKEN = os.environ["TOKEN"]
 bot.run(TOKEN)
