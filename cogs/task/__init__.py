@@ -38,11 +38,7 @@ class Tasker(commands.Cog):
             description="Select task to simulate",
             choices={
                 "Open Availability": "Open Availability",
-                "Close Availability and Open Lineups Submit and Edit": (
-                    "Close Availability and Open Lineups Submit and Edit"
-                ),
-                "Close Lineup Submit": "Close Lineup Submit",
-                "Close Lineup Edit": "Close Lineup Edit",
+                "Notify Lineups": "Notify Lineups",
                 "Calculate Games Played": "Calculate Games Played",
             },
         ),
@@ -56,9 +52,7 @@ class Tasker(commands.Cog):
 
         t = {
             "Open Availability": self.open_availability_task,
-            "Close Availability and Open Lineups Submit and Edit": self.close_availability_task,
-            "Close Lineup Submit": self.close_lineup_submit,
-            "Close Lineup Edit": self.close_lineup_channel,
+            "Notify Lineups": self.close_availability_task,
             "Calculate Games Played": self.calculate_gp,
         }
 
@@ -198,6 +192,9 @@ class Tasker(commands.Cog):
                 avail_submit_channel = get(
                     guild.text_channels, name=Data.AVIAL_SUBMIT_CHANNEL
                 )
+                chat_channel = get(
+                    guild.text_channels, name="chat"
+                )
                 lineups_channel = get(guild.text_channels, name="submit-lineups")
 
                 gm_role = get(guild.roles, name="General Manager")
@@ -235,6 +232,14 @@ class Tasker(commands.Cog):
                     content=(
                         f"{players_role.mention} choose which games you can play. "
                         "You must select a minimum of 4 games or more"
+                    )
+                )
+
+                await chat_channel.send(
+                    content=(
+                        f"{players_role.mention}, this is a friendly reminder to  {new_avail_submit_channel.mention}. "
+                        f"Please make sure you give your team your availability for "
+                        f"the week and get your 3 game minimums in."
                     )
                 )
 
@@ -319,10 +324,10 @@ class Tasker(commands.Cog):
 
             await lineups_channel.send(
                 content=(
-                    f"{owner_role.mention} or {gm_role.mention} please click on "
-                    f"{self.bot.get_command_mention('set-lineups')} to enter your preliminary lineups\n"
-                    f"You can use {self.bot.get_command_mention('get-avail')} "
-                    "command to check who is available for lineup"
+                    f"{owner_role.mention} & {gm_role.mention}, this is a friendly reminder to make sure "
+                    f"you submit your lineups for games before 8:30 EST on each day. "
+                    f"You can run the command {self.bot.get_command_mention('get-avail')} to check availability "
+                    f"given and Use the command {self.bot.get_command_mention('set-lineups')} to enter lineups"
                 )
             )
 
