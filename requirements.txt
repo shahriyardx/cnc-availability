@@ -29,6 +29,7 @@ multidict==6.0.5
 nextcord==2.6.0
 nodeenv==1.8.0
 oauthlib==3.2.2
+orjson==3.10.0
 prisma==0.13.1
 pyasn1==0.6.0
 pyasn1_modules==0.4.0
@@ -45,4 +46,7 @@ StrEnum==0.4.15
 tomlkit==0.12.4
 typing_extensions==4.10.0
 urllib3==2.2.1
+websocket-server==0.6.4
+websockets==12.0
+winerp==1.5.0
 yarl==1.9.4
