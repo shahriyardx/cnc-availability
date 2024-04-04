@@ -5,7 +5,7 @@ RUN apt-get update
 
 # Install deps
 COPY requirements.txt ./
-RUN pip install -r requirements.txt
+RUN pip install -r --no-cache-dir -I requirements.txt
 
 # Prisma
 COPY prisma ./prisma

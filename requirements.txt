@@ -7,7 +7,7 @@ anyio==4.3.0
 async-timeout==4.0.3
 attrs==23.2.0
 beautifulsoup4==4.12.3
-betterspread>=0.2.1
+betterspread==0.2.1
 bs4==0.0.2
 cachetools==5.3.3
 certifi==2024.2.2
