@@ -792,13 +792,15 @@ class UtilityCommands(commands.Cog):
         all_roster = await data_import_tab.values()
         team_tab = await roster_sheet.get_tab(team_name)
 
+        ids = [await team_tab.get_cell("B27"), await team_tab.get_cell("B28"), await team_tab.get_cell("B29")]
+
         for pid in players:
             m = i.guild.get_member(pid)
             if not m:
                 continue
 
             try:
-                await sync_player(self.bot, m, all_roster, team_tab)
+                await sync_player(self.bot, m, all_roster, team_tab, ids)
                 await asyncio.sleep(10)
             except:  # noqa
                 traceback.print_exc()

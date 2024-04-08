@@ -41,7 +41,7 @@ draft_sheet = Sheet("NHL Live Draft Sheet", connection=con)
 nick_sheet = Sheet("Official Nickname Updates", connection=con)
 
 
-async def sync_player(bot: IBot, member: nextcord.Member, all_roster=None, team_tab=None):
+async def sync_player(bot: IBot, member: nextcord.Member, all_roster=None, team_tab=None, ids=None):
     team_name = member.guild.name.split(" ", maxsplit=1)[1].strip()
 
     if not all_roster and not team_tab:
@@ -71,27 +71,12 @@ async def sync_player(bot: IBot, member: nextcord.Member, all_roster=None, team_
                     await add_roles(member, roles_to_add)
                     break
 
-    # checking owner gm and agm
-    owner_id = None
-    gm_id = None
-    agm_id = None
-
-    try:
-        v = await team_tab.get_cell("B27")
-        owner_id = get_number(v)
-    except: # noqa
-        pass
-
-    try:
-        v = await team_tab.get_cell("B28")
-        gm_id = get_number(v)
-    except: # noqa
-        pass
-    try:
-        v = await team_tab.get_cell("B29")
-        agm_id = get_number(v)
-    except: # noqa
-        pass
+    if not ids:
+        owner_id = get_number(await team_tab.get_cell("B27"))
+        gm_id = get_number(await team_tab.get_cell("B28"))
+        agm_id = get_number(await team_tab.get_cell("B29"))
+    else:
+        owner_id, gm_id, agm_id = list(map(lambda x: get_number(x), ids))
 
     if owner_id == member.id:
         await member.add_roles(get(member.guild.roles, name="Owner"))
