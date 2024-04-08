@@ -6,9 +6,8 @@ from nextcord.ext import commands
 from nextcord.interactions import Interaction
 from nextcord.utils import get
 
-from essentials.models import Data, IBot
+from essentials.models import IBot
 from utils.gspread import DataSheet
-from essentials.data import team_names
 from typing import Optional
 
 

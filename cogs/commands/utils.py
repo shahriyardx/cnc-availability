@@ -10,15 +10,6 @@ from nextcord.utils import get
 from essentials.models import IBot
 
 from utils.data import inactive_channel, inactive_roles, ir_channel, support_server_id
-from utils.gspread import DataSheet
-from betterspread import Sheet, Connection
-
-con = Connection("./credentials.json")
-
-
-roster_sheet = Sheet("OFFICIAL NHL ROSTER SHEET", connection=con)
-draft_sheet = Sheet("NHL Live Draft Sheet", connection=con)
-nick_sheet = Sheet("Official Nickname Updates", connection=con)
 
 
 def get_number(value):
@@ -43,7 +34,7 @@ async def add_roles(member: nextcord.Member, roles: list):
     await member.add_roles(*roles)
 
 
-async def sync_player(bot: IBot, member: nextcord.Member):
+async def sync_player(bot: IBot, member: nextcord.Member, all_roster, team_tab):
     team_name = member.guild.name.split(" ", maxsplit=1)[1].strip()
     cnc_member = bot.SUPPORT_GUILD.get_member(member.id)
     if not bot.SUPPORT_GUILD.get_member(member.id):
@@ -56,9 +47,6 @@ async def sync_player(bot: IBot, member: nextcord.Member):
     await member.add_roles(get(member.guild.roles, name="Team"))
 
     # Checking if team member
-    data_import_tab = await draft_sheet.get_tab("Data import")
-    all_roster = await data_import_tab.values()
-
     for row in all_roster[1:]:
         if get_number(row[3]) == member.id:
             roles_to_add = [
@@ -75,7 +63,6 @@ async def sync_player(bot: IBot, member: nextcord.Member):
     gm_id = None
     agm_id = None
 
-    team_tab = await roster_sheet.get_tab(team_name)
     try:
         v = await team_tab.get_cell("B27")
         owner_id = get_number(v)
@@ -132,7 +119,7 @@ async def append_into_ir(
     bot: AutoShardedBot,
     guild: Guild,
     user: Member,
-    sheet: Sheet,
+    sheet,
     total_games: int = 0,
 ):
     current_time = datetime.now(pytz.timezone("US/Eastern"))

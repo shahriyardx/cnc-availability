@@ -26,6 +26,13 @@ from pytz import timezone
 from betterspread import Sheet, Connection, Row
 from typing import List
 
+con = Connection("./credentials.json")
+
+
+roster_sheet = Sheet("OFFICIAL NHL ROSTER SHEET", connection=con)
+draft_sheet = Sheet("NHL Live Draft Sheet", connection=con)
+nick_sheet = Sheet("Official Nickname Updates", connection=con)
+
 
 def can_submit(day):
     now = datetime.now(tz=timezone("EST"))
@@ -60,11 +67,6 @@ class UtilityCommands(commands.Cog):
     def __init__(self, bot: IBot) -> None:
         self.bot = bot
         self.prisma = bot.prisma
-
-        con = Connection("./credentials.json")
-        self.roster_sheet = Sheet("OFFICIAL NHL ROSTER SHEET", connection=con)
-        self.draft_sheet = Sheet("NHL Live Draft Sheet", connection=con)
-        self.nick_sheet = Sheet("Official Nickname Updates", connection=con)
 
     @slash_command(description="Sync your roles and nickname with Roster sheet")
     async def sync(
@@ -189,7 +191,7 @@ class UtilityCommands(commands.Cog):
         if ir_role:
             await member.remove_roles(ir_role)
 
-        ir_tab = await self.roster_sheet.get_tab("IR")
+        ir_tab = await roster_sheet.get_tab("IR")
         ir_entry: List[Row] = await ir_tab.values()
         ir_entry.reverse()
 
@@ -290,7 +292,7 @@ class UtilityCommands(commands.Cog):
             content=f"Synced {synced}/{len(all_members)}"
         )
 
-        data_tab = await self.nick_sheet.get_tab("data")
+        data_tab = await nick_sheet.get_tab("data")
         nick_data = await data_tab.values()
         nicks = {}
 
@@ -759,7 +761,7 @@ class UtilityCommands(commands.Cog):
         if not team_role:
             return await i.edit_original_message(content="Team role not found")
 
-        values = await (await self.roster_sheet.get_tab(i.guild.name[4:])).values()
+        values = await (await roster_sheet.get_tab(i.guild.name[4:])).values()
         players = []
 
         for row in values:
@@ -784,15 +786,20 @@ class UtilityCommands(commands.Cog):
             content="Removing non-roster members finished, Working on syncing existing members..."
         )
 
+        data_import_tab = await draft_sheet.get_tab("Data import")
+        all_roster = await data_import_tab.values()
+        team_tab = await roster_sheet.get_tab(team_role.name)
+
         for pid in players:
             m = i.guild.get_member(pid)
             if not m:
                 continue
 
             try:
-                await sync_player(self.bot, m)
+                await sync_player(self.bot, m, all_roster, team_tab)
                 await asyncio.sleep(10)
             except:  # noqa
+                traceback.print_exc()
                 await i.channel.send(content=f"Syncing {m.mention} failed")
 
         await i.edit_original_message(content="Finished")
