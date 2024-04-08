@@ -10,7 +10,7 @@ from nextcord.utils import get
 from essentials.models import IBot
 
 from utils.data import inactive_channel, inactive_roles, ir_channel, support_server_id
-
+from betterspread import Sheet, Connection
 
 def get_number(value):
     try:
@@ -33,9 +33,22 @@ async def add_roles(member: nextcord.Member, roles: list):
     roles = [role for role in roles if role]
     await member.add_roles(*roles)
 
+con = Connection("./credentials.json")
 
-async def sync_player(bot: IBot, member: nextcord.Member, all_roster, team_tab):
+
+roster_sheet = Sheet("OFFICIAL NHL ROSTER SHEET", connection=con)
+draft_sheet = Sheet("NHL Live Draft Sheet", connection=con)
+nick_sheet = Sheet("Official Nickname Updates", connection=con)
+
+
+async def sync_player(bot: IBot, member: nextcord.Member, all_roster=None, team_tab=None):
     team_name = member.guild.name.split(" ", maxsplit=1)[1].strip()
+
+    if not all_roster and not team_tab:
+        data_import_tab = await draft_sheet.get_tab("Data import")
+        all_roster = await data_import_tab.values()
+        team_tab = await roster_sheet.get_tab(team_name)
+
     cnc_member = bot.SUPPORT_GUILD.get_member(member.id)
     if not bot.SUPPORT_GUILD.get_member(member.id):
         return
