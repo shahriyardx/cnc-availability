@@ -23,6 +23,8 @@ from ..task.utils import report_games_played, get_week, get_team_name
 from .views import StagePlayers
 from datetime import datetime
 from pytz import timezone
+from betterspread import Sheet, Connection, Row
+from typing import List
 
 
 def can_submit(day):
@@ -58,9 +60,11 @@ class UtilityCommands(commands.Cog):
     def __init__(self, bot: IBot) -> None:
         self.bot = bot
         self.prisma = bot.prisma
-        self.roster_sheet = DataSheet("OFFICIAL NHL ROSTER SHEET")
-        self.draft_sheet = DataSheet("NHL Live Draft Sheet")
-        self.nick_sheet = DataSheet("Official Nickname Updates")
+
+        con = Connection("./credentials.json")
+        self.roster_sheet = Sheet("OFFICIAL NHL ROSTER SHEET", connection=con)
+        self.draft_sheet = Sheet("NHL Live Draft Sheet", connection=con)
+        self.nick_sheet = Sheet("Official Nickname Updates", connection=con)
 
     @slash_command(description="Sync your roles and nickname with Roster sheet")
     async def sync(
@@ -185,11 +189,13 @@ class UtilityCommands(commands.Cog):
         if ir_role:
             await member.remove_roles(ir_role)
 
-        ir_entry: list = self.roster_sheet.get_values("IR")
+        ir_tab = await self.roster_sheet.get_tab("IR")
+        ir_entry: List[Row] = await ir_tab.values()
         ir_entry.reverse()
-        for index, entry in enumerate(ir_entry):
+
+        for entry in ir_entry:
             if entry[1] == player.display_name:
-                self.roster_sheet.delete_row("IR", len(ir_entry) - index)
+                await entry.delete()
 
         chat = get(team_guild.text_channels, name="chat")
         if chat:
@@ -284,7 +290,8 @@ class UtilityCommands(commands.Cog):
             content=f"Synced {synced}/{len(all_members)}"
         )
 
-        nick_data = self.nick_sheet.get_values("data")
+        data_tab = await self.nick_sheet.get_tab("data")
+        nick_data = await data_tab.values()
         nicks = {}
 
         for row in nick_data[1:]:
@@ -674,8 +681,8 @@ class UtilityCommands(commands.Cog):
             content=f"Lineup Edited, ID: `{old_lineup.id}`", view=None
         )
 
-    @slash_command(description="get lineup data")
-    async def gamedaylineups(
+    @slash_command(description="get lineup data", name="gameday-lineups")
+    async def gameday_lineups(
         self,
         interaction: Interaction,
         day: str = SlashOption(
@@ -734,8 +741,8 @@ class UtilityCommands(commands.Cog):
 
         await interaction.edit_original_message(content="Completed")
 
-    @slash_command(description="get lineup data")
-    async def syncteam(self, i: Interaction):
+    @slash_command(description="get lineup data", name="sync-team")
+    async def sync_team(self, i: Interaction):
         await i.response.defer()
 
         if get(i.user.roles, name="Owner") or get(i.user.roles, name="General Manager"):
@@ -752,12 +759,18 @@ class UtilityCommands(commands.Cog):
         if not team_role:
             return await i.edit_original_message(content="Team role not found")
 
-        values = self.roster_sheet.get_values(i.guild.name[4:])
+        values = await (await self.roster_sheet.get_tab(i.guild.name[4:])).values()
         players = []
+
         for row in values:
             try:
                 players.append(int(row[5]))
             except:  # noqa
+                pass
+
+            try:
+                players.append(int(row[1]))
+            except: # noqa
                 pass
 
         for member in team_role.members:
@@ -770,8 +783,6 @@ class UtilityCommands(commands.Cog):
         await i.edit_original_message(
             content="Removing non-roster members finished, Working on syncing existing members..."
         )
-
-        print(players)
 
         for pid in players:
             m = i.guild.get_member(pid)

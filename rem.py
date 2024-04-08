@@ -1,18 +1,36 @@
-class Solution(object):
-    def maxDepth(self, s):
-        depth = 0
-        opened = 0
-
-        for char in list(s):
-            if char == "(":
-                opened += 1
-
-            if char == ")":
-                if opened > depth:
-                    depth = opened
-                opened -= 1
-
-        return depth
+from datetime import datetime
+from pytz import timezone
 
 
-print(Solution().maxDepth("(1)+((2))+(((3)))"))
+def can_submit(day):
+    now = datetime.now(tz=timezone("EST"))
+    weekday = now.weekday()
+
+    days = {
+        "Monday": 0,
+        "Tuesday": 1,
+        "Wednesday": 2,
+        "Thursday": 3,
+        "Friday": 4,
+        "Saturday": 5,
+        "Sunday": 6,
+    }
+
+    if weekday == 0:
+        return True
+
+    if weekday > 3:
+        return None
+
+    if weekday != days[day]:
+        return False
+
+    last_time = datetime(
+        now.year, now.month, now.day, 20, 30, 0, 0, tzinfo=timezone("EST")
+    )
+    return now < last_time
+
+
+print(can_submit("Tuesday"))
+print(can_submit("Wednesday"))
+print(can_submit("Thursday"))
