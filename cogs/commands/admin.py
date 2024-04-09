@@ -536,7 +536,7 @@ class UtilityCommands(commands.Cog):
                 content=f"You can't submit lineups for `{day}` right now"
             )
 
-        if interaction.channel.name != "submit-lineups":
+        if interaction.channel.name != Data.LINEUP_SUBMIT_CHANNEL:
             return await interaction.followup.send(
                 content="Lineups can't be submitted in this channel"
             )
@@ -613,7 +613,7 @@ class UtilityCommands(commands.Cog):
     ):
         await interaction.response.defer(ephemeral=True)
 
-        if interaction.channel.name != "submit-lineups":
+        if interaction.channel.name != Data.LINEUP_SUBMIT_CHANNEL:
             return await interaction.followup.send(
                 content="Lineups can't be editted in this channel"
             )
@@ -775,7 +775,7 @@ class UtilityCommands(commands.Cog):
             except: # noqa
                 pass
 
-        for member in team_role.members:
+        for member in i.guild.members:
             if member.id not in players:
                 try:
                     await member.kick(reason="Not on roster")

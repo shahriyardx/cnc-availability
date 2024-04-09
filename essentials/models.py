@@ -39,5 +39,5 @@ Data = Itask(
     SUBMITTED_ROLE="Availability Submitted",
     SUPPORT_GUILD=int(os.getenv("SUPPORT_GUILD", 1055597639028183080)),
     LINEUP_LOG_CHANNEL="lineups",
-    LINEUP_SUBMIT_CHANNEL="submit-lineups",
+    LINEUP_SUBMIT_CHANNEL="set-lineups",
 )

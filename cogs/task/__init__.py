@@ -9,7 +9,6 @@ from nextcord import Interaction, SlashOption, slash_command
 from nextcord.ext import commands, tasks
 from nextcord.utils import get
 
-from cogs.commands.utils import append_into_ir
 from essentials.models import Data, IBot
 from essentials.time import get_next_date
 from essentials.utils import get_team_name
@@ -195,7 +194,7 @@ class Tasker(commands.Cog):
                 chat_channel = get(
                     guild.text_channels, name="chat"
                 )
-                lineups_channel = get(guild.text_channels, name="submit-lineups")
+                lineups_channel = get(guild.text_channels, name=Data.LINEUP_SUBMIT_CHANNEL)
 
                 gm_role = get(guild.roles, name="General Manager")
                 owner_role = get(guild.roles, name="Owner")
@@ -294,7 +293,7 @@ class Tasker(commands.Cog):
                 continue
 
             team_role = get(guild.roles, name="Team")
-            lineups_channel = get(guild.text_channels, name="submit-lineups")
+            lineups_channel = get(guild.text_channels, name=Data.LINEUP_SUBMIT_CHANNEL)
             playable_members = []
 
             for member in team_role.members:
