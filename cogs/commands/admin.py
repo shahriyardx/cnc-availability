@@ -48,19 +48,17 @@ def can_submit(day):
         "Sunday": 6,
     }
 
-    if weekday == 0:
+    if weekday < days[day]:
         return True
+    else:
+        if weekday > 3:
+            return None
 
-    if weekday > 3:
-        return None
+        last_time = datetime(
+            now.year, now.month, now.day, 20, 30, 0, 0, tzinfo=timezone("EST")
+        )
 
-    if weekday != days[day]:
-        return False
-
-    last_time = datetime(
-        now.year, now.month, now.day, 20, 30, 0, 0, tzinfo=timezone("EST")
-    )
-    return now < last_time
+        return now < last_time
 
 
 class UtilityCommands(commands.Cog):
