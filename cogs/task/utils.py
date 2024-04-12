@@ -129,7 +129,7 @@ async def report_games_played(
 
         if games_played < 3:
             strike_count = 3 - games_played
-            # await strike_player(member, strike_count, guild.name.split("CNC ")[1])
+            await strike_player(member, strike_count, guild.name.split("CNC ")[1])
             not_minimum.append([member, games_played, ecu in member.roles])
 
     if not_minimum:
@@ -141,7 +141,7 @@ async def report_games_played(
         mentions = "### Players who did not play minimum 3 games this week\n"
         for player_data in not_minimum:
             strike_count = 3 - int(player_data[1])
-            mentions += f"- {player_data[0].display_name} ({player_data[0].id}){' (ECU)' if player_data[2] else ''} played **{player_data[1]}** games. Got {strike_count} strikes\n"
+            mentions += f"- {player_data[0].mention} ({player_data[0].id}){' (ECU)' if player_data[2] else ''} played **{player_data[1]}** games. Got {strike_count} strikes\n"
 
         if return_first:
             return mentions
