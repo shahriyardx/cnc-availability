@@ -27,10 +27,10 @@ async def init_ipc(bot: AutoShardedBot):
             return json.dumps(
                 {
                     "current": data[0].data,
-                    "prev": {},
+                    "prev": json.dumps({}),
                 }
             )
         else:
-            return json.dumps({"current": {}, "prev": {}})
+            return json.dumps({"current": json.dumps({}), "prev": json.dumps({})})
 
     await server.start()
