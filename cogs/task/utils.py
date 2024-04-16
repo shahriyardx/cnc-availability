@@ -64,7 +64,7 @@ def get_played_games(
 
     # not in both
     if str(member.id) not in old_game_data and str(member.id) not in new_game_data:
-        return -1
+        return 0
 
     # in any of them
     if str(member.id) in new_game_data:
