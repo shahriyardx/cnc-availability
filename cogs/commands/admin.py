@@ -776,7 +776,7 @@ class UtilityCommands(commands.Cog):
             if member.bot:
                 continue
 
-            if member.id not in players:
+            if member.id not in players and member.id not in [810256917497905192, 696939596667158579]:
                 try:
                     await member.kick(reason="Not on roster")
                 except:  # noqa
