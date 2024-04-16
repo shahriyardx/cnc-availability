@@ -1,8 +1,10 @@
+import asyncio
 import datetime
 from typing import List, Union, Optional
 
 import betterspread
 import discord
+import gspread.exceptions
 import nextcord
 from nextcord import PermissionOverwrite, Role, TextChannel
 from nextcord.utils import get
@@ -124,12 +126,19 @@ async def report_games_played(
     for member in checking_members:
         games_played = get_played_games(old_data, new_data, member)
 
-        if games_played == -1:
-            continue
-
         if games_played < 3:
             strike_count = 3 - games_played
-            await strike_player(member, strike_count, guild.name.split("CNC ")[1])
+
+            while True:
+                try:
+                    await strike_player(member, strike_count, guild.name.split("CNC ")[1])
+                    break
+                except gspread.exceptions.APIError as error:
+                    if error.code == 429:
+                        await asyncio.sleep(65)
+                    else:
+                        break
+
             not_minimum.append([member, games_played, ecu in member.roles])
 
     if not_minimum:
