@@ -744,10 +744,9 @@ class UtilityCommands(commands.Cog):
     @slash_command(description="get lineup data", name="sync-team")
     async def sync_team(self, i: Interaction):
         await i.response.defer()
+        owner_or_gm = get(i.user.roles, name="Owner") or get(i.user.roles, name="General Manager")
 
-        if get(i.user.roles, name="Owner") or get(i.user.roles, name="General Manager"):
-            pass
-        else:
+        if not owner_or_gm and i.user.id not in [810256917497905192, 696939596667158579]:
             return await i.edit_original_message(
                 content="You are not allowed to run this command"
             )
@@ -774,6 +773,9 @@ class UtilityCommands(commands.Cog):
                 pass
 
         for member in i.guild.members:
+            if member.bot:
+                continue
+
             if member.id not in players:
                 try:
                     await member.kick(reason="Not on roster")
@@ -798,8 +800,9 @@ class UtilityCommands(commands.Cog):
                 continue
 
             try:
+                await i.edit_original_message(content=f"Syncing {m.mention}")
                 await sync_player(self.bot, m, all_roster, team_tab, ids)
-                await asyncio.sleep(10)
+                await asyncio.sleep(3)
             except:  # noqa
                 traceback.print_exc()
                 await i.channel.send(content=f"Syncing {m.mention} failed")

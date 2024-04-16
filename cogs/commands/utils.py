@@ -78,8 +78,6 @@ async def sync_player(bot: IBot, member: nextcord.Member, all_roster=None, team_
     else:
         owner_id, gm_id, agm_id = list(map(lambda x: get_number(x), ids))
 
-    print(owner_id, gm_id, agm_id)
-
     if owner_id == member.id:
         await member.add_roles(get(member.guild.roles, name="Owner"))
         await member.remove_roles(get(member.guild.roles, name="Team"))
