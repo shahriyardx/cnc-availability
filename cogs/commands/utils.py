@@ -91,10 +91,12 @@ async def sync_player(bot: IBot, member: nextcord.Member, all_roster=None, team_
 
     # importing nick
     cnc_nick = cnc_member.nick
-    try:
-        await member.edit(nick=cnc_nick)
-    except:  # noqa
-        pass
+
+    if cnc_nick != member.nick:
+        try:
+            await member.edit(nick=cnc_nick)
+        except:  # noqa
+            pass
 
 
 @dataclass
