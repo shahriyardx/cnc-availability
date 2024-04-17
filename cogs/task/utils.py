@@ -150,7 +150,10 @@ async def report_games_played(
         mentions = "### Players who did not play minimum 3 games this week\n"
         for player_data in not_minimum:
             strike_count = 3 - int(player_data[1])
-            mentions += f"- {player_data[0].mention} ({player_data[0].id}){' (ECU)' if player_data[2] else ''} played **{player_data[1]}** games. Got {strike_count} strikes\n"
+            mentions += (
+                f"- {player_data[0].mention} ({player_data[0].id}){' (ECU)' if player_data[2] else ''} "
+                f"played **{player_data[1]}** games. Got {strike_count} strikes\n"
+            )
 
         if return_first:
             return mentions
