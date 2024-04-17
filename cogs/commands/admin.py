@@ -744,9 +744,14 @@ class UtilityCommands(commands.Cog):
     @slash_command(description="get lineup data", name="sync-team")
     async def sync_team(self, i: Interaction):
         await i.response.defer()
-        owner_or_gm = get(i.user.roles, name="Owner") or get(i.user.roles, name="General Manager")
+        owner_or_gm = get(i.user.roles, name="Owner") or get(
+            i.user.roles, name="General Manager"
+        )
 
-        if not owner_or_gm and i.user.id not in [810256917497905192, 696939596667158579]:
+        if not owner_or_gm and i.user.id not in [
+            810256917497905192,
+            696939596667158579,
+        ]:
             return await i.edit_original_message(
                 content="You are not allowed to run this command"
             )
@@ -769,14 +774,17 @@ class UtilityCommands(commands.Cog):
 
             try:
                 players.append(int(row[1]))
-            except: # noqa
+            except:  # noqa
                 pass
 
         for member in i.guild.members:
             if member.bot:
                 continue
 
-            if member.id not in players and member.id not in [810256917497905192, 696939596667158579]:
+            if member.id not in players and member.id not in [
+                810256917497905192,
+                696939596667158579,
+            ]:
                 try:
                     await member.kick(reason="Not on roster")
                 except:  # noqa
@@ -791,7 +799,11 @@ class UtilityCommands(commands.Cog):
         team_tab = await roster_sheet.get_tab(team_name)
         all_roster = await team_tab.values()
 
-        ids = [await team_tab.get_cell("B27"), await team_tab.get_cell("B28"), await team_tab.get_cell("B29")]
+        ids = [
+            await team_tab.get_cell("B27"),
+            await team_tab.get_cell("B28"),
+            await team_tab.get_cell("B29"),
+        ]
 
         for pid in players:
             m = i.guild.get_member(pid)

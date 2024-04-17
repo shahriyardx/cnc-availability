@@ -131,7 +131,9 @@ async def report_games_played(
 
             while True:
                 try:
-                    await strike_player(member, strike_count, guild.name.split("CNC ")[1])
+                    await strike_player(
+                        member, strike_count, guild.name.split("CNC ")[1]
+                    )
                     break
                 except gspread.exceptions.APIError as error:
                     if error.code == 429:

@@ -12,6 +12,7 @@ from essentials.models import IBot
 from utils.data import inactive_channel, inactive_roles, ir_channel, support_server_id
 from betterspread import Sheet, Connection
 
+
 def get_number(value):
     try:
         return int(value)
@@ -33,6 +34,7 @@ async def add_roles(member: nextcord.Member, roles: list):
     roles = [role for role in roles if role]
     await member.add_roles(*roles)
 
+
 con = Connection("./credentials.json")
 
 
@@ -41,7 +43,9 @@ draft_sheet = Sheet("NHL Live Draft Sheet", connection=con)
 nick_sheet = Sheet("Official Nickname Updates", connection=con)
 
 
-async def sync_player(bot: IBot, member: nextcord.Member, all_roster=None, team_tab=None, ids=None):
+async def sync_player(
+    bot: IBot, member: nextcord.Member, all_roster=None, team_tab=None, ids=None
+):
     team_name = member.guild.name.split(" ", maxsplit=1)[1].strip()
     print("Syncing", member, "On", team_name)
     if not all_roster and not team_tab:
@@ -79,12 +83,27 @@ async def sync_player(bot: IBot, member: nextcord.Member, all_roster=None, team_
     else:
         owner_id, gm_id, agm_id = list(map(lambda x: get_number(x), ids))
 
+    async def get_pos():
+        data_drop = await roster_sheet.get_tab("INTERNAL Data Drop")
+        drop_values = await data_drop.values()
+
+        for r in drop_values[1:]:
+            if r[3] == str(member.id):
+                return [
+                    get(member.guild.roles, name=position_roles.get(row[1])),
+                    get(member.guild.roles, name=position_roles.get(row[2])),
+                ]
+
+        return []
+
     if owner_id == member.id:
-        await member.add_roles(get(member.guild.roles, name="Owner"))
+        pos = await get_pos()
+        await member.add_roles(get(member.guild.roles, name="Owner"), *pos)
         await member.remove_roles(get(member.guild.roles, name="Team"))
 
     if gm_id == member.id:
-        await member.add_roles(get(member.guild.roles, name="General Manager"))
+        pos = await get_pos()
+        await member.add_roles(get(member.guild.roles, name="General Manager"), *pos)
         await member.remove_roles(get(member.guild.roles, name="Team"))
 
     if agm_id == member.id:

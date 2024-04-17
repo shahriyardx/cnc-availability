@@ -191,10 +191,10 @@ class Tasker(commands.Cog):
                 avail_submit_channel = get(
                     guild.text_channels, name=Data.AVIAL_SUBMIT_CHANNEL
                 )
-                chat_channel = get(
-                    guild.text_channels, name="chat"
+                chat_channel = get(guild.text_channels, name="chat")
+                lineups_channel = get(
+                    guild.text_channels, name=Data.LINEUP_SUBMIT_CHANNEL
                 )
-                lineups_channel = get(guild.text_channels, name=Data.LINEUP_SUBMIT_CHANNEL)
 
                 gm_role = get(guild.roles, name="General Manager")
                 owner_role = get(guild.roles, name="Owner")
