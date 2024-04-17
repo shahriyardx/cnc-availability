@@ -84,7 +84,8 @@ class UtilityCommands(commands.Cog):
         try:
             await sync_player(self.bot, player)
         except Exception as e:
-            return interaction.edit_original_message(
+            traceback.print_exc()
+            return await interaction.edit_original_message(
                 content=f"Error occured during sync: {e}"
             )
 
