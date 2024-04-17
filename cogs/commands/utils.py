@@ -99,6 +99,7 @@ async def sync_player(
 
     if owner_id == member.id:
         pos = await get_pos()
+        print(pos)
         await member.add_roles(get(member.guild.roles, name="Owner"), *pos)
         await member.remove_roles(get(member.guild.roles, name="Team"))
 
