@@ -89,6 +89,7 @@ async def sync_player(
 
         for r in drop_values[1:]:
             if r[3] == str(member.id):
+                print(row)
                 return [
                     get(member.guild.roles, name=position_roles.get(row[1])),
                     get(member.guild.roles, name=position_roles.get(row[2])),
@@ -103,6 +104,7 @@ async def sync_player(
 
     if gm_id == member.id:
         pos = await get_pos()
+        print(pos)
         await member.add_roles(get(member.guild.roles, name="General Manager"), *pos)
         await member.remove_roles(get(member.guild.roles, name="Team"))
 
