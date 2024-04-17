@@ -45,7 +45,7 @@ async def sync_player(bot: IBot, member: nextcord.Member, all_roster=None, team_
     team_name = member.guild.name.split(" ", maxsplit=1)[1].strip()
     print("Syncing", member, "On", team_name)
     if not all_roster and not team_tab:
-        data_import_tab = await roster_sheet.get_tab("Data import")
+        data_import_tab = await roster_sheet.get_tab("INTERNAL Data Drop")
         all_roster = await data_import_tab.values()
         team_tab = await roster_sheet.get_tab(team_name)
 
