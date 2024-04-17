@@ -45,9 +45,8 @@ async def sync_player(bot: IBot, member: nextcord.Member, all_roster=None, team_
     team_name = member.guild.name.split(" ", maxsplit=1)[1].strip()
     print("Syncing", member, "On", team_name)
     if not all_roster and not team_tab:
-        data_import_tab = await roster_sheet.get_tab("INTERNAL Data Drop")
-        all_roster = await data_import_tab.values()
         team_tab = await roster_sheet.get_tab(team_name)
+        all_roster = await team_tab.values()
 
     cnc_member = bot.SUPPORT_GUILD.get_member(member.id)
     if not cnc_member:
@@ -63,10 +62,10 @@ async def sync_player(bot: IBot, member: nextcord.Member, all_roster=None, team_
 
     # Checking if team member
     for row in all_roster[1:]:
-        if get_number(row[3]) == member.id:
+        if get_number(row[5]) == member.id:
             roles_to_add = [
-                get(member.guild.roles, name=position_roles.get(row[1])),
-                get(member.guild.roles, name=position_roles.get(row[2])),
+                get(member.guild.roles, name=position_roles.get(row[3])),
+                get(member.guild.roles, name=position_roles.get(row[4])),
             ]
             for role in roles_to_add:
                 if role not in member.roles:
