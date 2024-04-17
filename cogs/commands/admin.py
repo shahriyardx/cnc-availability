@@ -788,7 +788,7 @@ class UtilityCommands(commands.Cog):
 
         team_name = i.guild.name.split(" ", maxsplit=1)[1].strip()
 
-        data_import_tab = await draft_sheet.get_tab("Data import")
+        data_import_tab = await draft_sheet.get_tab("INTERNAL Data Drop")
         all_roster = await data_import_tab.values()
         team_tab = await roster_sheet.get_tab(team_name)
 

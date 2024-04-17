@@ -63,10 +63,10 @@ async def sync_player(bot: IBot, member: nextcord.Member, all_roster=None, team_
 
     # Checking if team member
     for row in all_roster[1:]:
-        if get_number(row[5]) == member.id:
+        if get_number(row[3]) == member.id:
             roles_to_add = [
-                get(member.guild.roles, name=position_roles.get(row[3])),
-                get(member.guild.roles, name=position_roles.get(row[4])),
+                get(member.guild.roles, name=position_roles.get(row[1])),
+                get(member.guild.roles, name=position_roles.get(row[2])),
             ]
             for role in roles_to_add:
                 if role not in member.roles:
