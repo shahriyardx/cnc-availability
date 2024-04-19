@@ -53,11 +53,11 @@ async def sync_player(
 
     cnc_member = bot.SUPPORT_GUILD.get_member(member.id)
     if not cnc_member:
-        return
+        raise ValueError("Not in cnc discord")
 
     right_team = get(cnc_member.roles, name=team_name)
     if not right_team:
-        return
+        raise ValueError("Not in correct team")
 
     await member.add_roles(get(member.guild.roles, name="Team"))
 
