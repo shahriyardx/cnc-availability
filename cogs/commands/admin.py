@@ -815,9 +815,9 @@ class UtilityCommands(commands.Cog):
                 await i.edit_original_message(content=f"Syncing {m.mention}")
                 await sync_player(self.bot, m, all_roster, team_tab, ids)
                 await asyncio.sleep(3)
-            except:  # noqa
+            except Exception as e:  # noqa
                 traceback.print_exc()
-                await i.channel.send(content=f"Syncing {m.mention} failed")
+                await i.channel.send(content=f"Syncing {m.mention} failed. Reason: {e}")
 
         await i.edit_original_message(content="Finished")
 
