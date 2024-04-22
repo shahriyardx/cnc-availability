@@ -55,6 +55,8 @@ async def sync_player(
     if not cnc_member:
         raise ValueError("Not in cnc discord")
 
+    print(team_name, cnc_member.roles)
+
     right_team = get(cnc_member.roles, name=team_name)
     if not right_team:
         raise ValueError("Not in correct team")
