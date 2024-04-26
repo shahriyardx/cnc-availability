@@ -51,7 +51,11 @@ async def sync_player(
         team_tab = await roster_sheet.get_tab(team_name)
         all_roster = await team_tab.values()
 
-    cnc_member = bot.SUPPORT_GUILD.get_member(member.id)
+    try:
+        cnc_member = await bot.SUPPORT_GUILD.fetch_member(member.id)
+    except: # noqa
+        raise ValueError("Not in cnc discord")
+
     if not cnc_member:
         raise ValueError("Not in cnc discord")
 
