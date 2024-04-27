@@ -11,7 +11,7 @@ from essentials.models import IBot
 
 from utils.data import inactive_channel, inactive_roles, ir_channel, support_server_id
 from betterspread import Sheet, Connection
-
+from utils.data import support_server_id
 
 def get_number(value):
     try:
@@ -51,10 +51,8 @@ async def sync_player(
         team_tab = await roster_sheet.get_tab(team_name)
         all_roster = await team_tab.values()
 
-    try:
-        cnc_member = await bot.SUPPORT_GUILD.fetch_member(member.id)
-    except: # noqa
-        raise ValueError("Not in cnc discord")
+    support_guild = bot.get_guild(support_server_id)
+    cnc_member = support_guild.get_member(member.id)
 
     if not cnc_member:
         raise ValueError("Not in cnc discord")
