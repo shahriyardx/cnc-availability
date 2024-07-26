@@ -21,7 +21,7 @@ def get_rows(soup: BeautifulSoup, div_id: str):
     return players_data
 
 
-def get_team_data(team_id: int, season_id: str = "98054"):  # 95020
+def get_team_data(team_id: int, season_id: str = "99743"):  # 95020
     data = requests.get(
         "https://www.mystatsonline.com/hockey/visitor/league/stats/team_hockey.aspx?"
         f"IDLeague=63342&IDSeason={season_id}&IDTeam={team_id}"
